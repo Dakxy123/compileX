@@ -3,168 +3,220 @@
 {% block title %}CompileX{% endblock %}
 
 {% block stylesheets %}
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="css/home.css" rel="stylesheet">
+  {# Tailwind via CDN for quick conversion; replace with compiled Tailwind in production #}
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {margin:0; font-family:'Inter',sans-serif; scroll-behavior:smooth;}
-    header {
-      background:#1E293B; padding:15px 20px;
-      position:fixed; top:0; width:100%; z-index:1000;
-      display:flex; justify-content:space-between; align-items:center;
-      color:#fff;
+    html { scroll-behavior: smooth; }
+    /* Sidebar uses 'active' class as before */
+    .sidebar { transform: translateX(-100%); transition: transform .25s ease-in-out; }
+    .sidebar.active { transform: translateX(0); }
+    /* Simple backdrop transition for modals */
+    .modal-backdrop { background-color: rgba(0,0,0,0.5); }
+    /* Ensure fixed header space for content */
+    main { padding-top: 64px; }
+    /* Hero background fallback */
+    .hero-bg {
+      background-image: linear-gradient(rgba(30,41,59,0.85), rgba(30,41,59,0.6)), url("img/hero-placeholder.png");
+      background-size: cover;
+      background-position: center;
     }
-    header h1 {color:#2563EB; font-family:'Poppins',sans-serif; margin:0;}
-    .menu-icon {font-size:24px; cursor:pointer;}
-    .sidebar {
-      position:fixed; top:0; left:-260px; width:250px; height:100%;
-      background:#1E293B; color:#fff; padding:20px;
-      display:flex; flex-direction:column; justify-content:space-between;
-      transition:0.3s; z-index:2000;
-    }
-    .sidebar.active {left:0;}
-    .sidebar nav {display:flex; flex-direction:column; gap:15px; margin-top:30px;}
-    .sidebar nav a {color:#fff; text-decoration:none;}
-    .sidebar nav a:hover {color:#2563EB;}
-    .auth button {width:100%; margin:5px 0;}
-    section {padding:100px 20px; min-height:100vh;}
-    .hero {
-      background:linear-gradient(rgba(30,41,59,0.😎,rgba(30,41,59,0.8)),url("img/hero-placeholder.png") center/cover no-repeat;
-      color:#fff; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
-    }
-    .hero h2 {font-size:2.5rem; font-family:'Poppins',sans-serif;}
-    footer {background:#1E293B; color:#fff; text-align:center; padding:20px;}
-    footer a {color:#2563EB; margin:0 10px; text-decoration:none;}
   </style>
 {% endblock %}
+
 {% block body %}
-</head>
-<body>
-  <header>
-    <h1>CompileX</h1>
-    <span class="menu-icon" onclick="openSidebar()">&#9776;</span>
+<body class="antialiased bg-slate-50 text-slate-800">
+  <header class="fixed top-0 left-0 w-full z-50 bg-slate-800 text-white px-4 py-3 flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-blue-400 font-sans">CompileX</h1>
+    <div class="flex items-center gap-3">
+      <button class="md:hidden text-2xl focus:outline-none" aria-label="Open menu" onclick="openSidebar()">&#9776;</button>
+      <nav class="hidden md:flex gap-4">
+        <a href="#hero" class="text-slate-200 hover:text-white transition">Home</a>
+        <a href="#about" class="text-slate-200 hover:text-white transition">About</a>
+        <a href="#courses" class="text-slate-200 hover:text-white transition">Courses</a>
+        <a href="#team" class="text-slate-200 hover:text-white transition">Team</a>
+        <a href="#contact" class="text-slate-200 hover:text-white transition">Contact</a>
+      </nav>
+      <div class="hidden md:flex gap-2">
+        <button onclick="openModal('loginModal')" class="px-3 py-1 rounded bg-blue-500 hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-300 text-white">Login</button>
+        <button onclick="openModal('signupModal')" class="px-3 py-1 rounded bg-slate-100 hover:bg-slate-200 transition focus:outline-none">Sign Up</button>
+      </div>
+    </div>
   </header>
 
   <!-- Sidebar -->
-  <div id="sidebar" class="sidebar">
-    <button class="btn-close btn-close-white align-self-end" onclick="closeSidebar()"></button>
-    <h2>CompileX</h2>
-    <nav>
-      <a href="#hero" onclick="closeSidebar()">Home</a>
-      <a href="#about" onclick="closeSidebar()">About</a>
-      <a href="#courses" onclick="closeSidebar()">Courses</a>
-      <a href="#team" onclick="closeSidebar()">Team</a>
-      <a href="#contact" onclick="closeSidebar()">Contact</a>
+  <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-slate-800 text-white p-6 z-50 md:hidden">
+    <div class="flex justify-end">
+      <button class="text-white text-2xl focus:outline-none" onclick="closeSidebar()">×</button>
+    </div>
+    <h2 class="text-2xl font-semibold mt-4">CompileX</h2>
+    <nav class="mt-6 flex flex-col gap-4">
+      <a href="#hero" onclick="closeSidebar()" class="text-slate-200 hover:text-white transition">Home</a>
+      <a href="#about" onclick="closeSidebar()" class="text-slate-200 hover:text-white transition">About</a>
+      <a href="#courses" onclick="closeSidebar()" class="text-slate-200 hover:text-white transition">Courses</a>
+      <a href="#team" onclick="closeSidebar()" class="text-slate-200 hover:text-white transition">Team</a>
+      <a href="#contact" onclick="closeSidebar()" class="text-slate-200 hover:text-white transition">Contact</a>
     </nav>
-    <div class="auth">
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
-      <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#signupModal">Sign Up</button>
+    <div class="mt-auto">
+      <button onclick="openModal('loginModal')" class="w-full mb-2 px-3 py-2 rounded bg-blue-500 hover:bg-blue-600 transition focus:outline-none text-white">Login</button>
+      <button onclick="openModal('signupModal')" class="w-full px-3 py-2 rounded bg-slate-100 hover:bg-slate-200 transition focus:outline-none text-slate-800">Sign Up</button>
     </div>
-  </div>
+  </aside>
 
-  <!-- Hero -->
-  <section id="hero" class="hero">
-    <h2>Unlocking the Future of Learning</h2>
-    <p>Compile Knowledge, Build Skills — A modern, tech-inspired platform for students and instructors.</p>
-    <button class="btn btn-primary">Get Started</button>
-  </section>
+  <main>
+    <!-- Hero -->
+    <section id="hero" class="hero-bg h-[60vh] min-h-[420px] flex flex-col items-center justify-center text-center text-white px-4">
+      <h2 class="text-3xl md:text-5xl font-extrabold mb-4">Unlocking the Future of Learning</h2>
+      <p class="max-w-2xl mb-6">Compile Knowledge, Build Skills — A modern, tech-inspired platform for students and instructors.</p>
+      <button class="px-6 py-3 rounded bg-blue-500 hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-300">Get Started</button>
+    </section>
 
-  <!-- About -->
-  <section id="about" class="about text-center">
-    <h2>About Us</h2>
-    <p>CompileX empowers students and instructors with a modern, tech-inspired learning platform.</p>
-  </section>
+    <!-- About -->
+    <section id="about" class="py-16 px-4 bg-slate-50 text-center">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-2xl font-bold mb-4">About Us</h2>
+        <p class="text-slate-600">CompileX empowers students and instructors with a modern, tech-inspired learning platform.</p>
+      </div>
+    </section>
 
-  <!-- Courses -->
-  <section id="courses" class="courses text-center">
-    <h2>Available Courses</h2>
-    <input type="text" class="form-control mb-4 w-50 mx-auto" placeholder="Search Courses...">
-    <div id="course-list" class="row justify-content-center">
-      <div class="col-md-3 card m-2 p-2">
-        <img src="img/course-placeholder.png" class="card-img-top" alt="Course">
-        <div class="card-body">
-          <h5 class="card-title">Course Title</h5>
-          <p class="card-text">Description here...</p>
-          <button class="btn btn-primary">Enroll</button>
+    <!-- Courses -->
+    <section id="courses" class="py-16 px-4">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-2xl font-bold text-center mb-6">Available Courses</h2>
+        <div class="flex justify-center mb-6">
+          <input type="text" class="w-full max-w-lg px-4 py-2 border border-slate-200 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="Search Courses...">
+        </div>
+        <div id="course-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <article class="bg-white rounded-lg shadow p-4">
+            <img src="img/course-placeholder.png" alt="Course" class="w-full h-40 object-cover rounded">
+            <div class="mt-4">
+              <h3 class="font-semibold text-lg">Course Title</h3>
+              <p class="text-slate-600 mt-2">Description here...</p>
+              <div class="mt-4">
+                <button class="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 transition text-white focus:outline-none">Enroll</button>
+              </div>
+            </div>
+          </article>
+          {# ...existing code for additional course cards... #}
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Team -->
-  <section id="team" class="team text-center">
-    <h2>Our Team</h2>
-    <div id="team-list" class="row justify-content-center">
-      <div class="col-md-3 card m-2 p-2">
-        <img src="img/instructor-placeholder.png" class="card-img-top rounded-circle" alt="Instructor">
-        <div class="card-body">
-          <h5 class="card-title">Name</h5>
-          <p class="card-text">Role</p>
+    <!-- Team -->
+    <section id="team" class="py-16 px-4 bg-slate-50">
+      <div class="max-w-6xl mx-auto text-center">
+        <h2 class="text-2xl font-bold mb-6">Our Team</h2>
+        <div id="team-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
+          <div class="bg-white rounded-lg shadow p-4 w-full max-w-xs text-center">
+            <img src="img/instructor-placeholder.png" alt="Instructor" class="w-32 h-32 object-cover rounded-full mx-auto">
+            <div class="mt-4">
+              <h5 class="font-semibold">Name</h5>
+              <p class="text-slate-500">Role</p>
+            </div>
+          </div>
+          {# ...existing code for additional team cards... #}
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Contact -->
-  <section id="contact" class="contact text-center">
-    <h2>Contact Us</h2>
-    <form class="mx-auto" style="max-width:500px;">
-      <input type="text" class="form-control mb-3" placeholder="Your Name">
-      <input type="email" class="form-control mb-3" placeholder="Your Email">
-      <textarea class="form-control mb-3" rows="5" placeholder="Your Message"></textarea>
-      <button type="submit" class="btn btn-primary">Send</button>
-    </form>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <p>&copy; <span id="year">2025</span> CompileX. All Rights Reserved.</p>
-    <a href="#">Terms of Service</a> | 
-    <a href="#">Privacy Policy</a> | 
-    <a href="#contact">Contact</a>
-  </footer>
-
-<!-- Login Modal -->
-<div class="modal fade" id="loginModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Login</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Contact -->
+    <section id="contact" class="py-16 px-4">
+      <div class="max-w-2xl mx-auto text-center">
+        <h2 class="text-2xl font-bold mb-4">Contact Us</h2>
+        <form class="mx-auto" style="max-width:500px;" onsubmit="event.preventDefault(); /* handle submit */">
+          <input type="text" class="w-full px-4 py-2 mb-3 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="Your Name">
+          <input type="email" class="w-full px-4 py-2 mb-3 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="Your Email">
+          <textarea class="w-full px-4 py-2 mb-3 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-200" rows="5" placeholder="Your Message"></textarea>
+          <button type="submit" class="px-6 py-2 rounded bg-blue-500 hover:bg-blue-600 transition text-white focus:outline-none">Send</button>
+        </form>
       </div>
-      <div class="modal-body">
-        <form>
-          <input type="email" class="form-control mb-3" placeholder="Email">
-          <input type="password" class="form-control mb-3" placeholder="Password">
-          <button type="submit" class="btn btn-primary w-100">Login</button>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-white py-6 mt-8">
+      <div class="max-w-6xl mx-auto text-center">
+        <p class="mb-2">&copy; <span id="year">2025</span> CompileX. All Rights Reserved.</p>
+        <div class="flex flex-wrap justify-center gap-4 text-slate-300">
+          <a href="#" class="hover:text-white transition">Terms of Service</a>
+          <a href="#" class="hover:text-white transition">Privacy Policy</a>
+          <a href="#contact" class="hover:text-white transition">Contact</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  {# Login Modal #}
+  <div id="loginModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <div class="modal-backdrop absolute inset-0" onclick="closeModal('loginModal')" aria-hidden="true"></div>
+    <div class="relative bg-white rounded-lg shadow-lg w-full max-w-md mx-4 z-10">
+      <div class="flex justify-between items-center px-6 py-4 border-b">
+        <h3 class="text-lg font-semibold">Login</h3>
+        <button class="text-slate-500 hover:text-slate-700" onclick="closeModal('loginModal')" aria-label="Close">×</button>
+      </div>
+      <div class="px-6 py-4">
+        <form onsubmit="event.preventDefault(); /* handle login */ closeModal('loginModal')">
+          <input type="email" class="w-full px-4 py-2 mb-3 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="Email">
+          <input type="password" class="w-full px-4 py-2 mb-3 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="Password">
+          <button type="submit" class="w-full px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 transition text-white">Login</button>
         </form>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Signup Modal -->
-<div class="modal fade" id="signupModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Sign Up</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  {# Signup Modal #}
+  <div id="signupModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <div class="modal-backdrop absolute inset-0" onclick="closeModal('signupModal')" aria-hidden="true"></div>
+    <div class="relative bg-white rounded-lg shadow-lg w-full max-w-md mx-4 z-10">
+      <div class="flex justify-between items-center px-6 py-4 border-b">
+        <h3 class="text-lg font-semibold">Sign Up</h3>
+        <button class="text-slate-500 hover:text-slate-700" onclick="closeModal('signupModal')" aria-label="Close">×</button>
       </div>
-      <div class="modal-body">
-        <form>
-          <input type="text" class="form-control mb-3" placeholder="Full Name">
-          <input type="email" class="form-control mb-3" placeholder="Email">
-          <input type="password" class="form-control mb-3" placeholder="Password">
-          <button type="submit" class="btn btn-success w-100">Create Account</button>
+      <div class="px-6 py-4">
+        <form onsubmit="event.preventDefault(); /* handle signup */ closeModal('signupModal')">
+          <input type="text" class="w-full px-4 py-2 mb-3 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="Full Name">
+          <input type="email" class="w-full px-4 py-2 mb-3 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="Email">
+          <input type="password" class="w-full px-4 py-2 mb-3 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="Password">
+          <button type="submit" class="w-full px-4 py-2 rounded bg-green-600 hover:bg-green-700 transition text-white">Create Account</button>
         </form>
       </div>
     </div>
   </div>
-</div>
+
   <script>
+    // Sidebar control (keeps the original function names)
     function openSidebar(){ document.getElementById("sidebar").classList.add("active"); }
     function closeSidebar(){ document.getElementById("sidebar").classList.remove("active"); }
+
+    // Modal helpers
+    function openModal(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+      // trap focus could be added
+    }
+    function closeModal(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+    }
+
+    // Close modals with Escape
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape'){
+        ['loginModal','signupModal'].forEach(id => {
+          const el = document.getElementById(id);
+          if(el && !el.classList.contains('hidden')) closeModal(id);
+        });
+        // also close sidebar on escape for small screens
+        closeSidebar();
+      }
+    });
+
+    // Close sidebar on link click for larger devices as well (safety)
+    document.querySelectorAll('#sidebar nav a').forEach(a=>{
+      a.addEventListener('click',()=> closeSidebar());
+    });
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 {% endblock %}
