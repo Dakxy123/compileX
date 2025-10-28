@@ -1,0 +1,57 @@
+{{ form_start(form, { attr: { class: 'space-y-6' } }) }}
+
+<div class="grid grid-cols-1 gap-4">
+  {{ form_row(form.first_name, {
+    label: 'First name',
+    attr: { class: 'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500' }
+  }) }}
+
+  {{ form_row(form.middle_name, {
+    label: 'Middle name',
+    attr: { class: 'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500' }
+  }) }}
+
+  {{ form_row(form.last_name, {
+    label: 'Last name',
+    attr: { class: 'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500' }
+  }) }}
+
+  {{ form_row(form.email, {
+    label: 'Email',
+    attr: { class: 'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500' }
+  }) }}
+
+  {{ form_row(form.password, {
+    label: 'Password',
+    attr: { class: 'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500' }
+  }) }}
+
+  {{ form_row(form.bio, {
+    label: 'Bio',
+    attr: { class: 'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500' }
+  }) }}
+
+  {{ form_row(form.experties, {
+    label: 'Experties',
+    attr: { class: 'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500' }
+  }) }}
+
+  {{ form_row(form.isActive, {
+    label: 'Active',
+    attr: { class: 'h-4 w-4 rounded text-blue-600 border-gray-300 focus:ring-blue-500' }
+  }) }}
+</div>
+
+<div class="flex items-center justify-end space-x-3 pt-4">
+  <a href="{{ path('app_instructors_index') }}"
+     class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-800 rounded-md text-sm shadow-sm hover:bg-gray-200">
+    Back
+  </a>
+
+  <button type="submit"
+          class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    {{ button_label|default('Save') }}
+  </button>
+</div>
+
+{{ form_end(form) }}
