@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\InstructorsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: InstructorsRepository::class)]
 class Instructors
@@ -15,27 +17,35 @@ class Instructors
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "First name should not be blank.")]
     private ?string $first_name = null;
 
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $middle_name = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message:"Last name should not be blank.")]
     private ?string $last_name = null;
 
     #[ORM\Column(length: 100, unique: true)]
+    #[Assert\NotBlank(message: "Email should not be blank.")]
+    #[Assert\Email(message: "The email '{{ value }}' is not a valid email.")]
     private ?string $email = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message:"Password is required.")]
+    #[Assert\Regex(pattern:"/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/", message:"Password must be at least 8 characters long and contain both letters and numbers.")]
     private ?string $password = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $bio = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message:"Experties should not be blank.")]
     private ?string $experties = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message:"Active status must be specified.")]
     private ?bool $isActive = null;
 
     public function getId(): ?int

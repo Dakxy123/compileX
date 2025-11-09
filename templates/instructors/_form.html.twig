@@ -1,3 +1,4 @@
+{% form_theme form 'form/_errors_tailwind.html.twig' %}
 {{ form_start(form, { attr: { class: 'space-y-6' } }) }}
 
 <div class="grid grid-cols-1 gap-4">
@@ -21,10 +22,52 @@
     attr: { class: 'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500' }
   }) }}
 
-  {{ form_row(form.password, {
-    label: 'Password',
-    attr: { class: 'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500' }
-  }) }}
+<div class="space-y-1">
+  {{ form_label(form.password, 'Password') }}
+  <div class="relative">
+    {{ form_widget(form.password, {
+      attr: {
+        id: form.password.vars.id, 
+        class: 'block w-full rounded-md border border-gray-300 px-3 py-2 pr-16 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+      }
+    }) }}
+    <button type="button"
+            id="toggle_password"
+            class="absolute inset-y-0 right-3 flex items-center text-sm text-gray-600 hover:text-gray-800">
+      Show
+    </button>
+  </div>
+  {{ form_errors(form.password) }}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const input = document.getElementById('{{ form.password.vars.id }}');
+  const btn   = document.getElementById('toggle_password');
+  if (!input || !btn) return;
+  if (btn.dataset.bound) return; btn.dataset.bound = '1';
+
+  input.type = 'password';
+  btn.addEventListener('click', function () {
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.textContent = show ? 'Hide' : 'Show';
+  });
+});
+document.addEventListener('turbo:load', function () {
+  const input = document.getElementById('{{ form.password.vars.id }}');
+  const btn   = document.getElementById('toggle_password');
+  if (!input || !btn) return;
+  if (btn.dataset.bound) return; btn.dataset.bound = '1';
+
+  input.type = 'password';
+  btn.addEventListener('click', function () {
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.textContent = show ? 'Hide' : 'Show';
+  });
+});
+</script>
 
   {{ form_row(form.bio, {
     label: 'Bio',
@@ -35,11 +78,35 @@
     label: 'Experties',
     attr: { class: 'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500' }
   }) }}
+{% if instructor is defined and instructor.id is null %}
+  {% do form.isActive.setRendered() %}
+{% endif %}
+{% if instructor is defined and instructor.id is not null %}
+  <div class="space-y-1">
+    <label class="block text-sm font-medium text-gray-700">Active</label>
+    <div class="flex items-center gap-3">
+      {{ form_widget(form.isActive, {
+        attr: {
+          id: form.isActive.vars.id,
+          class: 'sr-only peer'
+        }
+      }) }}
 
-  {{ form_row(form.isActive, {
-    label: 'Active',
-    attr: { class: 'h-4 w-4 rounded text-blue-600 border-gray-300 focus:ring-blue-500' }
-  }) }}
+      <label for="{{ form.isActive.vars.id }}"
+             class="relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full bg-gray-300 transition
+                    peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500
+                    peer-checked:bg-green-500">
+        <span class="absolute left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></span>
+      </label>
+
+      <span class="text-sm text-gray-700">
+        {% if form.isActive.vars.data %}Active{% else %}Inactive{% endif %}
+      </span>
+    </div>
+    <div class="text-sm text-red-600 mt-1">{{ form_errors(form.isActive) }}</div>
+  </div>
+{% endif %}
+
 </div>
 
 <div class="flex items-center justify-end space-x-3 pt-4">
