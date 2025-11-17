@@ -11,71 +11,74 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
 
 #[Route('/instructors')]
+#[isGranted('ROLE_ADMIN')]
 final class InstructorsController extends AbstractController
 {
     #[Route(name: 'app_instructors_index', methods: ['GET'])]
-    public function index(Request $request, InstructorsRepository $instructorsRepository): Response # CHANGED
+    public function index(Request $request, InstructorsRepository $instructorsRepository): Response 
     {
-        $q = trim((string) $request->query->get('q', '')); # ADDED
-        $status = (string) $request->query->get('status', ''); # ADDED
-        $qb = $instructorsRepository->createQueryBuilder('i'); # ADDED
-        if ($q !== '') { # ADDED
-            $qb->andWhere('i.first_name LIKE :q OR i.last_name LIKE :q OR i.email LIKE :q') # ADDED
-               ->setParameter('q', '%'.$q.'%'); # ADDED
-        } # ADDED
-        if ($status !== '') { # ADDED
-            $qb->andWhere('i.isActive = :s')->setParameter('s', $status === '1'); # ADDED
-        } # ADDED
-        $qb->orderBy('i.last_name', 'ASC')->addOrderBy('i.first_name', 'ASC'); # ADDED
-        $instructors = $qb->getQuery()->getResult(); # ADDED
+        $q = trim((string) $request->query->get('q', '')); 
+        $status = (string) $request->query->get('status', ''); 
+        $qb = $instructorsRepository->createQueryBuilder('i'); 
+        if ($q !== '') { 
+            $qb->andWhere('i.first_name LIKE :q OR i.last_name LIKE :q OR i.email LIKE :q') 
+               ->setParameter('q', '%'.$q.'%'); 
+        } 
+        if ($status !== '') { 
+            $qb->andWhere('i.isActive = :s')->setParameter('s', $status === '1'); 
+        } 
+        $qb->orderBy('i.last_name', 'ASC')->addOrderBy('i.first_name', 'ASC'); 
+        $instructors = $qb->getQuery()->getResult(); 
 
         return $this->render('instructors/index.html.twig', [
-            'instructors' => $instructors, # CHANGED
-            'q' => $q, # ADDED
-            'status' => $status, # ADDED
+            'instructors' => $instructors, 
+            'q' => $q, 
+            'status' => $status, 
         ]);
     }
 
-    #[Route('/export', name: 'app_instructors_export', methods: ['GET'])] # ADDED
-    public function export(Request $request, InstructorsRepository $instructorsRepository): Response # ADDED
-    { # ADDED
-        $q = trim((string) $request->query->get('q', '')); # ADDED
-        $status = (string) $request->query->get('status', ''); # ADDED
-        $qb = $instructorsRepository->createQueryBuilder('i'); # ADDED
-        if ($q !== '') { # ADDED
-            $qb->andWhere('i.first_name LIKE :q OR i.last_name LIKE :q OR i.email LIKE :q') # ADDED
-               ->setParameter('q', '%'.$q.'%'); # ADDED
-        } # ADDED
-        if ($status !== '') { # ADDED
-            $qb->andWhere('i.isActive = :s')->setParameter('s', $status === '1'); # ADDED
-        } # ADDED
-        $qb->orderBy('i.last_name', 'ASC')->addOrderBy('i.first_name', 'ASC'); # ADDED
-        $rows = $qb->getQuery()->getResult(); # ADDED
+    #[Route('/export', name: 'app_instructors_export', methods: ['GET'])] 
+    public function export(Request $request, InstructorsRepository $instructorsRepository): Response 
+    { 
+        $q = trim((string) $request->query->get('q', '')); 
+        $status = (string) $request->query->get('status', ''); 
+        $qb = $instructorsRepository->createQueryBuilder('i'); 
+        if ($q !== '') { 
+            $qb->andWhere('i.first_name LIKE :q OR i.last_name LIKE :q OR i.email LIKE :q') 
+               ->setParameter('q', '%'.$q.'%'); 
+        } 
+        if ($status !== '') { 
+            $qb->andWhere('i.isActive = :s')->setParameter('s', $status === '1'); 
+        } 
+        $qb->orderBy('i.last_name', 'ASC')->addOrderBy('i.first_name', 'ASC'); 
+        $rows = $qb->getQuery()->getResult(); 
 
-        $out = fopen('php://temp', 'r+'); # ADDED
-        fputcsv($out, ['ID','First name','Middle name','Last name','Email','Active']); # ADDED
-        /** @var \App\Entity\Instructors $row */ # ADDED
-        foreach ($rows as $row) { # ADDED
-            fputcsv($out, [ # ADDED
-                $row->getId(), # ADDED
-                $row->getFirstName(), # ADDED
-                $row->getMiddleName(), # ADDED
-                $row->getLastName(), # ADDED
-                $row->getEmail(), # ADDED
-                $row->isActive() ? 'Yes' : 'No', # ADDED
-            ]); # ADDED
-        } # ADDED
-        rewind($out); # ADDED
-        $csv = stream_get_contents($out); # ADDED
-        fclose($out); # ADDED
+        $out = fopen('php://temp', 'r+'); 
+        fputcsv($out, ['ID','First name','Middle name','Last name','Email','Active']); 
+        /** @var \App\Entity\Instructors $row */ 
+        foreach ($rows as $row) { 
+            fputcsv($out, [ 
+                $row->getId(), 
+                $row->getFirstName(), 
+                $row->getMiddleName(), 
+                $row->getLastName(), 
+                $row->getEmail(), 
+                $row->isActive() ? 'Yes' : 'No', 
+            ]); 
+        } 
+        rewind($out); 
+        $csv = stream_get_contents($out); 
+        fclose($out); 
 
-        $response = new Response($csv); # ADDED
-        $response->headers->set('Content-Type', 'text/csv; charset=UTF-8'); # ADDED
-        $response->headers->set('Content-Disposition', 'attachment; filename="instructors.csv"'); # ADDED
-        return $response; # ADDED
-    } # ADDED
+        $response = new Response($csv); 
+        $response->headers->set('Content-Type', 'text/csv; charset=UTF-8'); 
+        $response->headers->set('Content-Disposition', 'attachment; filename="instructors.csv"'); 
+        return $response; 
+    } 
 
     #[Route('/new', name: 'app_instructors_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher): Response

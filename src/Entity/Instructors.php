@@ -3,12 +3,15 @@
 namespace App\Entity;
 
 use App\Repository\InstructorsRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: InstructorsRepository::class)]
+#[UniqueEntity(fields: ['email'], message: 'This email is already registered.')]
 class Instructors
 {
     #[ORM\Id]
@@ -45,8 +48,20 @@ class Instructors
     private ?string $experties = null;
 
     #[ORM\Column]
+    #[Assert\Type(type:"bool")]
     #[Assert\NotBlank(message:"Active status must be specified.")]
     private ?bool $isActive = null;
+
+    /**
+     * @var Collection<int, CourseOffering>
+     */
+    #[ORM\OneToMany(targetEntity: CourseOffering::class, mappedBy: 'instructor')]
+    private Collection $courseOfferings;
+
+    public function __construct()
+    {
+        $this->courseOfferings = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -145,6 +160,36 @@ class Instructors
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CourseOffering>
+     */
+    public function getCourseOfferings(): Collection
+    {
+        return $this->courseOfferings;
+    }
+
+    public function addCourseOffering(CourseOffering $courseOffering): static
+    {
+        if (!$this->courseOfferings->contains($courseOffering)) {
+            $this->courseOfferings->add($courseOffering);
+            $courseOffering->setInstructor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCourseOffering(CourseOffering $courseOffering): static
+    {
+        if ($this->courseOfferings->removeElement($courseOffering)) {
+            // set the owning side to null (unless already changed)
+            if ($courseOffering->getInstructor() === $this) {
+                $courseOffering->setInstructor(null);
+            }
+        }
 
         return $this;
     }

@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}CourseOffering index{% endblock %}
+
+{% block body %}
+    <h1>CourseOffering index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Term</th>
+                <th>Capacity</th>
+                <th>Status</th>
+                <th>Academic_year</th>
+                <th>Schedule</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for course_offering in course_offerings %}
+            <tr>
+                <td>{{ course_offering.id }}</td>
+                <td>{{ course_offering.term }}</td>
+                <td>{{ course_offering.capacity }}</td>
+                <td>{{ course_offering.status }}</td>
+                <td>{{ course_offering.academicYear }}</td>
+                <td>{{ course_offering.schedule }}</td>
+                <td>
+                    <a href="{{ path('app_course_offering_show', {'id': course_offering.id}) }}">show</a>
+                    <a href="{{ path('app_course_offering_edit', {'id': course_offering.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_course_offering_new') }}">Create new</a>
+{% endblock %}

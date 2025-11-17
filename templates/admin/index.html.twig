@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+<div class="flex min-h-screen bg-gray-50">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+    <div class="px-6 py-4">
+      <h2 class="text-xl font-semibold text-gray-900">Admin Panel</h2>
+    </div>
+    <nav class="flex-1 px-4 space-y-2">
+      <a href="{{ path('admin_dashboard') }}" class="block px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100">Dashboard</a>
+      <a href="{{ path('app_instructors_index') }}" class="block px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100">Instructors</a>
+      <a href="{{ path('app_course_index') }}" class="block px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100">Courses</a>
+      <a href="{{ path('app_section_index') }}" class="block px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100">Sections</a>
+      <a href="{{ path('app_student_index') }}" class="block px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100">Students</a>
+      <a href="/" class="block px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100">Back to Home</a>
+      <a href="{{ path('app_logout') }}" class="block px-3 py-2 rounded-md text-red-600 hover:bg-red-100">Logout</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
+    </div>
+
+    <!-- Summary Cards -->
+    <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mb-6">
+      <div class="rounded-2xl border border-gray-200 bg-white p-4">
+        <p class="text-sm text-gray-500">Total Instructors</p>
+        <p class="mt-2 text-2xl font-semibold">{{ instructorCount|default(0) }}</p>
+      </div>
+      <div class="rounded-2xl border border-gray-200 bg-white p-4">
+        <p class="text-sm text-gray-500">Total Courses</p>
+        <p class="mt-2 text-2xl font-semibold text-blue-700">{{ courseCount|default(0) }}</p>
+      </div>
+      <div class="rounded-2xl border border-gray-200 bg-white p-4">
+        <p class="text-sm text-gray-500">Active Instructors</p>
+        <p class="mt-2 text-2xl font-semibold text-green-700">{{ activeInstructorCount|default(0) }}</p>
+      </div>
+    </section>
+
+    <!-- Recent Instructors Table -->
+    <section class="mb-6 rounded-2xl border border-gray-200 bg-white overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-900">Recent Instructors</h2>
+        <a href="{{ path('app_instructors_index') }}" class="text-blue-600 hover:underline text-sm">View all</a>
+      </div>
+      <table class="min-w-full text-sm border-t border-gray-100">
+        <thead class="bg-gray-50 text-left">
+          <tr>
+            <th class="px-4 py-2">Name</th>
+            <th class="px-4 py-2">Email</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in recentInstructors %}
+            <tr class="{{ cycle(['bg-white','bg-gray-50/50'], loop.index0) }}">
+              <td class="px-4 py-2 font-medium">
+                {{ i.lastName }}{{ i.lastName is not empty ? ', ' : '' }}{{ i.firstName }}{% if i.middleName %} {{ i.middleName }}{% endif %}
+              </td>
+              <td class="px-4 py-2 text-gray-600">{{ i.email }}</td>
+              <td class="px-4 py-2">
+                {% if i.isActive %}
+                  <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">Active</span>
+                {% else %}
+                  <span class="inline-flex items-center rounded-full bg-gray-200 px-2.5 py-0.5 text-xs font-medium text-gray-700">Inactive</span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-2 text-right">
+                <a class="text-blue-600 hover:underline" href="{{ path('app_instructors_show', {'id': i.id}) }}">View</a>
+                <span class="mx-1">·</span>
+                <a class="text-blue-600 hover:underline" href="{{ path('app_instructors_edit', {'id': i.id}) }}">Edit</a>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="4" class="px-4 py-6 text-center text-gray-500">No recent instructors.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Courses Table -->
+    <section class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-900">Courses</h2>
+        <a href="{{ path('app_course_index') }}" class="text-blue-600 hover:underline text-sm">View all</a>
+      </div>
+      <table class="min-w-full text-sm border-t border-gray-100">
+        <thead class="bg-gray-50 text-left">
+          <tr>
+            <th class="px-4 py-2">Code</th>
+            <th class="px-4 py-2">Title</th>
+            <th class="px-4 py-2">Description</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in recentCourses %}
+            <tr class="{{ cycle(['bg-white','bg-gray-50/50'], loop.index0) }}">
+              <td class="px-4 py-2">{{ c.code }}</td>
+              <td class="px-4 py-2 font-medium">{{ c.title }}</td>
+              <td class="px-4 py-2">{{ c.description|default('—') }}</td>
+              <td class="px-4 py-2">
+                {% if c.isActive %}
+                  <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">Active</span>
+                {% else %}
+                  <span class="inline-flex items-center rounded-full bg-gray-200 px-2.5 py-0.5 text-xs font-medium text-gray-700">Inactive</span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-2 text-right">
+                <a class="text-blue-600 hover:underline" href="{{ path('app_course_show', {'id': c.id}) }}">View</a>
+                <span class="mx-1">·</span>
+                <a class="text-blue-600 hover:underline" href="{{ path('app_course_edit', {'id': c.id}) }}">Edit</a>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="5" class="px-4 py-6 text-center text-gray-500">No courses found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+</div>
+{% endblock %}

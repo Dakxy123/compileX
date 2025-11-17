@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Course index{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+<a href="{{ path('admin_dashboard') }}"
+   class="inline-flex items-center gap-2 mb-4 px-3 py-2 rounded-md border border-gray-200 bg-white text-gray-800 hover:bg-gray-50 shadow-sm">
+  ← Back to Admin
+</a>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <header class="mb-4 flex items-center justify-between">
+    <h1 class="text-2xl font-semibold text-gray-900">Courses</h1>
+    <div class="flex gap-2">
+      <a href="{{ path('app_course_new') }}" class="rounded-xl bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">+ Add Course</a>
+      <a href="{{ path('app_course_index') }}" class="rounded-xl border border-slate-200 px-4 py-2">Refresh</a>
+    </div>
+  </header>
+
+  <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+    <div class="px-4 py-3 border-b border-slate-100">
+      <form method="get" action="{{ path('app_course_index') }}" class="flex flex-wrap items-center gap-2">
+        <input type="text" name="q" value="{{ q|default('') }}"
+               class="w-full sm:w-auto max-w-xs rounded-xl border border-slate-300 px-3 py-2"
+               placeholder="Search courses by code or title..." />
+        <select name="status" class="rounded-xl border border-slate-300 px-3 py-2">
+          <option value="" {{ status is not defined or status == '' ? 'selected' : '' }}>All</option>
+          <option value="1" {{ status == '1' ? 'selected' : '' }}>Active</option>
+          <option value="0" {{ status == '0' ? 'selected' : '' }}>Inactive</option>
+        </select>
+        <button class="rounded-xl border border-slate-200 px-3 py-2 hover:bg-slate-50" type="submit">Filter</button>
+        <a class="rounded-xl border border-slate-200 px-3 py-2 hover:bg-slate-50"
+           href="{{ path('app_course_export', {q: q|default(''), status: status|default('')}) }}">Export</a>
+      </form>
+    </div>
+
+    <table class="min-w-full text-sm">
+      <thead class="bg-slate-50 text-left">
+        <tr>
+          <th class="px-4 py-2">ID</th>
+          <th class="px-4 py-2">Code</th>
+          <th class="px-4 py-2">Title</th>
+          <th class="px-4 py-2">Description</th>
+          <th class="px-4 py-2">Active</th>
+          <th class="px-4 py-2 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for course in courses %}
+          <tr class="{{ loop.index is odd ? 'bg-white' : 'bg-slate-50/50' }}">
+            <td class="px-4 py-2 text-slate-700">{{ course.id }}</td>
+            <td class="px-4 py-2 font-medium text-slate-900">{{ course.code }}</td>
+            <td class="px-4 py-2 text-slate-900">{{ course.title }}</td>
+            <td class="px-4 py-2 text-slate-700">{{ course.description|default('—') }}</td>
+            <td class="px-4 py-2">
+              {% if course.isActive %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Yes</span>
+              {% else %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">No</span>
+              {% endif %}
+            </td>
+            <td class="px-4 py-2 text-right">
+              <a class="text-blue-600 hover:underline" href="{{ path('app_course_show', {'id': course.id}) }}">View</a>
+              <span class="mx-1 text-slate-400">·</span>
+              <a class="text-yellow-600 hover:underline" href="{{ path('app_course_edit', {'id': course.id}) }}">Edit</a>
+              <span class="mx-1 text-slate-400">·</span>
+              <form method="post" action="{{ path('app_course_delete', {'id': course.id}) }}" class="inline" onsubmit="return confirm('Delete this course?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ course.id) }}">
+                <button class="text-rose-600 hover:underline" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="6" class="px-4 py-6 text-center text-slate-500">No records found</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

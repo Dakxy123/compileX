@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Log in!{% endblock %}
+
+{% block body %}
+  <script src="https://cdn.tailwindcss.com"></script>                       
+<div class="min-h-screen flex items-center justify-center bg-slate-900 py-12 px-4 sm:px-6 lg:px-8"> 
+  <div class="w-full max-w-md space-y-6"> 
+        <a href="{{ path('app_instructors_index') }}" class="text-sm text-gray-600 hover:text-gray-800">Back to list</a>
+    <div class="bg-slate-800/60 backdrop-blur rounded-2xl p-6 shadow-xl border border-slate-700"> 
+      <h1 class="text-2xl font-semibold text-white text-center mb-2">Sign in to your account</h1> 
+      {% if error %}
+        <div class="mb-4 text-sm text-red-300 bg-red-900/30 border border-red-700 rounded px-3 py-2">{{ error.messageKey|trans(error.messageData, 'security') }}</div> 
+      {% endif %}
+
+      {% if app.user %}
+        <div class="mb-4 text-sm text-slate-200">
+            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}" class="underline">Logout</a>
+        </div>
+      {% endif %}
+
+      <form method="post" action="{{ path('app_login') }}" class="space-y-4"> 
+        <div>
+          <label for="inputEmail" class="block text-sm font-medium text-slate-200">Email address</label> 
+          <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="mt-1 block w-full rounded-md border border-slate-600 bg-slate-900 text-slate-100 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" autocomplete="email" required autofocus> 
+        </div>
+
+        <div>
+          <label for="inputPassword" class="block text-sm font-medium text-slate-200">Password</label> 
+          <div class="relative">
+            <input type="password" name="password" id="inputPassword" class="mt-1 block w-full rounded-md border border-slate-600 bg-slate-900 text-slate-100 px-3 py-2 pr-16 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" autocomplete="current-password" required> 
+            <button type="button" id="togglePassword" class="absolute inset-y-0 right-3 my-auto text-slate-300 text-sm hover:text-white">Show</button> 
+          </div>
+        </div>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}"> 
+
+        <div class="flex items-center justify-between">
+          <label class="inline-flex items-center gap-2 text-sm text-slate-300">
+            <input type="checkbox" name="_remember_me" value="on" class="rounded border-slate-600 bg-slate-900"> 
+            Remember me 
+          </label>
+          <a href="#" class="text-sm text-slate-400 hover:text-slate-200">Forgot password?</a> 
+        </div>
+
+        <button class="w-full inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 font-medium text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" type="submit">
+          Sign in
+        </button> 
+      </form> 
+    </div> 
+  </div> 
+</div> 
+
+<script> 
+document.addEventListener('DOMContentLoaded',function(){
+  var btn = document.getElementById('togglePassword');
+  var input = document.getElementById('inputPassword');
+  if(btn && input){
+    btn.addEventListener('click', function(){
+      var show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.textContent = show ? 'Hide' : 'Show';
+    });
+  }
+});
+</script> 
+{% endblock %}
