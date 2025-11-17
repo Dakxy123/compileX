@@ -106,6 +106,10 @@
         </thead>
         <tbody>
           {% for c in recentCourses %}
+          $recentCourses = $this->getDoctrine()
+    ->getRepository(Course::class)
+    ->findBy([], ['id' => 'DESC'], 5); // last 5 courses
+
             <tr class="{{ cycle(['bg-white','bg-gray-50/50'], loop.index0) }}">
               <td class="px-4 py-2">{{ c.code }}</td>
               <td class="px-4 py-2 font-medium">{{ c.title }}</td>
