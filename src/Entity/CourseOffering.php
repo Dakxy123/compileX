@@ -27,10 +27,10 @@ class CourseOffering
 
     #[ORM\ManyToOne(inversedBy: 'courseOfferings')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?section $section = null;
+    private ?Section $section = null;
 
     #[ORM\ManyToOne(inversedBy: 'courseOfferings')]
-    private ?instructors $instructor = null;
+    private ?Instructors $instructor = null;
 
     #[ORM\Column(length: 9)]
     private ?string $academic_year = null;
@@ -94,24 +94,24 @@ class CourseOffering
         return $this;
     }
 
-    public function getSection(): ?section
+    public function getSection(): ?Section
     {
         return $this->section;
     }
 
-    public function setSection(?section $section): static
+    public function setSection(?Section $section): static
     {
         $this->section = $section;
 
         return $this;
     }
 
-    public function getInstructor(): ?instructors
+    public function getInstructor(): ?Instructors
     {
         return $this->instructor;
     }
 
-    public function setInstructor(?instructors $instructor): static
+    public function setInstructor(?Instructors $instructor): static
     {
         $this->instructor = $instructor;
 
