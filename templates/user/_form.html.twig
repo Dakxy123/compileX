@@ -1,4 +1,71 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
-{{ form_end(form) }}
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title|default('User Form') }}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+  const DARK_KEY = 'compilex-dark-mode';
+  function loadInitialTheme() {
+    const saved = localStorage.getItem(DARK_KEY);
+    const isDark = saved === 'true';
+    document.documentElement.classList.toggle('dark', isDark);
+  }
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.contains('dark');
+    document.documentElement.classList.toggle('dark', !isDark);
+    localStorage.setItem(DARK_KEY, (!isDark).toString());
+  }
+  document.addEventListener('DOMContentLoaded', loadInitialTheme);
+</script>
+
+<div class="flex min-h-screen justify-center items-start p-8 bg-slate-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+  <div class="w-full max-w-lg bg-white dark:bg-gray-800 rounded shadow p-6 relative">
+    <h1 class="text-2xl font-semibold mb-6">{{ title|default('User Form') }}</h1>
+
+    <button type="button"
+            class="absolute top-4 right-4 px-2 py-1 text-sm bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+            onclick="toggleTheme()">
+      Toggle Light/Dark
+    </button>
+
+    {{ form_start(form) }}
+
+      <!-- Email -->
+      <div class="mb-4">
+        {{ form_label(form.email, 'Email', {'label_attr': {'class':'block text-gray-700 dark:text-gray-200 mb-1'}}) }}
+        {{ form_widget(form.email, {'attr': {'class':'w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100'}}) }}
+        {% include '/form/_errors_tailwind.html.twig' with {'errors': form.email.vars.errors} %}
+      </div>
+
+      <!-- Role -->
+      <div class="mb-4">
+        {{ form_label(form.roles, 'Role', {'label_attr': {'class':'block text-gray-700 dark:text-gray-200 mb-1'}}) }}
+        {{ form_widget(form.roles, {'attr': {'class':'w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100'}}) }}
+        {% include '/form/_errors_tailwind.html.twig' with {'errors': form.roles.vars.errors} %}
+      </div>
+
+      <!-- Password -->
+      <div class="mb-4">
+        {{ form_label(form.password, 'Password', {'label_attr': {'class':'block text-gray-700 dark:text-gray-200 mb-1'}}) }}
+        {{ form_widget(form.password, {'attr': {'class':'w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100', 'autocomplete':'new-password'}}) }}
+        {% include '/form/_errors_tailwind.html.twig' with {'errors': form.password.vars.errors} %}
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-between items-center mt-6">
+        <button type="submit"
+                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700">
+          {{ button_label|default('Save') }}
+        </button>
+        <a href="{{ path('app_user_index') }}"
+           class="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-100 rounded hover:bg-gray-400 dark:hover:bg-gray-600">
+          Back to list
+        </a>
+      </div>
+
+    {{ form_end(form) }}
+  </div>
+</div>
+{% endblock %}

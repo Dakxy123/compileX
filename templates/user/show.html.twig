@@ -1,34 +1,26 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}User{% endblock %}
+{% block title %}User Details{% endblock %}
 
 {% block body %}
-    <h1>User</h1>
+<div class="p-8 bg-white dark:bg-gray-800 rounded shadow max-w-lg mx-auto">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">User Details</h2>
+    <a href="{{ path('app_user_index') }}" class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 text-2xl font-bold">×</a>
+  </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ user.id }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ user.email }}</td>
-            </tr>
-            <tr>
-                <th>Roles</th>
-                <td>{{ user.roles ? user.roles|json_encode : '' }}</td>
-            </tr>
-            <tr>
-                <th>Password</th>
-                <td>{{ user.password }}</td>
-            </tr>
-        </tbody>
-    </table>
+  <table class="min-w-full border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">
+    <tbody>
+      <tr><th class="px-4 py-2 border">ID</th><td class="px-4 py-2 border">{{ user.id }}</td></tr>
+      <tr><th class="px-4 py-2 border">Email</th><td class="px-4 py-2 border">{{ user.email }}</td></tr>
+      <tr><th class="px-4 py-2 border">Roles</th><td class="px-4 py-2 border">{{ user.roles|join(', ') }}</td></tr>
+    </tbody>
+  </table>
 
-    <a href="{{ path('app_user_index') }}">back to list</a>
-
-    <a href="{{ path('app_user_edit', {'id': user.id}) }}">edit</a>
-
+  <div class="mt-4 flex space-x-2">
+    <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 dark:hover:bg-yellow-700">Edit</a>
     {{ include('user/_delete_form.html.twig') }}
+    <a href="{{ path('app_user_index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600 dark:text-gray-100">Back to list</a>
+  </div>
+</div>
 {% endblock %}

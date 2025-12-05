@@ -5,13 +5,11 @@ namespace App\Entity;
 use App\Repository\CourseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: CourseRepository::class)]
-#[UniqueEntity('code', message: 'This course code is already in use.')]
 #[UniqueEntity('name', message: 'This course name is already in use.')]
 class Course
 {
@@ -20,38 +18,44 @@ class Course
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 32, unique: true)]
-    #[Assert\NotBlank(message: "Course code should not be blank.")]
-    #[Assert\Length(max: 32, maxMessage: "Course code cannot be longer than {{ limit }} characters.")]
-    private ?string $code = null;
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Course name should not be blank.')]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: 'Course name cannot be longer than {{ limit }} characters.'
+    )]
+    private ?string $name = null;
 
-    #[ORM\Column(length: 128)]
-    #[Assert\NotBlank(message: "Course title should not be blank.")]
-    #[Assert\Length(max: 128, maxMessage: "Course title cannot be longer than {{ limit }} characters.")]
-    private ?string $title = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\Length(
+        max: 2000,
+        maxMessage: 'Description cannot be longer than {{ limit }} characters.'
+    )]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: "Active status must be specified.")]
-    #[Assert\Type(type: "bool", message: "Active status must be a boolean.")]
-    private ?bool $isActive = null;
+    private ?bool $IsActive = true;
 
     /**
-     * @var Collection<int, Section>
+     * @var Collection<int, Subject>
      */
-    #[ORM\OneToMany(targetEntity: Section::class, mappedBy: 'course_program')]
-    private Collection $sections;
+    #[ORM\OneToMany(targetEntity: Subject::class, mappedBy: 'course')]
+    private Collection $subjects;
 
-    #[ORM\Column(length: 100, unique: true)]
-    #[Assert\NotBlank(message: "Course name should not be blank.")]
-    #[Assert\Length(max: 100, maxMessage: "Course name cannot be longer than {{ limit }} characters.")]
-    private ?string $name = null;
+    /**
+     * @var Collection<int, StudentProfile>
+     */
+    #[ORM\OneToMany(targetEntity: StudentProfile::class, mappedBy: 'course')]
+    private Collection $studentProfiles;
 
     public function __construct()
     {
-        $this->sections = new ArrayCollection();
+        $this->subjects = new ArrayCollection();
+        // Optional: ensure default active
+        if ($this->IsActive === null) {
+            $this->IsActive = true;
+        }
+        $this->studentProfiles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -59,25 +63,15 @@ class Course
         return $this->id;
     }
 
-    public function getCode(): ?string
+    public function getName(): ?string
     {
-        return $this->code;
+        return $this->name;
     }
 
-    public function setCode(string $code): static
+    public function setName(string $name): static
     {
-        $this->code = $code;
-        return $this;
-    }
+        $this->name = $name;
 
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
-    public function setTitle(string $title): static
-    {
-        $this->title = $title;
         return $this;
     }
 
@@ -89,55 +83,84 @@ class Course
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
         return $this;
     }
 
     public function isActive(): ?bool
     {
-        return $this->isActive;
+        return $this->IsActive;
     }
 
-    public function setIsActive(bool $isActive): static
+    public function setIsActive(bool $IsActive): static
     {
-        $this->isActive = $isActive;
+        $this->IsActive = $IsActive;
+
         return $this;
     }
 
     /**
-     * @return Collection<int, Section>
+     * @return Collection<int, Subject>
      */
-    public function getSections(): Collection
+    public function getSubjects(): Collection
     {
-        return $this->sections;
+        return $this->subjects;
     }
 
-    public function addSections(Section $section): static
+    public function addSubject(Subject $subject): static
     {
-        if (!$this->sections->contains($section)) {
-            $this->sections->add($section);
-            $section->setCourseProgram($this);
+        if (!$this->subjects->contains($subject)) {
+            $this->subjects->add($subject);
+            $subject->setCourse($this);
         }
+
         return $this;
     }
 
-    public function removeSection(Section $section): static
+    public function removeSubject(Subject $subject): static
     {
-        if ($this->sections->removeElement($section)) {
-            if ($section->getCourseProgram() === $this) {
-                $section->setCourseProgram(null);
+        if ($this->subjects->removeElement($subject)) {
+            // set the owning side to null (unless already changed)
+            if ($subject->getCourse() === $this) {
+                $subject->setCourse(null);
             }
         }
+
         return $this;
     }
 
-    public function getName(): ?string
+    public function __toString(): string
     {
-        return $this->name;
+        return (string) ($this->name ?? 'Course #'.$this->id);
     }
 
-    public function setName(string $name): static
+    /**
+     * @return Collection<int, StudentProfile>
+     */
+    public function getStudentProfiles(): Collection
     {
-        $this->name = $name;
+        return $this->studentProfiles;
+    }
+
+    public function addStudentProfile(StudentProfile $studentProfile): static
+    {
+        if (!$this->studentProfiles->contains($studentProfile)) {
+            $this->studentProfiles->add($studentProfile);
+            $studentProfile->setCourse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStudentProfile(StudentProfile $studentProfile): static
+    {
+        if ($this->studentProfiles->removeElement($studentProfile)) {
+            // set the owning side to null (unless already changed)
+            if ($studentProfile->getCourse() === $this) {
+                $studentProfile->setCourse(null);
+            }
+        }
+
         return $this;
     }
 }

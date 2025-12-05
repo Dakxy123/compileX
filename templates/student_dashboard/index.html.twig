@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Student Dashboard — CompileX{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+  <!-- Header -->
+  <header class="w-full bg-slate-800 text-white px-6 py-4 flex items-center justify-between shadow">
+    <h1 class="text-xl font-semibold text-blue-400">CompileX — Student</h1>
+
+    <div class="flex items-center gap-3 text-sm">
+      <span class="text-slate-200">
+        {{ app.user ? app.user.userIdentifier : '' }}
+      </span>
+
+      <a href="{{ path('home') }}"
+         class="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-100">
+        Home
+      </a>
+
+      <a href="{{ path('app_logout') }}"
+         class="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white">
+        Logout
+      </a>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1 p-6">
+    <div class="max-w-5xl mx-auto space-y-6">
+      <h2 class="text-2xl font-semibold mb-2">Welcome, Student 👋</h2>
+      <p class="text-slate-600">
+        This is your student area. For now, this is just a placeholder dashboard.
+        Later, this can show your course, year level, and progress.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <div class="bg-white rounded-xl shadow p-4 border border-slate-100">
+          <h3 class="font-semibold mb-2">My Status</h3>
+          <p class="text-sm text-slate-600">
+            In the future, you’ll see your course, year level, and status here.
+          </p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow p-4 border border-slate-100">
+          <h3 class="font-semibold mb-2">Subjects</h3>
+          <p class="text-sm text-slate-600">
+            This section can list your enrolled subjects and materials.
+          </p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow p-4 border border-slate-100">
+          <h3 class="font-semibold mb-2">Announcements</h3>
+          <p class="text-sm text-slate-600">
+            Future area for updates and important messages from the school.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\SubjectRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -19,55 +17,66 @@ class Subject
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 100)]
-    #[Assert\NotBlank(message: "Subject title is required.")]
-    #[Assert\Length(max: 100, maxMessage: "Subject title cannot exceed {{ limit }} characters.")]
-    private ?string $title = null;
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Subject name should not be blank.')]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: 'Subject name cannot be longer than {{ limit }} characters.'
+    )]
+    private ?string $name = null;
 
-    #[ORM\Column(length: 20, unique: true)]
-    #[Assert\NotBlank(message: "Subject code is required.")]
-    #[Assert\Length(max: 20, maxMessage: "Subject code cannot exceed {{ limit }} characters.")]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Subject code is required.')]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: 'Subject code cannot be longer than {{ limit }} characters.'
+    )]
     private ?string $code = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: "Active status must be specified.")]
-    private ?bool $is_active = null;
+    #[Assert\NotNull(message: 'Year level is required.')]
+    #[Assert\Range(
+        min: 1,
+        max: 10,
+        notInRangeMessage: 'Year level must be between {{ min }} and {{ max }}.'
+    )]
+    private ?int $yearLevel = null;
 
-    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
-    #[Assert\Positive(message: "Units must be a positive number.")]
-    private ?int $units = null;
+    #[ORM\Column]
+    #[Assert\NotNull(message: 'Semester is required.')]
+    #[Assert\Range(
+        min: 1,
+        max: 2,
+        notInRangeMessage: 'Semester must be 1 or 2.'
+    )]
+    private ?int $semester = null;
 
-    /**
-     * @var Collection<int, Section>
-     */
-    #[ORM\OneToMany(targetEntity: Section::class, mappedBy: 'name')]
-    private Collection $sections;
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(
+        max: 2000,
+        maxMessage: 'Description cannot be longer than {{ limit }} characters.'
+    )]
+    private ?string $description = null;
 
-    /**
-     * @var Collection<int, CourseOffering>
-     */
-    #[ORM\OneToMany(targetEntity: CourseOffering::class, mappedBy: 'subject')]
-    private Collection $courseOfferings;
-
-    public function __construct()
-    {
-        $this->sections = new ArrayCollection();
-        $this->courseOfferings = new ArrayCollection();
-    }
+    #[ORM\ManyToOne(inversedBy: 'subjects')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'Course is required.')]
+    private ?Course $course = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getTitle(): ?string
+    public function getName(): ?string
     {
-        return $this->title;
+        return $this->name;
     }
 
-    public function setTitle(string $title): static
+    public function setName(string $name): static
     {
-        $this->title = $title;
+        $this->name = $name;
+
         return $this;
     }
 
@@ -79,82 +88,64 @@ class Subject
     public function setCode(string $code): static
     {
         $this->code = $code;
+
         return $this;
     }
 
-    public function isActive(): ?bool
+    public function getYearLevel(): ?int
     {
-        return $this->is_active;
+        return $this->yearLevel;
     }
 
-    public function setIsActive(bool $is_active): static
+    public function setYearLevel(int $yearLevel): static
     {
-        $this->is_active = $is_active;
+        $this->yearLevel = $yearLevel;
+
         return $this;
     }
 
-    public function getUnits(): ?int
+    public function getSemester(): ?int
     {
-        return $this->units;
+        return $this->semester;
     }
 
-    public function setUnits(?int $units): static
+    public function setSemester(int $semester): static
     {
-        $this->units = $units;
+        $this->semester = $semester;
+
         return $this;
     }
 
-    /**
-     * @return Collection<int, Section>
-     */
-    public function getSections(): Collection
+    public function getDescription(): ?string
     {
-        return $this->sections;
+        return $this->description;
     }
 
-    public function addSection(Section $section): static
+    public function setDescription(?string $description): static
     {
-        if (!$this->sections->contains($section)) {
-            $this->sections->add($section);
-            $section->setName($this);
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getCourse(): ?Course
+    {
+        return $this->course;
+    }
+
+    public function setCourse(?Course $course): static
+    {
+        $this->course = $course;
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        if ($this->name && $this->code) {
+            return sprintf('%s (%s)', $this->name, $this->code);
         }
-        return $this;
-    }
 
-    public function removeSection(Section $section): static
-    {
-        if ($this->sections->removeElement($section)) {
-            if ($section->getName() === $this) {
-                $section->setName(null);
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, CourseOffering>
-     */
-    public function getCourseOfferings(): Collection
-    {
-        return $this->courseOfferings;
-    }
-
-    public function addCourseOffering(CourseOffering $courseOffering): static
-    {
-        if (!$this->courseOfferings->contains($courseOffering)) {
-            $this->courseOfferings->add($courseOffering);
-            $courseOffering->setSubject($this);
-        }
-        return $this;
-    }
-
-    public function removeCourseOffering(CourseOffering $courseOffering): static
-    {
-        if ($this->courseOfferings->removeElement($courseOffering)) {
-            if ($courseOffering->getSubject() === $this) {
-                $courseOffering->setSubject(null);
-            }
-        }
-        return $this;
+        return (string) ($this->name ?? 'Subject #'.$this->id);
     }
 }

@@ -1,137 +1,397 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Admin Dashboard — CompileX{% endblock %}
 
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
-<div class="flex min-h-screen bg-gray-50">
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
+
+<div id="app" class="flex min-h-screen bg-slate-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
 
   <!-- Sidebar -->
-  <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
-    <div class="px-6 py-4">
-      <h2 class="text-xl font-semibold text-gray-900">Admin Panel</h2>
+  <aside id="sidebar"
+         class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="px-6 py-5 border-b border-slate-700 dark:border-gray-700 flex items-center justify-between">
+      <h2 class="text-xl font-semibold tracking-tight">CompileX Admin</h2>
+      <button class="text-2xl md:text-3xl focus:outline-none" onclick="toggleSidebar()">×</button>
     </div>
-    <nav class="flex-1 px-4 space-y-2">
-      <a href="{{ path('admin_dashboard') }}" class="block px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100">Dashboard</a>
-      <a href="{{ path('app_instructors_index') }}" class="block px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100">Instructors</a>
-      <a href="{{ path('app_course_index') }}" class="block px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100">Courses</a>
-      <a href="{{ path('app_section_index') }}" class="block px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100">Sections</a>
-      <a href="{{ path('app_student_index') }}" class="block px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100">Students</a>
-      <a href="/" class="block px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100">Back to Home</a>
-      <a href="{{ path('app_logout') }}" class="block px-3 py-2 rounded-md text-red-600 hover:bg-red-100">Logout</a>
+
+    <nav class="flex-1 px-4 py-4 space-y-1">
+      <a href="{{ path('app_admin') }}"
+         class="block px-3 py-2 rounded-md font-medium bg-slate-700 dark:bg-gray-700 hover:bg-slate-600 dark:hover:bg-gray-600">
+        Admin Dashboard
+      </a>
+      <a href="{{ path('app_user_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Users
+      </a>
+      <a href="{{ path('app_course_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Courses
+      </a>
+      <a href="{{ path('app_subject_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Subjects
+      </a>
+      <a href="{{ path('app_student_profile_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Students
+      </a>
+
+      <div class="pt-4 border-t border-slate-700 dark:border-gray-600">
+        <button id="mode-toggle"
+                class="mt-4 block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Toggle Light/Dark Mode
+        </button>
+        <a href="/" class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Back to Home
+        </a>
+        <a href="{{ path('app_logout') }}"
+           class="block px-3 py-2 rounded-md font-medium text-red-500 hover:bg-red-700">
+          Logout
+        </a>
+      </div>
     </nav>
   </aside>
 
   <!-- Main Content -->
-  <main class="flex-1 p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
-    </div>
+  <div class="flex-1 flex flex-col min-h-screen">
+    <header class="fixed top-0 left-0 w-full z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
+      <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">CompileX</h1>
+      <button class="text-2xl md:text-3xl focus:outline-none" aria-label="Toggle menu" onclick="toggleSidebar()">
+        <span id="burger-icon">&#9776;</span>
+      </button>
+    </header>
 
-    <!-- Summary Cards -->
-    <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mb-6">
-      <div class="rounded-2xl border border-gray-200 bg-white p-4">
-        <p class="text-sm text-gray-500">Total Instructors</p>
-        <p class="mt-2 text-2xl font-semibold">{{ instructorCount|default(0) }}</p>
-      </div>
-      <div class="rounded-2xl border border-gray-200 bg-white p-4">
-        <p class="text-sm text-gray-500">Total Courses</p>
-        <p class="mt-2 text-2xl font-semibold text-blue-700">{{ courseCount|default(0) }}</p>
-      </div>
-      <div class="rounded-2xl border border-gray-200 bg-white p-4">
-        <p class="text-sm text-gray-500">Active Instructors</p>
-        <p class="mt-2 text-2xl font-semibold text-green-700">{{ activeInstructorCount|default(0) }}</p>
-      </div>
-    </section>
+    <div class="h-16"></div>
 
-    <!-- Recent Instructors Table -->
-    <section class="mb-6 rounded-2xl border border-gray-200 bg-white overflow-hidden">
-      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-900">Recent Instructors</h2>
-        <a href="{{ path('app_instructors_index') }}" class="text-blue-600 hover:underline text-sm">View all</a>
+    <main id="main-content" class="flex-1 p-8 space-y-8">
+
+      <!-- Header -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+        <div>
+          <h1 class="text-3xl font-semibold">Admin Dashboard</h1>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Quick overview of users, courses, subjects, and student progress.
+          </p>
+        </div>
       </div>
-      <table class="min-w-full text-sm border-t border-gray-100">
-        <thead class="bg-gray-50 text-left">
-          <tr>
-            <th class="px-4 py-2">Name</th>
-            <th class="px-4 py-2">Email</th>
-            <th class="px-4 py-2">Status</th>
-            <th class="px-4 py-2 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for i in recentInstructors %}
-            <tr class="{{ cycle(['bg-white','bg-gray-50/50'], loop.index0) }}">
-              <td class="px-4 py-2 font-medium">
-                {{ i.lastName }}{{ i.lastName is not empty ? ', ' : '' }}{{ i.firstName }}{% if i.middleName %} {{ i.middleName }}{% endif %}
-              </td>
-              <td class="px-4 py-2 text-gray-600">{{ i.email }}</td>
-              <td class="px-4 py-2">
-                {% if i.isActive %}
-                  <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">Active</span>
+
+      <!-- Stats Grid -->
+      <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+
+        <!-- Users Overview -->
+        <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Users Overview</h2>
+            <a href="{{ path('app_user_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+              Manage →
+            </a>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Users</p>
+              <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-50">
+                {{ totalUsers }}
+              </p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Admins</p>
+              <p class="text-3xl font-extrabold text-indigo-700 dark:text-indigo-300">
+                {{ totalAdmins }}
+              </p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Instructors</p>
+              <p class="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">
+                {{ totalInstructors }}
+              </p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Student Profiles</p>
+              <p class="text-3xl font-extrabold text-sky-700 dark:text-sky-300">
+                {{ totalStudentProfiles }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Courses & Subjects -->
+        <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Courses & Subjects</h2>
+            <div class="flex gap-2 text-xs">
+              <a href="{{ path('app_course_index') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Courses →</a>
+              <a href="{{ path('app_subject_index') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Subjects →</a>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Courses</p>
+              <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-50">
+                {{ totalCourses }}
+              </p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Active Courses</p>
+              <p class="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">
+                {{ activeCourses }}
+              </p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Inactive Courses</p>
+              <p class="text-3xl font-extrabold text-amber-700 dark:text-amber-300">
+                {{ inactiveCourses }}
+              </p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Subjects</p>
+              <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-50">
+                {{ totalSubjects }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Students Progress -->
+        <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Student Progress</h2>
+            <a href="{{ path('app_student_profile_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+              Manage →
+            </a>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Ongoing</p>
+              <p class="text-3xl font-extrabold text-blue-700 dark:text-blue-300">
+                {{ ongoingStudents }}
+              </p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Completed</p>
+              <p class="text-3xl font-extrabold text-green-700 dark:text-green-300">
+                {{ completedStudents }}
+              </p>
+            </div>
+          </div>
+
+          <p class="text-xs text-gray-600 dark:text-gray-400">
+            Based on Student Profiles and their current status.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Latest Data Preview -->
+      <section class="space-y-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          Latest Activity
+        </h2>
+
+        <div class="grid gap-6 lg:grid-cols-2">
+
+          <!-- Latest Users -->
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
+            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Users</h3>
+              <a href="{{ path('app_user_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                View all
+              </a>
+            </div>
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-gray-900">
+                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  <th class="px-4 py-2">Email</th>
+                  <th class="px-4 py-2">Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for u in latestUsers %}
+                  {% set allRoles = u.roles is iterable ? u.roles : [] %}
+                  {% set mainRoles = allRoles|filter(r => r != 'ROLE_USER') %}
+                  {% set displayRole = mainRoles is not empty ? mainRoles|join(', ') : 'ROLE_USER' %}
+                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                    <td class="px-4 py-2">{{ u.email }}</td>
+                    <td class="px-4 py-2 text-xs">{{ displayRole }}</td>
+                  </tr>
                 {% else %}
-                  <span class="inline-flex items-center rounded-full bg-gray-200 px-2.5 py-0.5 text-xs font-medium text-gray-700">Inactive</span>
-                {% endif %}
-              </td>
-              <td class="px-4 py-2 text-right">
-                <a class="text-blue-600 hover:underline" href="{{ path('app_instructors_show', {'id': i.id}) }}">View</a>
-                <span class="mx-1">·</span>
-                <a class="text-blue-600 hover:underline" href="{{ path('app_instructors_edit', {'id': i.id}) }}">Edit</a>
-              </td>
-            </tr>
-          {% else %}
-            <tr>
-              <td colspan="4" class="px-4 py-6 text-center text-gray-500">No recent instructors.</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </section>
+                  <tr>
+                    <td colspan="2" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                      No users yet.
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
 
-    <!-- Courses Table -->
-    <section class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-900">Courses</h2>
-        <a href="{{ path('app_course_index') }}" class="text-blue-600 hover:underline text-sm">View all</a>
-      </div>
-      <table class="min-w-full text-sm border-t border-gray-100">
-        <thead class="bg-gray-50 text-left">
-          <tr>
-            <th class="px-4 py-2">Code</th>
-            <th class="px-4 py-2">Title</th>
-            <th class="px-4 py-2">Description</th>
-            <th class="px-4 py-2">Status</th>
-            <th class="px-4 py-2 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in recentCourses %}
-            <tr class="{{ cycle(['bg-white','bg-gray-50/50'], loop.index0) }}">
-              <td class="px-4 py-2">{{ c.code }}</td>
-              <td class="px-4 py-2 font-medium">{{ c.title }}</td>
-              <td class="px-4 py-2">{{ c.description|default('—') }}</td>
-              <td class="px-4 py-2">
-                {% if c.isActive %}
-                  <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">Active</span>
+          <!-- Latest Courses -->
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
+            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Courses</h3>
+              <a href="{{ path('app_course_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                View all
+              </a>
+            </div>
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-gray-900">
+                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  <th class="px-4 py-2">Name</th>
+                  <th class="px-4 py-2">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for c in latestCourses %}
+                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                    <td class="px-4 py-2">
+                      {{ c.name|length > 30 ? c.name|slice(0, 30) ~ '…' : c.name }}
+                    </td>
+                    <td class="px-4 py-2">
+                      {% if c.isActive() %}
+                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                          Active
+                        </span>
+                      {% else %}
+                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                          Inactive
+                        </span>
+                      {% endif %}
+                    </td>
+                  </tr>
                 {% else %}
-                  <span class="inline-flex items-center rounded-full bg-gray-200 px-2.5 py-0.5 text-xs font-medium text-gray-700">Inactive</span>
-                {% endif %}
-              </td>
-              <td class="px-4 py-2 text-right">
-                <a class="text-blue-600 hover:underline" href="{{ path('app_course_show', {'id': c.id}) }}">View</a>
-                <span class="mx-1">·</span>
-                <a class="text-blue-600 hover:underline" href="{{ path('app_course_edit', {'id': c.id}) }}">Edit</a>
-              </td>
-            </tr>
-          {% else %}
-            <tr>
-              <td colspan="5" class="px-4 py-6 text-center text-gray-500">No courses found.</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </section>
+                  <tr>
+                    <td colspan="2" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                      No courses yet.
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
 
-  </main>
+          <!-- Latest Subjects -->
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
+            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Subjects</h3>
+              <a href="{{ path('app_subject_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                View all
+              </a>
+            </div>
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-gray-900">
+                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  <th class="px-4 py-2">Code</th>
+                  <th class="px-4 py-2">Name</th>
+                  <th class="px-4 py-2">Course</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for s in latestSubjects %}
+                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                    <td class="px-4 py-2 font-mono text-xs">{{ s.code }}</td>
+                    <td class="px-4 py-2">
+                      {{ s.name|length > 25 ? s.name|slice(0, 25) ~ '…' : s.name }}
+                    </td>
+                    <td class="px-4 py-2 text-xs">
+                      {{ s.course ? (s.course.name|length > 20 ? s.course.name|slice(0,20) ~ '…' : s.course.name) : '—' }}
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="3" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                      No subjects yet.
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Latest Student Profiles -->
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
+            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Student Profiles</h3>
+              <a href="{{ path('app_student_profile_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                View all
+              </a>
+            </div>
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-gray-900">
+                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  <th class="px-4 py-2">User</th>
+                  <th class="px-4 py-2">Course</th>
+                  <th class="px-4 py-2">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for sp in latestStudentProfiles %}
+                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                    <td class="px-4 py-2 text-xs">
+                      {{ sp.user ? sp.user.email : '—' }}
+                    </td>
+                    <td class="px-4 py-2 text-xs">
+                      {{ sp.course ? (sp.course.name|length > 20 ? sp.course.name|slice(0,20) ~ '…' : sp.course.name) : '—' }}
+                    </td>
+                    <td class="px-4 py-2 text-xs">
+                      {{ sp.status }}
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="3" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                      No student profiles yet.
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
 </div>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const burgerIcon = document.getElementById('burger-icon');
+
+function toggleSidebar() {
+  sidebar.classList.toggle('-translate-x-full');
+  burgerIcon.innerHTML = sidebar.classList.contains('-translate-x-full') ? '&#9776;' : '&times;';
+}
+
+const DARK_KEY = 'compilex-dark-mode';
+const modeToggle = document.getElementById('mode-toggle');
+function loadInitialTheme() {
+  const saved = localStorage.getItem(DARK_KEY);
+  document.documentElement.classList.toggle('dark', saved === 'true');
+}
+modeToggle.addEventListener('click', e => {
+  e.stopPropagation();
+  const isDark = document.documentElement.classList.contains('dark');
+  document.documentElement.classList.toggle('dark', !isDark);
+  localStorage.setItem(DARK_KEY, (!isDark).toString());
+});
+loadInitialTheme();
+
+document.addEventListener('click', e => {
+  if (!sidebar.contains(e.target) &&
+      !e.target.closest('button[aria-label="Toggle menu"]') &&
+      !sidebar.classList.contains('-translate-x-full')) {
+    toggleSidebar();
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !sidebar.classList.contains('-translate-x-full')) toggleSidebar();
+});
+</script>
 {% endblock %}

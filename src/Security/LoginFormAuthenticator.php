@@ -35,17 +35,38 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
             new UserBadge($email),
             new PasswordCredentials($request->getPayload()->getString('password')),
             [
-                new CsrfTokenBadge('authenticate', $request->getPayload()->getString('_csrf_token')),            ]
+                new CsrfTokenBadge('authenticate', $request->getPayload()->getString('_csrf_token')),
+            ]
         );
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
-    {
+    public function onAuthenticationSuccess(
+        Request $request,
+        TokenInterface $token,
+        string $firewallName
+    ): ?Response {
+        // 1) If user was trying to access a protected page before login,
+        //    send them back there first.
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
 
-        return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
+        // 2) Role-based redirect
+        $user  = $token->getUser();
+        $roles = $user->getRoles(); // e.g. ['ROLE_USER', 'ROLE_ADMIN']
+
+        // ✅ Admin → admin dashboard
+        if (in_array('ROLE_ADMIN', $roles, true)) {
+            return new RedirectResponse($this->urlGenerator->generate('app_admin'));
+        }
+
+        // ✅ Instructor → instructor dashboard
+        if (in_array('ROLE_INSTRUCTOR', $roles, true)) {
+            return new RedirectResponse($this->urlGenerator->generate('app_instructor_dashboard'));
+        }
+
+        // ✅ Default → student dashboard (ROLE_USER)
+        return new RedirectResponse($this->urlGenerator->generate('app_student_dashboard'));
     }
 
     protected function getLoginUrl(Request $request): string

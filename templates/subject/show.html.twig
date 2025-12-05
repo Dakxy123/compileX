@@ -1,34 +1,61 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Subject{% endblock %}
+{% block title %}Subject Details{% endblock %}
 
 {% block body %}
-    <h1>Subject</h1>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ subject.id }}</td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>{{ subject.name }}</td>
-            </tr>
-            <tr>
-                <th>Code</th>
-                <td>{{ subject.code }}</td>
-            </tr>
-            <tr>
-                <th>Is_active</th>
-                <td>{{ subject.isActive ? 'Yes' : 'No' }}</td>
-            </tr>
-        </tbody>
+<div class="min-h-screen flex items-start justify-center bg-slate-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-10">
+  <div class="w-full max-w-xl bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-semibold">Subject Details</h1>
+      <a href="{{ path('app_subject_index') }}" class="text-sm text-blue-500 hover:underline">
+        Back to list
+      </a>
+    </div>
+
+    <table class="min-w-full text-sm border border-gray-200 dark:border-gray-700">
+      <tbody>
+        <tr>
+          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left w-32">ID</th>
+          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">{{ subject.id }}</td>
+        </tr>
+        <tr>
+          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Code</th>
+          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">{{ subject.code }}</td>
+        </tr>
+        <tr>
+          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Name</th>
+          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">{{ subject.name }}</td>
+        </tr>
+        <tr>
+          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Year Level</th>
+          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">{{ subject.yearLevel }}</td>
+        </tr>
+        <tr>
+          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Course</th>
+          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+            {{ subject.course ? subject.course.name : '—' }}
+          </td>
+        </tr>
+        <tr>
+          <th class="px-4 py-2 text-left">Description</th>
+          <td class="px-4 py-2">
+            {{ subject.description ?: '—' }}
+          </td>
+        </tr>
+      </tbody>
     </table>
 
-    <a href="{{ path('app_subject_index') }}">back to list</a>
+    <div class="mt-4 flex justify-between">
+      <a href="{{ path('app_subject_edit', {'id': subject.id}) }}"
+         class="px-4 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-700">
+        Edit
+      </a>
 
-    <a href="{{ path('app_subject_edit', {'id': subject.id}) }}">edit</a>
-
-    {{ include('subject/_delete_form.html.twig') }}
+      {% include 'subject/_delete_form.html.twig' %}
+    </div>
+  </div>
+</div>
 {% endblock %}

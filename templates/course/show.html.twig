@@ -1,42 +1,60 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Course details{% endblock %}
+{% block title %}Course Details{% endblock %}
 
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="flex items-start justify-between mb-6">
-    <h1 class="text-2xl font-semibold text-gray-900">Course details</h1>
-    <div class="flex items-center space-x-2">
-      <a href="{{ path('app_course_index') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-800 rounded-md shadow-sm hover:bg-gray-200">Back</a>
-      <a href="{{ path('app_course_edit', {'id': course.id}) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded-md shadow-sm hover:bg-yellow-600">Edit</a>
+<script>tailwind.config = { darkMode: 'class' };</script>
+
+<div class="min-h-screen flex items-start justify-center bg-slate-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-10">
+  <div class="w-full max-w-xl bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-semibold">Course Details</h1>
+      <a href="{{ path('app_course_index') }}" class="text-sm text-blue-500 hover:underline">
+        Back to list
+      </a>
     </div>
-  </div>
 
-  <div class="bg-white shadow-sm sm:rounded-lg border border-gray-200">
-    <div class="px-4 py-5 sm:p-6">
-      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-        <dt class="text-sm font-medium text-gray-500">ID</dt>
-        <dd class="text-sm text-gray-900">{{ course.id }}</dd>
+    <table class="min-w-full text-sm border border-gray-200 dark:border-gray-700">
+      <tbody>
+        <tr>
+          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left w-32">ID</th>
+          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">{{ course.id }}</td>
+        </tr>
+        <tr>
+          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Name</th>
+          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">{{ course.name }}</td>
+        </tr>
+        <tr>
+          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Description</th>
+          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+            {{ course.description ?: '—' }}
+          </td>
+        </tr>
+        <tr>
+          <th class="px-4 py-2 text-left">Status</th>
+          <td class="px-4 py-2">
+            {% if course.isActive() %}
+              <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                Active
+              </span>
+            {% else %}
+              <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                Inactive
+              </span>
+            {% endif %}
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-        <dt class="text-sm font-medium text-gray-500">Code</dt>
-        <dd class="text-sm text-gray-900">{{ course.code }}</dd>
+    <div class="mt-4 flex justify-between">
+      <a href="{{ path('app_course_edit', {'id': course.id}) }}"
+         class="px-4 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-700">
+        Edit
+      </a>
 
-        <dt class="text-sm font-medium text-gray-500">Title</dt>
-        <dd class="text-sm text-gray-900">{{ course.title }}</dd>
-
-        <dt class="text-sm font-medium text-gray-500">Description</dt>
-        <dd class="text-sm text-gray-700">{{ course.description|default('—') }}</dd>
-
-        <dt class="text-sm font-medium text-gray-500">Active</dt>
-        <dd class="text-sm">
-          {% if course.isActive %}
-            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Active</span>
-          {% else %}
-            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Inactive</span>
-          {% endif %}
-        </dd>
-      </dl>
+      {% include 'course/_delete_form.html.twig' %}
     </div>
   </div>
 </div>

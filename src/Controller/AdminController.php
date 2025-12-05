@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
-use App\Repository\InstructorsRepository;
+use App\Repository\UserRepository;
 use App\Repository\CourseRepository;
+use App\Repository\SubjectRepository;
+use App\Repository\StudentProfileRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -13,36 +15,103 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 final class AdminController extends AbstractController
 {
-    #[Route('/', name: 'admin_dashboard', methods: ['GET'])]
+    #[Route('', name: 'app_admin', methods: ['GET'])]
     public function index(
-        InstructorsRepository $instructorsRepository,
-        CourseRepository $courseRepository
+        UserRepository $userRepository,
+        CourseRepository $courseRepository,
+        SubjectRepository $subjectRepository,
+        StudentProfileRepository $studentProfileRepository
     ): Response {
-        // Instructor stats
-        $instructorCount         = $instructorsRepository->count([]);
-        $activeInstructorCount   = $instructorsRepository->count(['isActive' => true]);
-        $inactiveInstructorCount = $instructorsRepository->count(['isActive' => false]);
+        // --- User stats ---
+        $totalUsers = $userRepository->count([]);
 
-        // Recent instructors (last 5)
-        $recentInstructors = $instructorsRepository->createQueryBuilder('i')
-            ->orderBy('i.id', 'DESC')
+        $totalAdmins = (int) $userRepository->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->andWhere('u.roles LIKE :role')
+            ->setParameter('role', '%"ROLE_ADMIN"%')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $totalInstructors = (int) $userRepository->createQueryBuilder('u2')
+            ->select('COUNT(u2.id)')
+            ->andWhere('u2.roles LIKE :role')
+            ->setParameter('role', '%"ROLE_INSTRUCTOR"%')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // Students based on StudentProfile count
+        $totalStudentProfiles = $studentProfileRepository->count([]);
+
+        // --- Course stats ---
+        $totalCourses = $courseRepository->count([]);
+
+        $activeCourses = (int) $courseRepository->createQueryBuilder('c')
+            ->select('COUNT(c.id)')
+            ->andWhere('c.IsActive = :active')
+            ->setParameter('active', true)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $inactiveCourses = $totalCourses - $activeCourses;
+
+        // --- Subject stats ---
+        $totalSubjects = $subjectRepository->count([]);
+
+        // --- Student status stats ---
+        $ongoingStudents = (int) $studentProfileRepository->createQueryBuilder('sp')
+            ->select('COUNT(sp.id)')
+            ->andWhere('sp.status = :status')
+            ->setParameter('status', 'Ongoing')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $completedStudents = (int) $studentProfileRepository->createQueryBuilder('sp2')
+            ->select('COUNT(sp2.id)')
+            ->andWhere('sp2.status = :status')
+            ->setParameter('status', 'Completed')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // --- Latest items for preview tables ---
+        $latestUsers = $userRepository->createQueryBuilder('u')
+            ->orderBy('u.id', 'DESC')
             ->setMaxResults(5)
             ->getQuery()
             ->getResult();
 
-        // Recent courses (last 5)
-        $recentCourses = $courseRepository->createQueryBuilder('c')
+        $latestCourses = $courseRepository->createQueryBuilder('c')
             ->orderBy('c.id', 'DESC')
             ->setMaxResults(5)
             ->getQuery()
             ->getResult();
 
+        $latestSubjects = $subjectRepository->createQueryBuilder('s')
+            ->orderBy('s.id', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+
+        $latestStudentProfiles = $studentProfileRepository->createQueryBuilder('sp3')
+            ->orderBy('sp3.id', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+
         return $this->render('admin/index.html.twig', [
-            'instructorCount'         => $instructorCount,
-            'activeInstructorCount'   => $activeInstructorCount,
-            'inactiveInstructorCount' => $inactiveInstructorCount,
-            'recentInstructors'       => $recentInstructors,
-            'recentCourses'           => $recentCourses,
+            'totalUsers'           => $totalUsers,
+            'totalAdmins'          => $totalAdmins,
+            'totalInstructors'     => $totalInstructors,
+            'totalStudentProfiles' => $totalStudentProfiles,
+            'totalCourses'         => $totalCourses,
+            'activeCourses'        => $activeCourses,
+            'inactiveCourses'      => $inactiveCourses,
+            'totalSubjects'        => $totalSubjects,
+            'ongoingStudents'      => $ongoingStudents,
+            'completedStudents'    => $completedStudents,
+            'latestUsers'          => $latestUsers,
+            'latestCourses'        => $latestCourses,
+            'latestSubjects'       => $latestSubjects,
+            'latestStudentProfiles'=> $latestStudentProfiles,
         ]);
     }
 }

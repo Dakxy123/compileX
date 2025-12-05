@@ -3,11 +3,33 @@
 {% block title %}Edit Subject{% endblock %}
 
 {% block body %}
-    <h1>Edit Subject</h1>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
 
-    {{ include('subject/_form.html.twig', {'button_label': 'Update'}) }}
+<div class="min-h-screen flex items-start justify-center bg-slate-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-10">
+  <div class="w-full max-w-xl bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-semibold">Edit Subject</h1>
+      <a href="{{ path('app_subject_index') }}" class="text-sm text-blue-500 hover:underline">
+        Back to list
+      </a>
+    </div>
 
-    <a href="{{ path('app_subject_index') }}">back to list</a>
-
-    {{ include('subject/_delete_form.html.twig') }}
+    {{ form_start(form) }}
+      {% include 'subject/_form.html.twig' with {form: form} %}
+      <div class="mt-6 flex justify-between">
+        <a href="{{ path('app_subject_show', {'id': subject.id}) }}"
+           class="px-3 py-2 rounded bg-gray-300 dark:bg-gray-700 text-sm">
+          View
+        </a>
+        <div class="flex gap-2">
+          <button type="submit"
+                  class="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 dark:hover:bg-blue-700">
+            Update
+          </button>
+        </div>
+      </div>
+    {{ form_end(form) }}
+  </div>
+</div>
 {% endblock %}

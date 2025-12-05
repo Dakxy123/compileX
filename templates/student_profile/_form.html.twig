@@ -1,0 +1,45 @@
+<div class="space-y-4">
+  <!-- User -->
+  <div>
+    {{ form_label(form.user, 'User (Account)', {'label_attr': {'class':'block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200'}}) }}
+    {{ form_widget(form.user, {
+      'attr': {
+        'class':'w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100'
+      }
+    }) }}
+    {% include '/form/_errors_tailwind.html.twig' with {'errors': form.user.vars.errors} %}
+  </div>
+
+  <!-- Course -->
+  <div>
+    {{ form_label(form.course, 'Course', {'label_attr': {'class':'block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200'}}) }}
+    {{ form_widget(form.course, {
+      'attr': {
+        'class':'w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100'
+      }
+    }) }}
+    {% include '/form/_errors_tailwind.html.twig' with {'errors': form.course.vars.errors} %}
+  </div>
+
+  <!-- Year Level -->
+  <div>
+    {{ form_label(form.yearLevel, 'Year Level', {'label_attr': {'class':'block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200'}}) }}
+    {{ form_widget(form.yearLevel, {
+      'attr': {
+        'class':'w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100'
+      }
+    }) }}
+    {% include '/form/_errors_tailwind.html.twig' with {'errors': form.yearLevel.vars.errors} %}
+  </div>
+
+  <!-- Status -->
+  <div>
+    {{ form_label(form.status, 'Status', {'label_attr': {'class':'block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200'}}) }}
+    {{ form_widget(form.status, {
+      'attr': {
+        'class':'w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100'
+      }
+    }) }}
+    {% include '/form/_errors_tailwind.html.twig' with {'errors': form.status.vars.errors} %}
+  </div>
+</div>
