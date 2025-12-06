@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\StudentProfileRepository;
 use App\Entity\User;
 use App\Entity\Course;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -51,11 +53,18 @@ class StudentProfile
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    /**
+     * @var Collection<int, Enrollment>
+     */
+    #[ORM\OneToMany(targetEntity: Enrollment::class, mappedBy: 'studentProfile')]
+    private Collection $enrollments;
+
     public function __construct()
     {
         $now = new \DateTimeImmutable();
         $this->createdAt = $now;
         $this->updatedAt = $now;
+        $this->enrollments = new ArrayCollection();
     }
 
     public function touch(): void
@@ -147,5 +156,35 @@ class StudentProfile
         $year = $this->yearLevel ?? 0;
 
         return sprintf('%s — %s (Year %d)', $email, $courseName, $year);
+    }
+
+    /**
+     * @return Collection<int, Enrollment>
+     */
+    public function getEnrollments(): Collection
+    {
+        return $this->enrollments;
+    }
+
+    public function addEnrollment(Enrollment $enrollment): static
+    {
+        if (!$this->enrollments->contains($enrollment)) {
+            $this->enrollments->add($enrollment);
+            $enrollment->setStudentProfile($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEnrollment(Enrollment $enrollment): static
+    {
+        if ($this->enrollments->removeElement($enrollment)) {
+            // set the owning side to null (unless already changed)
+            if ($enrollment->getStudentProfile() === $this) {
+                $enrollment->setStudentProfile(null);
+            }
+        }
+
+        return $this;
     }
 }

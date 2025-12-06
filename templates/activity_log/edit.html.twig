@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Activity Log — Admin — CompileX{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
+
+{% form_theme form 'form/_errors_tailwind.html.twig' %}
+
+<div id="app" class="flex min-h-screen bg-slate-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+
+  {% include 'partials/_admin_sidebar.html.twig' with { active: 'activity_log' } only ignore missing %}
+
+  <div class="flex-1 flex flex-col min-h-screen">
+    {% include 'partials/_admin_header.html.twig' ignore missing %}
+
+    <div class="h-16"></div>
+
+    <main id="main-content" class="flex-1 p-8 max-w-3xl mx-auto space-y-6">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-semibold">Edit Activity Log Entry</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            Update the details of this log entry.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <a href="{{ path('app_activity_log_show', {id: activity_log.id}) }}"
+             class="inline-flex items-center px-3 py-2 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800">
+            View
+          </a>
+          <a href="{{ path('app_activity_log_index') }}"
+             class="inline-flex items-center px-3 py-2 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800">
+            ← Back to list
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-5 space-y-4">
+        {% include 'activity_log/_form.html.twig' with { form: form, button_label: 'Update' } %}
+
+        {% include 'activity_log/_delete_form.html.twig' with { activity_log: activity_log } %}
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+// same JS as new.html.twig
+const sidebar = document.getElementById('sidebar');
+const burgerIcon = document.getElementById('burger-icon');
+
+if (sidebar && burgerIcon) {
+  function toggleSidebar() {
+    sidebar.classList.toggle('-translate-x-full');
+    burgerIcon.innerHTML = sidebar.classList.contains('-translate-x-full') ? '&#9776;' : '&times;';
+  }
+  window.toggleSidebar = toggleSidebar;
+
+  const DARK_KEY = 'compilex-dark-mode';
+  const modeToggle = document.getElementById('mode-toggle');
+  function loadInitialTheme() {
+    const saved = localStorage.getItem(DARK_KEY);
+    document.documentElement.classList.toggle('dark', saved === 'true');
+  }
+  if (modeToggle) {
+    modeToggle.addEventListener('click', e => {
+      e.stopPropagation();
+      const isDark = document.documentElement.classList.contains('dark');
+      document.documentElement.classList.toggle('dark', !isDark);
+      localStorage.setItem(DARK_KEY, (!isDark).toString());
+    });
+  }
+  loadInitialTheme();
+
+  document.addEventListener('click', e => {
+    if (!sidebar.contains(e.target) &&
+        !e.target.closest('button[aria-label="Toggle menu"]') &&
+        !sidebar.classList.contains('-translate-x-full')) {
+      toggleSidebar();
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !sidebar.classList.contains('-translate-x-full')) toggleSidebar();
+  });
+}
+</script>
+{% endblock %}

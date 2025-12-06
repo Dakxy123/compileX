@@ -1,0 +1,50 @@
+{% form_theme form 'form/_errors_tailwind.html.twig' %}
+
+{{ form_start(form, {
+  attr: {
+    class: 'space-y-4'
+  }
+}) }}
+
+  <div>
+    {{ form_label(form.instructor, null, {'label_attr': {'class': 'block text-sm font-medium text-slate-700'}}) }}
+    {{ form_widget(form.instructor, {
+      attr: {
+        class: 'mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300'
+      }
+    }) }}
+    {{ form_errors(form.instructor) }}
+  </div>
+
+  <div>
+    {{ form_label(form.subject, null, {'label_attr': {'class': 'block text-sm font-medium text-slate-700'}}) }}
+    {{ form_widget(form.subject, {
+      attr: {
+        class: 'mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300'
+      }
+    }) }}
+    {{ form_errors(form.subject) }}
+  </div>
+
+  <div class="flex items-center gap-2">
+    {{ form_widget(form.isPrimary, {
+      attr: {
+        class: 'rounded border-slate-300 text-blue-600 focus:ring-blue-500'
+      }
+    }) }}
+    {{ form_label(form.isPrimary, null, {'label_attr': {'class': 'text-sm text-slate-700'}}) }}
+    {{ form_errors(form.isPrimary) }}
+  </div>
+
+  <div class="pt-2 flex gap-2">
+    <button type="submit"
+            class="inline-flex items-center px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">
+      {{ button_label|default('Save') }}
+    </button>
+    <a href="{{ path('app_instructor_assignment_index') }}"
+       class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-100">
+      Cancel
+    </a>
+  </div>
+
+{{ form_end(form) }}

@@ -1,0 +1,224 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Activity Log — Admin — CompileX{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
+
+<div id="app" class="flex min-h-screen bg-slate-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+
+  <aside id="sidebar"
+         class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="px-6 py-5 border-b border-slate-700 dark:border-gray-700 flex items-center justify-between">
+      <h2 class="text-xl font-semibold tracking-tight">CompileX Admin</h2>
+      <button class="text-2xl md:text-3xl focus:outline-none" onclick="toggleSidebar()">×</button>
+    </div>
+
+    <nav class="flex-1 px-4 py-4 space-y-1">
+      <a href="{{ path('app_admin') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Admin Dashboard
+      </a>
+      <a href="{{ path('app_user_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Users
+      </a>
+      <a href="{{ path('app_course_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Courses
+      </a>
+      <a href="{{ path('app_subject_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Subjects
+      </a>
+      <a href="{{ path('app_module_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Modules
+      </a>
+      <a href="{{ path('app_enrollment_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Enrollments
+      </a>
+      <a href="{{ path('app_student_profile_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Students
+      </a>
+      <a href="{{ path('app_activity_log_index') }}"
+         class="block px-3 py-2 rounded-md font-medium bg-slate-700 dark:bg-gray-700 hover:bg-slate-600 dark:hover:bg-gray-600">
+        Activity Log
+      </a>
+
+      <div class="pt-4 border-t border-slate-700 dark:border-gray-600">
+        <button id="mode-toggle"
+                class="mt-4 block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Toggle Light/Dark Mode
+        </button>
+        <a href="/" class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Back to Home
+        </a>
+        <a href="{{ path('app_logout') }}"
+           class="block px-3 py-2 rounded-md font-medium text-red-500 hover:bg-red-700">
+          Logout
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="flex-1 flex flex-col min-h-screen">
+    <header class="fixed top-0 left-0 w-full z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
+      <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">CompileX</h1>
+      <button class="text-2xl md:text-3xl focus:outline-none" aria-label="Toggle menu" onclick="toggleSidebar()">
+        <span id="burger-icon">&#9776;</span>
+      </button>
+    </header>
+
+    <div class="h-16"></div>
+
+    <main id="main-content" class="flex-1 p-8 space-y-8 max-w-6xl mx-auto">
+
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-semibold">Activity Log</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            View a history of important actions performed by admins and staff in the system.
+          </p>
+        </div>
+        <a href="{{ path('app_admin') }}"
+           class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-100 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+          ← Back to Dashboard
+        </a>
+      </div>
+
+      <form method="get"
+            class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 flex flex-wrap gap-3 items-end">
+        <div class="flex-1 min-w-[220px]">
+          <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Search</label>
+          <input type="text"
+                 name="q"
+                 value="{{ app.request.query.get('q') }}"
+                 class="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                 placeholder="Email, action, context, description...">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Action</label>
+          <select name="action"
+                  class="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+            <option value="">All</option>
+            {% for a in availableActions %}
+              <option value="{{ a }}" {{ app.request.query.get('action') == a ? 'selected' : '' }}>
+                {{ a }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="flex gap-2">
+          <button type="submit"
+                  class="inline-flex items-center px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">
+            Filter
+          </button>
+          <a href="{{ path('app_activity_log_index') }}"
+             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800">
+            Reset
+          </a>
+        </div>
+      </form>
+
+      <div class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50 dark:bg-slate-950">
+            <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <th class="px-4 py-2">Date</th>
+              <th class="px-4 py-2">User</th>
+              <th class="px-4 py-2">Action</th>
+              <th class="px-4 py-2">Context</th>
+              <th class="px-4 py-2">Description</th>
+              <th class="px-4 py-2">IP</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for log in logs %}
+            <tr class="border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/80">
+              <td class="px-4 py-2 align-top text-xs whitespace-nowrap">
+                {{ log.createdAt ? log.createdAt|date('Y-m-d H:i') : '—' }}
+              </td>
+              <td class="px-4 py-2 align-top text-xs">
+                {% if log.user %}
+                  <div class="font-medium text-slate-800 dark:text-slate-100">
+                    {{ log.user.email }}
+                  </div>
+                {% else %}
+                  <span class="text-slate-500">System</span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-2 align-top text-xs">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] text-slate-700 dark:text-slate-300">
+                  {{ log.action }}
+                </span>
+              </td>
+              <td class="px-4 py-2 align-top text-xs text-slate-700 dark:text-slate-200">
+                {{ log.context ?: '—' }}
+              </td>
+              <td class="px-4 py-2 align-top text-xs text-slate-700 dark:text-slate-200">
+                {% if log.description %}
+                  {{ log.description|length > 80 ? log.description|slice(0,80) ~ '…' : log.description }}
+                {% else %}
+                  <span class="text-slate-400">—</span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-2 align-top text-xs text-slate-600 dark:text-slate-300">
+                {{ log.ipAddress ?: '—' }}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" class="px-4 py-4 text-center text-xs text-slate-500 dark:text-slate-400">
+                No activity logs yet.
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const burgerIcon = document.getElementById('burger-icon');
+
+function toggleSidebar() {
+  sidebar.classList.toggle('-translate-x-full');
+  burgerIcon.innerHTML = sidebar.classList.contains('-translate-x-full') ? '&#9776;' : '&times;';
+}
+
+const DARK_KEY = 'compilex-dark-mode';
+const modeToggle = document.getElementById('mode-toggle');
+function loadInitialTheme() {
+  const saved = localStorage.getItem(DARK_KEY);
+  document.documentElement.classList.toggle('dark', saved === 'true');
+}
+modeToggle.addEventListener('click', e => {
+  e.stopPropagation();
+  const isDark = document.documentElement.classList.contains('dark');
+  document.documentElement.classList.toggle('dark', !isDark);
+  localStorage.setItem(DARK_KEY, (!isDark).toString());
+});
+loadInitialTheme();
+
+document.addEventListener('click', e => {
+  if (!sidebar.contains(e.target) &&
+      !e.target.closest('button[aria-label="Toggle menu"]') &&
+      !sidebar.classList.contains('-translate-x-full')) {
+    toggleSidebar();
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !sidebar.classList.contains('-translate-x-full')) toggleSidebar();
+});
+</script>
+{% endblock %}

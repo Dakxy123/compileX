@@ -1,0 +1,84 @@
+{{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
+
+  {% include 'form/_errors_tailwind.html.twig' with { form: form } %}
+
+  <div class="grid md:grid-cols-2 gap-4">
+    <div>
+      {{ form_label(form.studentProfile, null, {'label_attr': {'class': 'block text-sm font-medium text-slate-700'}}) }}
+      {{ form_widget(form.studentProfile, {
+        'attr': {
+          'class': 'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300'
+        }
+      }) }}
+      {{ form_help(form.studentProfile) }}
+      {{ form_errors(form.studentProfile) }}
+    </div>
+
+    <div>
+      {{ form_label(form.subject, null, {'label_attr': {'class': 'block text-sm font-medium text-slate-700'}}) }}
+      {{ form_widget(form.subject, {
+        'attr': {
+          'class': 'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300'
+        }
+      }) }}
+      {{ form_help(form.subject) }}
+      {{ form_errors(form.subject) }}
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-4">
+    <div>
+      {{ form_label(form.status, null, {'label_attr': {'class': 'block text-sm font-medium text-slate-700'}}) }}
+      {{ form_widget(form.status, {
+        'attr': {
+          'class': 'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300'
+        }
+      }) }}
+      {{ form_errors(form.status) }}
+    </div>
+
+    <div>
+      {{ form_label(form.score, null, {'label_attr': {'class': 'block text-sm font-medium text-slate-700'}}) }}
+      {{ form_widget(form.score, {
+        'attr': {
+          'class': 'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300'
+        }
+      }) }}
+      <p class="mt-1 text-[11px] text-slate-500">Optional. 0–100, decimals allowed.</p>
+      {{ form_errors(form.score) }}
+    </div>
+
+    <div>
+      {{ form_label(form.grade, null, {'label_attr': {'class': 'block text-sm font-medium text-slate-700'}}) }}
+      {{ form_widget(form.grade, {
+        'attr': {
+          'class': 'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300'
+        }
+      }) }}
+      <p class="mt-1 text-[11px] text-slate-500">Optional. e.g. A, B+, 1.0</p>
+      {{ form_errors(form.grade) }}
+    </div>
+  </div>
+
+  <div>
+    {{ form_label(form.remarks, null, {'label_attr': {'class': 'block text-sm font-medium text-slate-700'}}) }}
+    {{ form_widget(form.remarks, {
+      'attr': {
+        'class': 'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300'
+      }
+    }) }}
+    {{ form_errors(form.remarks) }}
+  </div>
+
+  <div class="pt-2 flex flex-wrap justify-between gap-3">
+    <a href="{{ path('app_enrollment_index') }}"
+       class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-100">
+      Cancel
+    </a>
+    <button class="inline-flex items-center px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
+            type="submit">
+      Save
+    </button>
+  </div>
+
+{{ form_end(form) }}

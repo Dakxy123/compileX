@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Enrollment — Admin — CompileX{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-slate-50 text-slate-900 py-8 px-4">
+  <div class="max-w-3xl mx-auto space-y-6">
+    <div class="flex items-center justify-between gap-2">
+      <div>
+        <h1 class="text-2xl font-semibold">New Enrollment</h1>
+        <p class="text-sm text-slate-500">
+          Link a student to a subject and, optionally, set their status, score and grade.
+        </p>
+      </div>
+      <a href="{{ path('app_enrollment_index') }}"
+         class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-100">
+        ← Back to list
+      </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+      {% include 'enrollment/_form.html.twig' with { form: form } %}
+    </div>
+  </div>
+</div>
+{% endblock %}

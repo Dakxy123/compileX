@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Instructor Assignment — CompileX{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="flex min-h-screen bg-slate-50 text-slate-900">
+
+  {% include 'instructor_assignment/_sidebar.html.twig' ignore missing %}
+
+  <div class="flex-1 flex flex-col min-h-screen md:ml-64">
+    <header class="fixed top-0 left-0 md:left-64 right-0 z-40 bg-slate-800 text-white flex items-center justify-between px-6 py-3 shadow-md">
+      <h1 class="text-xl font-semibold text-blue-400 tracking-tight">CompileX</h1>
+      <button class="text-2xl md:hidden focus:outline-none" aria-label="Toggle menu" onclick="toggleSidebar()">
+        <span id="burger-icon">&#9776;</span>
+      </button>
+    </header>
+
+    <div class="h-16"></div>
+
+    <main class="flex-1 p-6 md:p-8 max-w-xl mx-auto w-full space-y-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-semibold">Instructor Assignment</h1>
+        <a href="{{ path('app_instructor_assignment_index') }}"
+           class="inline-flex items-center px-3 py-2 text-xs rounded-md border border-slate-300 bg-white hover:bg-slate-100">
+          ← Back
+        </a>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-lg shadow-sm divide-y divide-slate-100 text-sm">
+        <div class="px-4 py-3 flex justify-between gap-4">
+          <span class="text-slate-500">Instructor</span>
+          <span class="font-medium text-slate-900">
+            {{ assignment.instructor ? assignment.instructor.email : '—' }}
+          </span>
+        </div>
+
+        <div class="px-4 py-3 flex justify-between gap-4">
+          <span class="text-slate-500">Subject</span>
+          <span class="text-right">
+            {% if assignment.subject %}
+              <div class="font-mono text-[11px] text-slate-600">{{ assignment.subject.code }}</div>
+              <div class="font-medium text-slate-900">
+                {{ assignment.subject.name }}
+              </div>
+            {% else %}
+              —
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="px-4 py-3 flex justify-between gap-4">
+          <span class="text-slate-500">Course</span>
+          <span class="font-medium text-slate-900">
+            {% if assignment.subject and assignment.subject.course %}
+              {{ assignment.subject.course.name }}
+            {% else %}
+              —
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="px-4 py-3 flex justify-between gap-4">
+          <span class="text-slate-500">Primary</span>
+          <span>
+            {% if assignment.isPrimary %}
+              <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-100 text-emerald-700">
+                Primary instructor
+              </span>
+            {% else %}
+              <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full bg-slate-100 text-slate-700">
+                Secondary
+              </span>
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="px-4 py-3 flex justify-between gap-4">
+          <span class="text-slate-500">Assigned at</span>
+          <span class="font-medium text-slate-900">
+            {% if assignment.createdAt %}
+              {{ assignment.createdAt|date('Y-m-d H:i') }}
+            {% else %}
+              —
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 pt-2">
+        <a href="{{ path('app_instructor_assignment_edit', {id: assignment.id}) }}"
+           class="inline-flex items-center px-3 py-2 text-xs rounded-md bg-blue-600 text-white hover:bg-blue-700">
+          Edit
+        </a>
+        {% include 'instructor_assignment/_delete_form.html.twig' with { assignment: assignment } %}
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const burgerIcon = document.getElementById('burger-icon');
+function toggleSidebar() {
+  if (!sidebar) return;
+  sidebar.classList.toggle('-translate-x-full');
+  if (burgerIcon) {
+    burgerIcon.innerHTML = sidebar.classList.contains('-translate-x-full') ? '&#9776;' : '&times;';
+  }
+}
+</script>
+{% endblock %}

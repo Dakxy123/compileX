@@ -1,0 +1,265 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Enrollments — Admin — CompileX{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
+
+<div id="app" class="flex min-h-screen bg-slate-50 text-slate-900 dark:bg-gray-900 dark:text-gray-100">
+
+  {# =============== SIDEBAR =============== #}
+  <aside id="sidebar"
+         class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="px-6 py-5 border-b border-slate-700 dark:border-gray-700 flex items-center justify-between">
+      <h2 class="text-xl font-semibold tracking-tight">CompileX Admin</h2>
+      <button class="text-2xl md:text-3xl focus:outline-none" onclick="toggleSidebar()">×</button>
+    </div>
+
+    <nav class="flex-1 px-4 py-4 space-y-1">
+      <a href="{{ path('app_admin') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Admin Dashboard
+      </a>
+      <a href="{{ path('app_user_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Users
+      </a>
+      <a href="{{ path('app_course_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Courses
+      </a>
+      <a href="{{ path('app_subject_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Subjects
+      </a>
+      <a href="{{ path('app_module_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Modules
+      </a>
+      <a href="{{ path('app_student_profile_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Students
+      </a>
+      <a href="{{ path('app_enrollment_index') }}"
+         class="block px-3 py-2 rounded-md font-medium bg-slate-700 dark:bg-gray-700 hover:bg-slate-600 dark:hover:bg-gray-600">
+        Enrollments
+      </a>
+
+      <div class="pt-4 border-t border-slate-700 dark:border-gray-600">
+        <button id="mode-toggle"
+                class="mt-4 block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Toggle Light/Dark Mode
+        </button>
+        <a href="/" class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Back to Home
+        </a>
+        <a href="{{ path('app_logout') }}"
+           class="block px-3 py-2 rounded-md font-medium text-red-500 hover:bg-red-700">
+          Logout
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  {# =============== MAIN =============== #}
+  <div class="flex-1 flex flex-col min-h-screen">
+    <header class="fixed top-0 left-0 w-full z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
+      <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">CompileX</h1>
+      <button class="text-2xl md:text-3xl focus:outline-none" aria-label="Toggle menu" onclick="toggleSidebar()">
+        <span id="burger-icon">&#9776;</span>
+      </button>
+    </header>
+
+    <div class="h-16"></div>
+
+    <main id="main-content" class="flex-1 p-8 space-y-6">
+
+      {# Header + actions #}
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-semibold">Enrollments</h1>
+          <p class="text-sm text-slate-500 dark:text-gray-400">
+            Manage which students are enrolled in which subjects, including scores and grades.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href="{{ path('app_admin') }}"
+             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700">
+            ← Back to Dashboard
+          </a>
+          <a href="{{ path('app_enrollment_new') }}"
+             class="inline-flex items-center px-3 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">
+            + New Enrollment
+          </a>
+        </div>
+      </div>
+
+      {# Filters #}
+      <form method="get"
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-slate-200 dark:border-gray-700 p-4 flex flex-wrap gap-3 items-end">
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-xs font-medium text-slate-600 dark:text-gray-300 mb-1">Search</label>
+          <input type="text"
+                 name="q"
+                 value="{{ app.request.query.get('q') }}"
+                 class="w-full rounded-md border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                 placeholder="Student email, subject code/name, course...">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 dark:text-gray-300 mb-1">Status</label>
+          <select name="status"
+                  class="rounded-md border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+            <option value="">All statuses</option>
+            {% for s in statuses %}
+              <option value="{{ s }}" {{ app.request.query.get('status') == s ? 'selected' : '' }}>
+                {{ s }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="flex gap-2">
+          <button type="submit"
+                  class="inline-flex items-center px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">
+            Filter
+          </button>
+          <a href="{{ path('app_enrollment_index') }}"
+             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:bg-slate-100 dark:hover:bg-gray-800">
+            Reset
+          </a>
+        </div>
+      </form>
+
+      {# Table #}
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-slate-200 dark:border-gray-700 overflow-hidden">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50 dark:bg-gray-900">
+            <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+              <th class="px-4 py-2">Student</th>
+              <th class="px-4 py-2">Subject</th>
+              <th class="px-4 py-2">Status</th>
+              <th class="px-4 py-2">Score</th>
+              <th class="px-4 py-2">Grade</th>
+              <th class="px-4 py-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for enrollment in enrollments %}
+            {% set sp = enrollment.studentProfile %}
+            {% set user = sp ? sp.user : null %}
+            {% set subj = enrollment.subject %}
+            <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+              <td class="px-4 py-2 align-top text-xs">
+                {% if user %}
+                  <div class="font-medium text-slate-800 dark:text-gray-100">{{ user.email }}</div>
+                {% else %}
+                  <div class="text-slate-500 dark:text-gray-400">—</div>
+                {% endif %}
+                {% if sp and sp.course %}
+                  <div class="text-[11px] text-slate-500 dark:text-gray-400">
+                    {{ sp.course.name|length > 30 ? sp.course.name|slice(0,30) ~ '…' : sp.course.name }}
+                  </div>
+                {% endif %}
+              </td>
+              <td class="px-4 py-2 align-top text-xs">
+                {% if subj %}
+                  <div class="font-mono text-[11px] text-slate-600 dark:text-gray-300">{{ subj.code }}</div>
+                  <div class="text-slate-800 dark:text-gray-100">
+                    {{ subj.name|length > 30 ? subj.name|slice(0,30) ~ '…' : subj.name }}
+                  </div>
+                  {% if subj.course %}
+                    <div class="text-[11px] text-slate-500 dark:text-gray-400">
+                      {{ subj.course.name|length > 28 ? subj.course.name|slice(0,28) ~ '…' : subj.course.name }}
+                    </div>
+                  {% endif %}
+                {% else %}
+                  <span class="text-slate-500 dark:text-gray-400">—</span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-2 align-top">
+                {% set status = enrollment.status %}
+                {% set badgeClasses = {
+                  'Enrolled': 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+                  'Ongoing': 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
+                  'Completed': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300',
+                  'Dropped': 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+                }[status] ?? 'bg-slate-100 text-slate-700 dark:bg-gray-700 dark:text-gray-300' %}
+                <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full {{ badgeClasses }}">
+                  {{ status }}
+                </span>
+              </td>
+              <td class="px-4 py-2 align-top text-xs">
+                {% if enrollment.score is not null %}
+                  {{ enrollment.score|number_format(2, '.', ',') }}
+                {% else %}
+                  <span class="text-slate-400 dark:text-gray-500">—</span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-2 align-top text-xs">
+                {{ enrollment.grade ?: '—' }}
+              </td>
+              <td class="px-4 py-2 align-top text-right text-xs">
+                <div class="inline-flex items-center gap-2">
+                  <a href="{{ path('app_enrollment_show', {id: enrollment.id}) }}"
+                     class="px-2 py-1 rounded border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
+                    View
+                  </a>
+                  <a href="{{ path('app_enrollment_edit', {id: enrollment.id}) }}"
+                     class="px-2 py-1 rounded border border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/40">
+                    Edit
+                  </a>
+                  {% include 'enrollment/_delete_form.html.twig' with { enrollment: enrollment } %}
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" class="px-4 py-4 text-center text-xs text-slate-500 dark:text-gray-400">
+                No enrollments found.
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const burgerIcon = document.getElementById('burger-icon');
+
+function toggleSidebar() {
+  sidebar.classList.toggle('-translate-x-full');
+  burgerIcon.innerHTML = sidebar.classList.contains('-translate-x-full') ? '&#9776;' : '&times;';
+}
+
+const DARK_KEY = 'compilex-dark-mode';
+const modeToggle = document.getElementById('mode-toggle');
+function loadInitialTheme() {
+  const saved = localStorage.getItem(DARK_KEY);
+  document.documentElement.classList.toggle('dark', saved === 'true');
+}
+modeToggle.addEventListener('click', e => {
+  e.stopPropagation();
+  const isDark = document.documentElement.classList.contains('dark');
+  document.documentElement.classList.toggle('dark', !isDark);
+  localStorage.setItem(DARK_KEY, (!isDark).toString());
+});
+loadInitialTheme();
+
+document.addEventListener('click', e => {
+  if (!sidebar.contains(e.target) &&
+      !e.target.closest('button[aria-label="Toggle menu"]') &&
+      !sidebar.classList.contains('-translate-x-full')) {
+    toggleSidebar();
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !sidebar.classList.contains('-translate-x-full')) toggleSidebar();
+});
+</script>
+{% endblock %}

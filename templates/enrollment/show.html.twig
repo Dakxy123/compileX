@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Enrollment Details — Admin — CompileX{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-slate-50 text-slate-900 py-8 px-4">
+  <div class="max-w-3xl mx-auto space-y-6">
+    <div class="flex items-center justify-between gap-2">
+      <div>
+        <h1 class="text-2xl font-semibold">Enrollment Details</h1>
+      </div>
+      <a href="{{ path('app_enrollment_index') }}"
+         class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-100">
+        ← Back to list
+      </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6 space-y-4 text-sm">
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Student</h2>
+          {% if enrollment.studentProfile and enrollment.studentProfile.user %}
+            <p class="font-medium">{{ enrollment.studentProfile.user.email }}</p>
+          {% else %}
+            <p class="text-slate-500">—</p>
+          {% endif %}
+        </div>
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Course</h2>
+          {% if enrollment.studentProfile and enrollment.studentProfile.course %}
+            <p>{{ enrollment.studentProfile.course.name }}</p>
+          {% else %}
+            <p class="text-slate-500">—</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Subject</h2>
+          {% if enrollment.subject %}
+            <p class="font-mono text-[11px] text-slate-600">{{ enrollment.subject.code }}</p>
+            <p>{{ enrollment.subject.name }}</p>
+          {% else %}
+            <p class="text-slate-500">—</p>
+          {% endif %}
+        </div>
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Status</h2>
+          <p>{{ enrollment.status }}</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4">
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Score</h2>
+          {% if enrollment.score is not null %}
+            <p>{{ enrollment.score|number_format(2, '.', ',') }}</p>
+          {% else %}
+            <p class="text-slate-500">—</p>
+          {% endif %}
+        </div>
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Grade</h2>
+          <p>{{ enrollment.grade ?: '—' }}</p>
+        </div>
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Status</h2>
+          <p>{{ enrollment.status }}</p>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Remarks</h2>
+        <p class="whitespace-pre-line">
+          {{ enrollment.remarks ?: '—' }}
+        </p>
+      </div>
+
+      <div class="pt-4 border-t border-slate-200 mt-2 flex justify-between">
+        <a href="{{ path('app_enrollment_edit', {id: enrollment.id}) }}"
+           class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-blue-500 text-blue-600 hover:bg-blue-50">
+          Edit
+        </a>
+        {% include 'enrollment/_delete_form.html.twig' with { enrollment: enrollment } %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

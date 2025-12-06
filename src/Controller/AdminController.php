@@ -7,7 +7,10 @@ use App\Repository\CourseRepository;
 use App\Repository\SubjectRepository;
 use App\Repository\StudentProfileRepository;
 use App\Repository\ContactMessageRepository;
-use App\Repository\ModuleRepository; // 👈 ADD THIS
+use App\Repository\ModuleRepository;
+use App\Repository\EnrollmentRepository;
+use App\Repository\InstructorAssignmentRepository;
+use App\Repository\ActivityLogRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -24,9 +27,11 @@ final class AdminController extends AbstractController
         SubjectRepository $subjectRepository,
         StudentProfileRepository $studentProfileRepository,
         ContactMessageRepository $contactMessageRepository,
-        ModuleRepository $moduleRepository, // 👈 ADD THIS
+        ModuleRepository $moduleRepository,
+        EnrollmentRepository $enrollmentRepository,
+        InstructorAssignmentRepository $instructorAssignmentRepository,
+        ActivityLogRepository $activityLogRepository,
     ): Response {
-        // --- User stats ---
         $totalUsers = $userRepository->count([]);
 
         $totalAdmins = (int) $userRepository->createQueryBuilder('u')
@@ -43,10 +48,8 @@ final class AdminController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
-        // Students based on StudentProfile count
         $totalStudentProfiles = $studentProfileRepository->count([]);
 
-        // --- Course stats ---
         $totalCourses = $courseRepository->count([]);
 
         $activeCourses = (int) $courseRepository->createQueryBuilder('c')
@@ -58,10 +61,8 @@ final class AdminController extends AbstractController
 
         $inactiveCourses = $totalCourses - $activeCourses;
 
-        // --- Subject stats ---
         $totalSubjects = $subjectRepository->count([]);
 
-        // --- Student status stats ---
         $ongoingStudents = (int) $studentProfileRepository->createQueryBuilder('sp')
             ->select('COUNT(sp.id)')
             ->andWhere('sp.status = :status')
@@ -76,7 +77,6 @@ final class AdminController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
-        // --- Contact messages stats ---
         $totalContactMessages = $contactMessageRepository->count([]);
 
         $latestContactMessages = $contactMessageRepository->createQueryBuilder('m')
@@ -85,7 +85,6 @@ final class AdminController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        // --- Module stats ---
         $totalModules = $moduleRepository->count([]);
 
         $latestModules = $moduleRepository->createQueryBuilder('m2')
@@ -94,21 +93,52 @@ final class AdminController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        // --- Latest items for preview tables ---
-        $latestUsers = $userRepository->createQueryBuilder('u')
-            ->orderBy('u.id', 'DESC')
+        $totalEnrollments = $enrollmentRepository->count([]);
+
+        $latestEnrollments = $enrollmentRepository->createQueryBuilder('e')
+            ->leftJoin('e.studentProfile', 'sp')->addSelect('sp')
+            ->leftJoin('sp.user', 'u')->addSelect('u')
+            ->leftJoin('e.subject', 's')->addSelect('s')
+            ->leftJoin('s.course', 'c')->addSelect('c')
+            ->orderBy('e.id', 'DESC')
             ->setMaxResults(5)
             ->getQuery()
             ->getResult();
 
-        $latestCourses = $courseRepository->createQueryBuilder('c')
-            ->orderBy('c.id', 'DESC')
+        $totalInstructorAssignments = $instructorAssignmentRepository->count([]);
+
+        $latestInstructorAssignments = $instructorAssignmentRepository->createQueryBuilder('ia')
+            ->leftJoin('ia.instructor', 'instr')->addSelect('instr')
+            ->leftJoin('ia.subject', 'subj')->addSelect('subj')
+            ->leftJoin('subj.course', 'course')->addSelect('course')
+            ->orderBy('ia.id', 'DESC')
             ->setMaxResults(5)
             ->getQuery()
             ->getResult();
 
-        $latestSubjects = $subjectRepository->createQueryBuilder('s')
-            ->orderBy('s.id', 'DESC')
+        $totalActivityLogs = $activityLogRepository->count([]);
+
+        $latestActivityLogs = $activityLogRepository->createQueryBuilder('al')
+            ->leftJoin('al.user', 'alu')->addSelect('alu')
+            ->orderBy('al.createdAt', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+
+        $latestUsers = $userRepository->createQueryBuilder('u3')
+            ->orderBy('u3.id', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+
+        $latestCourses = $courseRepository->createQueryBuilder('c2')
+            ->orderBy('c2.id', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+
+        $latestSubjects = $subjectRepository->createQueryBuilder('s2')
+            ->orderBy('s2.id', 'DESC')
             ->setMaxResults(5)
             ->getQuery()
             ->getResult();
@@ -120,24 +150,30 @@ final class AdminController extends AbstractController
             ->getResult();
 
         return $this->render('admin/index.html.twig', [
-            'totalUsers'             => $totalUsers,
-            'totalAdmins'            => $totalAdmins,
-            'totalInstructors'       => $totalInstructors,
-            'totalStudentProfiles'   => $totalStudentProfiles,
-            'totalCourses'           => $totalCourses,
-            'activeCourses'          => $activeCourses,
-            'inactiveCourses'        => $inactiveCourses,
-            'totalSubjects'          => $totalSubjects,
-            'ongoingStudents'        => $ongoingStudents,
-            'completedStudents'      => $completedStudents,
-            'totalContactMessages'   => $totalContactMessages,
-            'totalModules'           => $totalModules,        
-            'latestUsers'            => $latestUsers,
-            'latestCourses'          => $latestCourses,
-            'latestSubjects'         => $latestSubjects,
-            'latestStudentProfiles'  => $latestStudentProfiles,
-            'latestContactMessages'  => $latestContactMessages,
-            'latestModules'          => $latestModules,       
+            'totalUsers'                  => $totalUsers,
+            'totalAdmins'                 => $totalAdmins,
+            'totalInstructors'            => $totalInstructors,
+            'totalStudentProfiles'        => $totalStudentProfiles,
+            'totalCourses'                => $totalCourses,
+            'activeCourses'               => $activeCourses,
+            'inactiveCourses'             => $inactiveCourses,
+            'totalSubjects'               => $totalSubjects,
+            'ongoingStudents'             => $ongoingStudents,
+            'completedStudents'           => $completedStudents,
+            'totalContactMessages'        => $totalContactMessages,
+            'totalModules'                => $totalModules,
+            'totalEnrollments'            => $totalEnrollments,
+            'totalInstructorAssignments'  => $totalInstructorAssignments,
+            'totalActivityLogs'           => $totalActivityLogs,
+            'latestUsers'                 => $latestUsers,
+            'latestCourses'               => $latestCourses,
+            'latestSubjects'              => $latestSubjects,
+            'latestStudentProfiles'       => $latestStudentProfiles,
+            'latestContactMessages'       => $latestContactMessages,
+            'latestModules'               => $latestModules,
+            'latestEnrollments'           => $latestEnrollments,
+            'latestInstructorAssignments' => $latestInstructorAssignments,
+            'latestActivityLogs'          => $latestActivityLogs,
         ]);
     }
 }
