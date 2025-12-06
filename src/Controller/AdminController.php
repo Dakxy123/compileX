@@ -6,6 +6,8 @@ use App\Repository\UserRepository;
 use App\Repository\CourseRepository;
 use App\Repository\SubjectRepository;
 use App\Repository\StudentProfileRepository;
+use App\Repository\ContactMessageRepository;
+use App\Repository\ModuleRepository; // 👈 ADD THIS
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,7 +22,9 @@ final class AdminController extends AbstractController
         UserRepository $userRepository,
         CourseRepository $courseRepository,
         SubjectRepository $subjectRepository,
-        StudentProfileRepository $studentProfileRepository
+        StudentProfileRepository $studentProfileRepository,
+        ContactMessageRepository $contactMessageRepository,
+        ModuleRepository $moduleRepository, // 👈 ADD THIS
     ): Response {
         // --- User stats ---
         $totalUsers = $userRepository->count([]);
@@ -72,6 +76,24 @@ final class AdminController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
+        // --- Contact messages stats ---
+        $totalContactMessages = $contactMessageRepository->count([]);
+
+        $latestContactMessages = $contactMessageRepository->createQueryBuilder('m')
+            ->orderBy('m.id', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+
+        // --- Module stats ---
+        $totalModules = $moduleRepository->count([]);
+
+        $latestModules = $moduleRepository->createQueryBuilder('m2')
+            ->orderBy('m2.id', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+
         // --- Latest items for preview tables ---
         $latestUsers = $userRepository->createQueryBuilder('u')
             ->orderBy('u.id', 'DESC')
@@ -98,20 +120,24 @@ final class AdminController extends AbstractController
             ->getResult();
 
         return $this->render('admin/index.html.twig', [
-            'totalUsers'           => $totalUsers,
-            'totalAdmins'          => $totalAdmins,
-            'totalInstructors'     => $totalInstructors,
-            'totalStudentProfiles' => $totalStudentProfiles,
-            'totalCourses'         => $totalCourses,
-            'activeCourses'        => $activeCourses,
-            'inactiveCourses'      => $inactiveCourses,
-            'totalSubjects'        => $totalSubjects,
-            'ongoingStudents'      => $ongoingStudents,
-            'completedStudents'    => $completedStudents,
-            'latestUsers'          => $latestUsers,
-            'latestCourses'        => $latestCourses,
-            'latestSubjects'       => $latestSubjects,
-            'latestStudentProfiles'=> $latestStudentProfiles,
+            'totalUsers'             => $totalUsers,
+            'totalAdmins'            => $totalAdmins,
+            'totalInstructors'       => $totalInstructors,
+            'totalStudentProfiles'   => $totalStudentProfiles,
+            'totalCourses'           => $totalCourses,
+            'activeCourses'          => $activeCourses,
+            'inactiveCourses'        => $inactiveCourses,
+            'totalSubjects'          => $totalSubjects,
+            'ongoingStudents'        => $ongoingStudents,
+            'completedStudents'      => $completedStudents,
+            'totalContactMessages'   => $totalContactMessages,
+            'totalModules'           => $totalModules,        
+            'latestUsers'            => $latestUsers,
+            'latestCourses'          => $latestCourses,
+            'latestSubjects'         => $latestSubjects,
+            'latestStudentProfiles'  => $latestStudentProfiles,
+            'latestContactMessages'  => $latestContactMessages,
+            'latestModules'          => $latestModules,       
         ]);
     }
 }

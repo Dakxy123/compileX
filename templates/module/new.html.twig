@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Module — Admin{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="p-8 max-w-4xl mx-auto">
+    <h1 class="text-3xl font-semibold mb-4">Create Module</h1>
+
+    <div class="mb-4">
+        <a href="{{ path('app_module_index') }}"
+           class="text-blue-600 hover:underline">&larr; Back to list</a>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 p-6 rounded shadow border border-gray-200 dark:border-gray-700">
+        {% include 'module/_form.html.twig' with { 'button_label': 'Create' } %}
+    </div>
+</div>
+{% endblock %}

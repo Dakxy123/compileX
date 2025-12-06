@@ -35,6 +35,10 @@
          class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
         Subjects
       </a>
+      <a href="{{ path('app_module_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Modules
+      </a>
       <a href="{{ path('app_student_profile_index') }}"
          class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
         Students
@@ -67,129 +71,160 @@
 
     <div class="h-16"></div>
 
-    <main id="main-content" class="flex-1 p-8 space-y-8">
+    <main id="main-content" class="flex-1 p-8 space-y-10">
 
-      <!-- Header -->
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-        <div>
-          <h1 class="text-3xl font-semibold">Admin Dashboard</h1>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Quick overview of users, courses, subjects, and student progress.
-          </p>
+      <!-- Page header + quick nav -->
+      <div class="space-y-3">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+          <div>
+            <h1 class="text-3xl font-semibold">Admin Dashboard</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Quick overview of users, courses, subjects, student progress, modules, and contact messages.
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick scroll nav -->
+        <div class="flex flex-wrap gap-2 text-xs md:text-sm">
+          <a href="#overview"
+             class="px-3 py-1 rounded-full border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
+            Overview
+          </a>
+          <a href="#latest"
+             class="px-3 py-1 rounded-full border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
+            Latest Activity
+          </a>
+          <a href="#contacts"
+             class="px-3 py-1 rounded-full border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
+            Contact Messages
+          </a>
         </div>
       </div>
 
-      <!-- Stats Grid -->
-      <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <!-- ================= OVERVIEW ================= -->
+      <section id="overview" class="space-y-6 scroll-mt-20">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          Overview
+        </h2>
 
-        <!-- Users Overview -->
-        <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Users Overview</h2>
-            <a href="{{ path('app_user_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-              Manage →
-            </a>
+        <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+
+          <!-- Users Overview -->
+          <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Users</h3>
+              <a href="{{ path('app_user_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                Manage →
+              </a>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Users</p>
+                <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-50">
+                  {{ totalUsers }}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Admins</p>
+                <p class="text-3xl font-extrabold text-indigo-700 dark:text-indigo-300">
+                  {{ totalAdmins }}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Instructors</p>
+                <p class="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">
+                  {{ totalInstructors }}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Student Profiles</p>
+                <p class="text-3xl font-extrabold text-sky-700 dark:text-sky-300">
+                  {{ totalStudentProfiles }}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1">
-              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Users</p>
-              <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-50">
-                {{ totalUsers }}
-              </p>
+          <!-- Courses, Subjects & Modules -->
+          <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Courses, Subjects & Modules</h3>
+              <div class="flex gap-2 text-xs">
+                <a href="{{ path('app_course_index') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Courses →</a>
+                <a href="{{ path('app_subject_index') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Subjects →</a>
+                <a href="{{ path('app_module_index') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Modules →</a>
+              </div>
             </div>
-            <div class="space-y-1">
-              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Admins</p>
-              <p class="text-3xl font-extrabold text-indigo-700 dark:text-indigo-300">
-                {{ totalAdmins }}
-              </p>
-            </div>
-            <div class="space-y-1">
-              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Instructors</p>
-              <p class="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">
-                {{ totalInstructors }}
-              </p>
-            </div>
-            <div class="space-y-1">
-              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Student Profiles</p>
-              <p class="text-3xl font-extrabold text-sky-700 dark:text-sky-300">
-                {{ totalStudentProfiles }}
-              </p>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Courses</p>
+                <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-50">
+                  {{ totalCourses }}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Active Courses</p>
+                <p class="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">
+                  {{ activeCourses }}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Inactive Courses</p>
+                <p class="text-3xl font-extrabold text-amber-700 dark:text-amber-300">
+                  {{ inactiveCourses }}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Subjects</p>
+                <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-50">
+                  {{ totalSubjects }}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Modules</p>
+                <p class="text-3xl font-extrabold text-purple-700 dark:text-purple-300">
+                  {{ totalModules }}
+                </p>
+              </div>
             </div>
           </div>
+
+          <!-- Students Progress -->
+          <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Student Progress</h3>
+              <a href="{{ path('app_student_profile_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                Manage →
+              </a>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Ongoing</p>
+                <p class="text-3xl font-extrabold text-blue-700 dark:text-blue-300">
+                  {{ ongoingStudents }}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Completed</p>
+                <p class="text-3xl font-extrabold text-green-700 dark:text-green-300">
+                  {{ completedStudents }}
+                </p>
+              </div>
+            </div>
+
+            <p class="text-xs text-gray-600 dark:text-gray-400">
+              Based on Student Profiles and their current status.
+            </p>
+          </div>
+
         </div>
+      </section>
 
-        <!-- Courses & Subjects -->
-        <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Courses & Subjects</h2>
-            <div class="flex gap-2 text-xs">
-              <a href="{{ path('app_course_index') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Courses →</a>
-              <a href="{{ path('app_subject_index') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Subjects →</a>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1">
-              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Courses</p>
-              <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-50">
-                {{ totalCourses }}
-              </p>
-            </div>
-            <div class="space-y-1">
-              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Active Courses</p>
-              <p class="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">
-                {{ activeCourses }}
-              </p>
-            </div>
-            <div class="space-y-1">
-              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Inactive Courses</p>
-              <p class="text-3xl font-extrabold text-amber-700 dark:text-amber-300">
-                {{ inactiveCourses }}
-              </p>
-            </div>
-            <div class="space-y-1">
-              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Subjects</p>
-              <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-50">
-                {{ totalSubjects }}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Students Progress -->
-        <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Student Progress</h2>
-            <a href="{{ path('app_student_profile_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-              Manage →
-            </a>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1">
-              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Ongoing</p>
-              <p class="text-3xl font-extrabold text-blue-700 dark:text-blue-300">
-                {{ ongoingStudents }}
-              </p>
-            </div>
-            <div class="space-y-1">
-              <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Completed</p>
-              <p class="text-3xl font-extrabold text-green-700 dark:text-green-300">
-                {{ completedStudents }}
-              </p>
-            </div>
-          </div>
-
-          <p class="text-xs text-gray-600 dark:text-gray-400">
-            Based on Student Profiles and their current status.
-          </p>
-        </div>
-
-      </div>
-
-      <!-- Latest Data Preview -->
-      <section class="space-y-6">
+      <!-- ================= LATEST ACTIVITY ================= -->
+      <section id="latest" class="space-y-6 scroll-mt-20">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
           Latest Activity
         </h2>
@@ -353,6 +388,118 @@
             </table>
           </div>
 
+          <!-- Latest Modules -->
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
+            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Modules</h3>
+              <a href="{{ path('app_module_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                View all
+              </a>
+            </div>
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-gray-900">
+                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  <th class="px-4 py-2">Code</th>
+                  <th class="px-4 py-2">Title</th>
+                  <th class="px-4 py-2">Subject</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for m in latestModules %}
+                  {# Flexible handling sa field names sa Module entity #}
+                  {% set code = m.code is defined ? m.code : (m.moduleCode is defined ? m.moduleCode : '—') %}
+                  {% set titleCandidate = m.name is defined ? m.name : (m.title is defined ? m.title : '') %}
+                  {% set title = titleCandidate ? (titleCandidate|length > 25 ? titleCandidate|slice(0,25) ~ '…' : titleCandidate) : '—' %}
+                  {% set subjectName = '—' %}
+                  {% if m.subject is defined and m.subject %}
+                    {% set rawSubjectName = m.subject.name is defined ? m.subject.name : '' %}
+                    {% set subjectName = rawSubjectName ? (rawSubjectName|length > 20 ? rawSubjectName|slice(0,20) ~ '…' : rawSubjectName) : '—' %}
+                  {% endif %}
+
+                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                    <td class="px-4 py-2 font-mono text-xs">
+                      {{ code }}
+                    </td>
+                    <td class="px-4 py-2">
+                      {{ title }}
+                    </td>
+                    <td class="px-4 py-2 text-xs">
+                      {{ subjectName }}
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="3" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                      No modules yet.
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= CONTACT MESSAGES ================= -->
+      <section id="contacts" class="space-y-6 scroll-mt-20">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            Contact Messages
+          </h2>
+          <span class="text-xs px-3 py-1 rounded-full bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">
+            Total messages: {{ totalContactMessages }}
+          </span>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
+          <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Contact Messages</h3>
+          </div>
+
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-50 dark:bg-gray-900">
+              <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <th class="px-4 py-2">From</th>
+                <th class="px-4 py-2">Email</th>
+                <th class="px-4 py-2">Subject</th>
+                <th class="px-4 py-2">Message</th>
+                <th class="px-4 py-2">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in latestContactMessages %}
+                <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                  <td class="px-4 py-2 text-xs">
+                    {{ m.name ?? '—' }}
+                  </td>
+                  <td class="px-4 py-2 text-xs">
+                    {{ m.email ?? '—' }}
+                  </td>
+                  <td class="px-4 py-2 text-xs">
+                    {{ m.subject is defined and m.subject ? (m.subject|length > 25 ? m.subject|slice(0,25) ~ '…' : m.subject) : '—' }}
+                  </td>
+                  <td class="px-4 py-2 text-xs">
+                    {% set msg = m.message is defined ? m.message : '' %}
+                    {{ msg|length > 40 ? msg|slice(0,40) ~ '…' : msg }}
+                  </td>
+                  <td class="px-4 py-2 text-xs">
+                    {% if m.createdAt is defined and m.createdAt %}
+                      {{ m.createdAt|date('Y-m-d H:i') }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="5" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                    No contact messages yet.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       </section>
 
