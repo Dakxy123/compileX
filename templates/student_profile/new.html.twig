@@ -1,66 +1,20 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Student Profile{% endblock %}
+{% block title %}Create Student Profile — Admin{% endblock %}
 
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config = { darkMode: 'class' };</script>
 
-<div class="min-h-screen flex items-start justify-center bg-slate-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-10">
-  <div class="w-full max-w-xl bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-semibold">New Student Profile</h1>
-      <a href="{{ path('app_student_profile_index') }}" class="text-sm text-blue-500 hover:underline">
-        ← Back to list
-      </a>
-    </div>
+<div class="p-8 max-w-4xl mx-auto">
+  <h1 class="text-3xl font-semibold mb-4">Create Student Profile</h1>
 
-    {{ form_start(form) }}
-      {% include 'student_profile/_form.html.twig' with { form: form } %}
-      <div class="mt-6 flex justify-end gap-2">
-        <button type="submit"
-                class="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 dark:hover:bg-blue-700">
-          Save
-        </button>
-      </div>
-    {{ form_end(form) }}
+  <div class="mb-4">
+    <a href="{{ path('app_student_profile_index') }}"
+       class="text-blue-600 hover:underline">&larr; Back to list</a>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 p-6 rounded shadow border border-gray-200 dark:border-gray-700">
+    {% include 'student_profile/_form.html.twig' with { 'button_label': 'Create' } %}
   </div>
 </div>
-
-{# 🔍 Tom Select for searchable User & Course dropdowns #}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css">
-<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const userSelectId = '{{ form.user.vars.id }}';
-    const courseSelectId = '{{ form.course.vars.id }}';
-
-    const userSelect = document.getElementById(userSelectId);
-    const courseSelect = document.getElementById(courseSelectId);
-
-    if (userSelect) {
-      new TomSelect(userSelect, {
-        create: false,
-        sortField: {
-          field: 'text',
-          direction: 'asc'
-        },
-        maxOptions: 1000,
-        placeholder: 'Search user by email...'
-      });
-    }
-
-    if (courseSelect) {
-      new TomSelect(courseSelect, {
-        create: false,
-        sortField: {
-          field: 'text',
-          direction: 'asc'
-        },
-        maxOptions: 1000,
-        placeholder: 'Search course...'
-      });
-    }
-  });
-</script>
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Activity Log — Admin — CompileX{% endblock %}
+{% block title %}Instructor Applications — Admin — CompileX{% endblock %}
 
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
@@ -42,13 +42,21 @@
          class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
         Enrollments
       </a>
+      <a href="{{ path('app_instructor_assignment_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Instructor Assignments
+      </a>
+      <a href="{{ path('app_instructor_application_admin_index') }}"
+         class="block px-3 py-2 rounded-md font-medium bg-slate-700 dark:bg-gray-700">
+        Instructor Applications
+      </a>
+      <a href="{{ path('app_activity_log_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Activity Logs
+      </a>
       <a href="{{ path('app_student_profile_index') }}"
          class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
         Students
-      </a>
-      <a href="{{ path('app_activity_log_index') }}"
-         class="block px-3 py-2 rounded-md font-medium bg-slate-700 dark:bg-gray-700 hover:bg-slate-600 dark:hover:bg-gray-600">
-        Activity Log
       </a>
 
       <div class="pt-4 border-t border-slate-700 dark:border-gray-600">
@@ -69,7 +77,9 @@
 
   <div class="flex-1 flex flex-col min-h-screen">
     <header class="fixed top-0 left-0 w-full z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
-      <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">CompileX</h1>
+      <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">
+        CompileX
+      </h1>
       <button class="text-2xl md:text-3xl focus:outline-none" aria-label="Toggle menu" onclick="toggleSidebar()">
         <span id="burger-icon">&#9776;</span>
       </button>
@@ -77,105 +87,108 @@
 
     <div class="h-16"></div>
 
-    <main id="main-content" class="flex-1 p-8 space-y-8 max-w-6xl mx-auto">
+    <main class="flex-1 p-6 md:p-8 space-y-6 max-w-6xl mx-auto w-full">
 
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 class="text-2xl font-semibold">Activity Log</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400">
-            View a history of important actions performed by admins and staff in the system.
+          <h2 class="text-2xl md:text-3xl font-semibold">Instructor Applications</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Review student requests to become instructors.
           </p>
         </div>
+
         <a href="{{ path('app_admin') }}"
-           class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-100 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+           class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:bg-slate-100 dark:hover:bg-gray-800">
           ← Back to Dashboard
         </a>
       </div>
 
+      {# flashes #}
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="rounded-md px-4 py-2 text-sm
+                      {% if label == 'success' %}
+                        bg-emerald-50 text-emerald-800 border border-emerald-200
+                      {% elseif label == 'error' %}
+                        bg-red-50 text-red-800 border border-red-200
+                      {% else %}
+                        bg-slate-50 text-slate-800 border border-slate-200
+                      {% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+
       <form method="get"
-            class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 flex flex-wrap gap-3 items-end">
-        <div class="flex-1 min-w-[220px]">
-          <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Search</label>
-          <input type="text"
-                 name="q"
-                 value="{{ app.request.query.get('q') }}"
-                 class="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                 placeholder="Email, action, context, description...">
-        </div>
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-slate-200 dark:border-gray-700 p-4 flex flex-wrap gap-3 items-end">
         <div>
-          <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Action</label>
-          <select name="action"
-                  class="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+          <label class="block text-xs font-medium text-slate-600 dark:text-gray-300 mb-1">Status</label>
+          <select name="status"
+                  class="rounded-md border border-slate-300 dark:border-gray-600 px-3 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300">
             <option value="">All</option>
-            {% for a in availableActions %}
-              <option value="{{ a }}" {{ app.request.query.get('action') == a ? 'selected' : '' }}>
-                {{ a }}
-              </option>
-            {% endfor %}
+            <option value="PENDING"  {{ statusFilter == 'PENDING'  ? 'selected' : '' }}>Pending</option>
+            <option value="APPROVED" {{ statusFilter == 'APPROVED' ? 'selected' : '' }}>Approved</option>
+            <option value="REJECTED" {{ statusFilter == 'REJECTED' ? 'selected' : '' }}>Rejected</option>
           </select>
         </div>
+
         <div class="flex gap-2">
           <button type="submit"
                   class="inline-flex items-center px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">
             Filter
           </button>
-          <a href="{{ path('app_activity_log_index') }}"
-             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <a href="{{ path('app_instructor_application_admin_index') }}"
+             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:bg-slate-100 dark:hover:bg-gray-800">
             Reset
           </a>
         </div>
       </form>
 
-      <div class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-slate-200 dark:border-gray-700 overflow-hidden">
         <table class="min-w-full text-sm">
-          <thead class="bg-slate-50 dark:bg-slate-950">
-            <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              <th class="px-4 py-2">Date</th>
-              <th class="px-4 py-2">User</th>
-              <th class="px-4 py-2">Action</th>
-              <th class="px-4 py-2">Context</th>
-              <th class="px-4 py-2">Description</th>
-              <th class="px-4 py-2">IP</th>
+          <thead class="bg-slate-50 dark:bg-gray-900">
+            <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              <th class="px-4 py-2">Applicant</th>
+              <th class="px-4 py-2">Status</th>
+              <th class="px-4 py-2">Reason</th>
+              <th class="px-4 py-2">Submitted</th>
+              <th class="px-4 py-2 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-          {% for log in logs %}
-            <tr class="border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/80">
-              <td class="px-4 py-2 align-top text-xs whitespace-nowrap">
-                {{ log.createdAt ? log.createdAt|date('Y-m-d H:i') : '—' }}
+          {% for a in applications %}
+            <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+              <td class="px-4 py-2 text-xs align-top">
+                {{ a.applicant ? a.applicant.email : '—' }}
               </td>
-              <td class="px-4 py-2 align-top text-xs">
-                {% if log.user %}
-                  <div class="font-medium text-slate-800 dark:text-slate-100">
-                    {{ log.user.email }}
-                  </div>
-                {% else %}
-                  <span class="text-slate-500">System</span>
-                {% endif %}
-              </td>
-              <td class="px-4 py-2 align-top text-xs">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] text-slate-700 dark:text-slate-300">
-                  {{ log.action }}
+              <td class="px-4 py-2 text-xs align-top">
+                {% set badgeClasses = {
+                  'PENDING':  'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
+                  'APPROVED': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300',
+                  'REJECTED': 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+                }[a.status] ?? 'bg-slate-100 text-slate-700 dark:bg-gray-700 dark:text-gray-200' %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold {{ badgeClasses }}">
+                  {{ a.status }}
                 </span>
               </td>
-              <td class="px-4 py-2 align-top text-xs text-slate-700 dark:text-slate-200">
-                {{ log.context ?: '—' }}
+              <td class="px-4 py-2 text-xs align-top">
+                {% set r = a.reason ?? '' %}
+                {{ r|length > 40 ? r|slice(0,40) ~ '…' : r }}
               </td>
-              <td class="px-4 py-2 align-top text-xs text-slate-700 dark:text-slate-200">
-                {% if log.description %}
-                  {{ log.description|length > 80 ? log.description|slice(0,80) ~ '…' : log.description }}
-                {% else %}
-                  <span class="text-slate-400">—</span>
-                {% endif %}
+              <td class="px-4 py-2 text-xs align-top">
+                {{ a.createdAt ? a.createdAt|date('Y-m-d H:i') : '—' }}
               </td>
-              <td class="px-4 py-2 align-top text-xs text-slate-600 dark:text-slate-300">
-                {{ log.ipAddress ?: '—' }}
+              <td class="px-4 py-2 text-xs align-top text-right">
+                <a href="{{ path('app_instructor_application_admin_show', {id: a.id}) }}"
+                   class="inline-flex items-center px-2 py-1 rounded-md border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
+                  View
+                </a>
               </td>
             </tr>
           {% else %}
             <tr>
-              <td colspan="6" class="px-4 py-4 text-center text-xs text-slate-500 dark:text-slate-400">
-                No activity logs yet.
+              <td colspan="5" class="px-4 py-4 text-center text-xs text-gray-500 dark:text-gray-400">
+                No instructor applications found.
               </td>
             </tr>
           {% endfor %}

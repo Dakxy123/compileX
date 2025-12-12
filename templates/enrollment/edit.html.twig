@@ -1,32 +1,24 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Enrollment — Admin — CompileX{% endblock %}
+{% block title %}Edit Enrollment — Admin{% endblock %}
 
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
 
-<div class="min-h-screen bg-slate-50 text-slate-900 py-8 px-4">
-  <div class="max-w-3xl mx-auto space-y-6">
-    <div class="flex items-center justify-between gap-2">
-      <div>
-        <h1 class="text-2xl font-semibold">Edit Enrollment</h1>
-        <p class="text-sm text-slate-500">
-          Update status, score, grade or remarks for this enrollment.
-        </p>
-      </div>
-      <a href="{{ path('app_enrollment_index') }}"
-         class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-100">
-        ← Back to list
-      </a>
-    </div>
+<div class="p-8 max-w-4xl mx-auto">
+  <h1 class="text-3xl font-semibold mb-4">Edit Enrollment</h1>
 
-    <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6 space-y-4">
-      {% include 'enrollment/_form.html.twig' with { form: form } %}
+  <div class="flex justify-between mb-4">
+    <a href="{{ path('app_enrollment_index') }}"
+       class="text-blue-600 hover:underline">&larr; Back to list</a>
 
-      <div class="border-t border-slate-200 pt-4 mt-2">
-        {% include 'enrollment/_delete_form.html.twig' with { enrollment: enrollment } %}
-      </div>
+    <div>
+      {% include 'enrollment/_delete_form.html.twig' %}
     </div>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 p-6 rounded shadow border border-gray-200 dark:border-gray-700">
+    {% include 'enrollment/_form.html.twig' with { 'button_label': 'Update' } %}
   </div>
 </div>
 {% endblock %}

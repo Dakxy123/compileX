@@ -4,58 +4,104 @@
 
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config = { darkMode: 'class' };</script>
+<script> tailwind.config = { darkMode: 'class' } </script>
 
 <div class="min-h-screen flex items-start justify-center bg-slate-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-10">
-  <div class="w-full max-w-xl bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-semibold">Subject Details</h1>
-      <a href="{{ path('app_subject_index') }}" class="text-sm text-blue-500 hover:underline">
-        Back to list
+  <div class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-semibold">Subject Details</h1>
+      <a href="{{ path('app_subject_index') }}"
+         class="text-sm text-blue-500 hover:underline">
+        Back to List
       </a>
     </div>
 
-    <table class="min-w-full text-sm border border-gray-200 dark:border-gray-700">
-      <tbody>
+    <!-- DETAILS TABLE -->
+    <table class="w-full text-sm border border-gray-200 dark:border-gray-700 rounded overflow-hidden">
+      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+
         <tr>
-          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left w-32">ID</th>
-          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">{{ subject.id }}</td>
+          <th class="px-4 py-3 bg-gray-100 dark:bg-gray-700 text-left font-medium text-gray-700 dark:text-gray-300 w-40">
+            ID
+          </th>
+          <td class="px-4 py-3">{{ subject.id }}</td>
         </tr>
+
         <tr>
-          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Code</th>
-          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">{{ subject.code }}</td>
+          <th class="px-4 py-3 bg-gray-100 dark:bg-gray-700">Code</th>
+          <td class="px-4 py-3 font-mono">{{ subject.code }}</td>
         </tr>
+
         <tr>
-          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Name</th>
-          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">{{ subject.name }}</td>
+          <th class="px-4 py-3 bg-gray-100 dark:bg-gray-700">Name</th>
+          <td class="px-4 py-3">{{ subject.name }}</td>
         </tr>
+
         <tr>
-          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Year Level</th>
-          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">{{ subject.yearLevel }}</td>
+          <th class="px-4 py-3 bg-gray-100 dark:bg-gray-700">Year Level</th>
+          <td class="px-4 py-3">Year {{ subject.yearLevel }}</td>
         </tr>
+
         <tr>
-          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Course</th>
-          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+          <th class="px-4 py-3 bg-gray-100 dark:bg-gray-700">Semester</th>
+          <td class="px-4 py-3">
+            {% if subject.semester == 1 %}
+              1st Semester
+            {% elseif subject.semester == 2 %}
+              2nd Semester
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        </tr>
+
+        <tr>
+          <th class="px-4 py-3 bg-gray-100 dark:bg-gray-700">Course</th>
+          <td class="px-4 py-3">
             {{ subject.course ? subject.course.name : '—' }}
           </td>
         </tr>
-        <tr>
-          <th class="px-4 py-2 text-left">Description</th>
-          <td class="px-4 py-2">
+
+        <tr valign="top">
+          <th class="px-4 py-3 bg-gray-100 dark:bg-gray-700 align-top">Description</th>
+          <td class="px-4 py-3 whitespace-pre-line">
             {{ subject.description ?: '—' }}
           </td>
         </tr>
+
       </tbody>
     </table>
 
-    <div class="mt-4 flex justify-between">
+    <!-- ACTION BUTTONS -->
+    <div class="mt-6 flex justify-between">
+
+      <!-- EDIT -->
       <a href="{{ path('app_subject_edit', {'id': subject.id}) }}"
          class="px-4 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-700">
         Edit
       </a>
 
-      {% include 'subject/_delete_form.html.twig' %}
+      <!-- DELETE OR REQUEST DELETE -->
+      {% if is_granted('ROLE_ADMIN') %}
+        
+        {# ADMIN: show delete form #}
+        {% include 'subject/_delete_form.html.twig' %}
+
+      {% else %}
+        
+        {# INSTRUCTOR: request delete only #}
+        <button type="button"
+                class="px-4 py-2 rounded bg-red-100 text-red-700 border border-red-300 
+                       dark:bg-red-900/40 dark:border-red-700 dark:text-red-200 cursor-pointer">
+          Request Delete
+        </button>
+
+      {% endif %}
+
     </div>
+
   </div>
 </div>
 {% endblock %}

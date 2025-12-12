@@ -1,265 +1,376 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Enrollments — Admin — CompileX{% endblock %}
+{% block title %}Enrollment Management{% endblock %}
 
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-  tailwind.config = { darkMode: 'class' };
+  tailwind.config = { darkMode: 'class' }
 </script>
 
-<div id="app" class="flex min-h-screen bg-slate-50 text-slate-900 dark:bg-gray-900 dark:text-gray-100">
+<div id="app" class="flex min-h-screen bg-slate-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
 
-  {# =============== SIDEBAR =============== #}
+  {# ===================== SIDEBAR (ROLE-AWARE) ===================== #}
   <aside id="sidebar"
-         class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col">
+         class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col overflow-y-auto">
     <div class="px-6 py-5 border-b border-slate-700 dark:border-gray-700 flex items-center justify-between">
-      <h2 class="text-xl font-semibold tracking-tight">CompileX Admin</h2>
-      <button class="text-2xl md:text-3xl focus:outline-none" onclick="toggleSidebar()">×</button>
+      <h2 class="text-xl font-semibold tracking-tight">
+        {% if is_granted('ROLE_ADMIN') %}
+          CompileX Admin
+        {% elseif is_granted('ROLE_INSTRUCTOR') %}
+          CompileX Instructor
+        {% else %}
+          CompileX
+        {% endif %}
+      </h2>
+      <button class="text-2xl md:text-3xl focus:outline-none" id="sidebar-close">×</button>
     </div>
 
-    <nav class="flex-1 px-4 py-4 space-y-1">
-      <a href="{{ path('app_admin') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Admin Dashboard
-      </a>
-      <a href="{{ path('app_user_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Users
-      </a>
-      <a href="{{ path('app_course_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Courses
-      </a>
-      <a href="{{ path('app_subject_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Subjects
-      </a>
-      <a href="{{ path('app_module_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Modules
-      </a>
-      <a href="{{ path('app_student_profile_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Students
-      </a>
-      <a href="{{ path('app_enrollment_index') }}"
-         class="block px-3 py-2 rounded-md font-medium bg-slate-700 dark:bg-gray-700 hover:bg-slate-600 dark:hover:bg-gray-600">
-        Enrollments
-      </a>
+    <nav class="flex-1 px-4 py-4 space-y-1 text-sm">
 
-      <div class="pt-4 border-t border-slate-700 dark:border-gray-600">
+      {# ===== ADMIN NAV ===== #}
+      {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('app_admin') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Admin Dashboard
+        </a>
+        <a href="{{ path('app_user_index') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Users
+        </a>
+        <a href="{{ path('app_course_index') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Courses
+        </a>
+        <a href="{{ path('app_subject_index') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Subjects
+        </a>
+        <a href="{{ path('app_module_index') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Modules
+        </a>
+        <a href="{{ path('app_enrollment_index') }}"
+           class="block px-3 py-2 rounded-md font-medium bg-slate-700 dark:bg-gray-700 hover:bg-slate-600 dark:hover:bg-gray-600">
+          Enrollments
+        </a>
+        <a href="{{ path('app_instructor_assignment_index') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Instructor Assignments
+        </a>
+        <a href="{{ path('app_instructor_application_admin_index') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Instructor Applications
+        </a>
+        <a href="{{ path('app_activity_log_index') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Activity Logs
+        </a>
+        <a href="{{ path('app_student_profile_index') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Students
+        </a>
+
+      {# ===== INSTRUCTOR NAV ===== #}
+      {% elseif is_granted('ROLE_INSTRUCTOR') %}
+        <a href="{{ path('home') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Home
+        </a>
+
+        {% if is_granted('ROLE_ADMIN') %}
+          <a href="{{ path('app_admin') }}"
+             class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+            Admin Dashboard
+          </a>
+        {% endif %}
+
+        <a href="{{ path('app_instructor_dashboard') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Instructor Dashboard
+        </a>
+
+        <div class="mt-4 pt-3 border-t border-slate-700 dark:border-gray-600 text-xs uppercase tracking-wide text-slate-400 dark:text-gray-400">
+          Global Lists (View Only)
+        </div>
+
+        <a href="{{ path('app_subject_index') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          All Subjects
+        </a>
+        <a href="{{ path('app_module_index') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          All Modules
+        </a>
+        <a href="{{ path('app_enrollment_index') }}"
+           class="block px-3 py-2 rounded-md font-medium bg-slate-700 dark:bg-gray-700 hover:bg-slate-600 dark:hover:bg-gray-600">
+          All Enrollments
+        </a>
+        <a href="{{ path('app_student_profile_index') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          All Students
+        </a>
+      {% endif %}
+
+      <div class="pt-4 border-t border-slate-700 dark:border-gray-600 mt-4 space-y-1">
         <button id="mode-toggle"
-                class="mt-4 block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+                class="mt-2 block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
           Toggle Light/Dark Mode
         </button>
-        <a href="/" class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-          Back to Home
-        </a>
+
+        {% if is_granted('ROLE_ADMIN') %}
+          <a href="/" class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+            Back to Home
+          </a>
+        {% endif %}
+
         <a href="{{ path('app_logout') }}"
-           class="block px-3 py-2 rounded-md font-medium text-red-500 hover:bg-red-700">
+           class="block px-3 py-2 rounded-md font-medium text-red-300 hover:bg-red-700/40">
           Logout
         </a>
       </div>
     </nav>
   </aside>
 
-  {# =============== MAIN =============== #}
+  {# ===================== MAIN ===================== #}
   <div class="flex-1 flex flex-col min-h-screen">
     <header class="fixed top-0 left-0 w-full z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
       <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">CompileX</h1>
-      <button class="text-2xl md:text-3xl focus:outline-none" aria-label="Toggle menu" onclick="toggleSidebar()">
+      <button class="text-2xl md:text-3xl focus:outline-none" aria-label="Toggle menu" id="burger-button">
         <span id="burger-icon">&#9776;</span>
       </button>
     </header>
 
     <div class="h-16"></div>
 
-    <main id="main-content" class="flex-1 p-8 space-y-6">
+    <main id="main-content" class="flex-1 p-8 max-w-6xl mx-auto w-full">
 
-      {# Header + actions #}
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
         <div>
-          <h1 class="text-2xl font-semibold">Enrollments</h1>
-          <p class="text-sm text-slate-500 dark:text-gray-400">
-            Manage which students are enrolled in which subjects, including scores and grades.
+          <h1 class="text-3xl font-semibold">Enrollments</h1>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            View and manage student enrollments per subject and course.
           </p>
         </div>
-        <div class="flex flex-wrap gap-2">
-          <a href="{{ path('app_admin') }}"
-             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700">
-            ← Back to Dashboard
-          </a>
-          <a href="{{ path('app_enrollment_new') }}"
-             class="inline-flex items-center px-3 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">
-            + New Enrollment
-          </a>
+
+        <div class="space-x-2">
+          {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_enrollment_new') }}"
+               class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700">
+              + New Enrollment
+            </a>
+
+            <a href="{{ path('app_enrollment_export', { q: q, status: status }) }}"
+               class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 dark:hover:bg-green-700">
+              Export CSV
+            </a>
+          {% endif %}
         </div>
       </div>
 
       {# Filters #}
-      <form method="get"
-            class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-slate-200 dark:border-gray-700 p-4 flex flex-wrap gap-3 items-end">
-        <div class="flex-1 min-w-[200px]">
-          <label class="block text-xs font-medium text-slate-600 dark:text-gray-300 mb-1">Search</label>
+      <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+        <div class="md:col-span-2 flex gap-2">
           <input type="text"
                  name="q"
-                 value="{{ app.request.query.get('q') }}"
-                 class="w-full rounded-md border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                 placeholder="Student email, subject code/name, course...">
+                 value="{{ q }}"
+                 placeholder="Search by student email, course, or subject"
+                 class="px-3 py-2 border rounded w-full bg-white dark:bg-gray-700 dark:text-gray-100 text-gray-900">
         </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-600 dark:text-gray-300 mb-1">Status</label>
-          <select name="status"
-                  class="rounded-md border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
-            <option value="">All statuses</option>
-            {% for s in statuses %}
-              <option value="{{ s }}" {{ app.request.query.get('status') == s ? 'selected' : '' }}>
-                {{ s }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
+
         <div class="flex gap-2">
-          <button type="submit"
-                  class="inline-flex items-center px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">
-            Filter
+          <select name="status"
+                  class="w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100">
+            <option value="all" {{ status == 'all' ? 'selected' : '' }}>All Status</option>
+            <option value="Pending" {{ status == 'Pending' ? 'selected' : '' }}>Pending</option>
+            <option value="Approved" {{ status == 'Approved' ? 'selected' : '' }}>Approved</option>
+            <option value="Rejected" {{ status == 'Rejected' ? 'selected' : '' }}>Rejected</option>
+          </select>
+
+          <button class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 dark:bg-gray-600 dark:hover:bg-gray-500">
+            Apply
           </button>
-          <a href="{{ path('app_enrollment_index') }}"
-             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:bg-slate-100 dark:hover:bg-gray-800">
-            Reset
-          </a>
         </div>
       </form>
 
+      {# Flash messages #}
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="mb-4 px-4 py-3 rounded border text-sm
+                      {% if label == 'success' %}
+                        bg-green-50 border-green-300 text-green-800 dark:bg-green-900/40 dark:border-green-700 dark:text-green-200
+                      {% elseif label == 'error' %}
+                        bg-red-50 border-red-300 text-red-800 dark:bg-red-900/40 dark:border-red-700 dark:text-red-200
+                      {% else %}
+                        bg-slate-50 border-slate-300 text-slate-800 dark:bg-slate-800/40 dark:border-slate-600 dark:text-slate-100
+                      {% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+
       {# Table #}
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-slate-200 dark:border-gray-700 overflow-hidden">
-        <table class="min-w-full text-sm">
-          <thead class="bg-slate-50 dark:bg-gray-900">
-            <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
-              <th class="px-4 py-2">Student</th>
-              <th class="px-4 py-2">Subject</th>
-              <th class="px-4 py-2">Status</th>
-              <th class="px-4 py-2">Score</th>
-              <th class="px-4 py-2">Grade</th>
-              <th class="px-4 py-2 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-          {% for enrollment in enrollments %}
-            {% set sp = enrollment.studentProfile %}
-            {% set user = sp ? sp.user : null %}
-            {% set subj = enrollment.subject %}
-            <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-              <td class="px-4 py-2 align-top text-xs">
-                {% if user %}
-                  <div class="font-medium text-slate-800 dark:text-gray-100">{{ user.email }}</div>
-                {% else %}
-                  <div class="text-slate-500 dark:text-gray-400">—</div>
-                {% endif %}
-                {% if sp and sp.course %}
-                  <div class="text-[11px] text-slate-500 dark:text-gray-400">
-                    {{ sp.course.name|length > 30 ? sp.course.name|slice(0,30) ~ '…' : sp.course.name }}
-                  </div>
-                {% endif %}
-              </td>
-              <td class="px-4 py-2 align-top text-xs">
-                {% if subj %}
-                  <div class="font-mono text-[11px] text-slate-600 dark:text-gray-300">{{ subj.code }}</div>
-                  <div class="text-slate-800 dark:text-gray-100">
-                    {{ subj.name|length > 30 ? subj.name|slice(0,30) ~ '…' : subj.name }}
-                  </div>
-                  {% if subj.course %}
-                    <div class="text-[11px] text-slate-500 dark:text-gray-400">
-                      {{ subj.course.name|length > 28 ? subj.course.name|slice(0,28) ~ '…' : subj.course.name }}
-                    </div>
-                  {% endif %}
-                {% else %}
-                  <span class="text-slate-500 dark:text-gray-400">—</span>
-                {% endif %}
-              </td>
-              <td class="px-4 py-2 align-top">
-                {% set status = enrollment.status %}
-                {% set badgeClasses = {
-                  'Enrolled': 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-                  'Ongoing': 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
-                  'Completed': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300',
-                  'Dropped': 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-                }[status] ?? 'bg-slate-100 text-slate-700 dark:bg-gray-700 dark:text-gray-300' %}
-                <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full {{ badgeClasses }}">
-                  {{ status }}
-                </span>
-              </td>
-              <td class="px-4 py-2 align-top text-xs">
-                {% if enrollment.score is not null %}
-                  {{ enrollment.score|number_format(2, '.', ',') }}
-                {% else %}
-                  <span class="text-slate-400 dark:text-gray-500">—</span>
-                {% endif %}
-              </td>
-              <td class="px-4 py-2 align-top text-xs">
-                {{ enrollment.grade ?: '—' }}
-              </td>
-              <td class="px-4 py-2 align-top text-right text-xs">
-                <div class="inline-flex items-center gap-2">
-                  <a href="{{ path('app_enrollment_show', {id: enrollment.id}) }}"
-                     class="px-2 py-1 rounded border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
-                    View
-                  </a>
-                  <a href="{{ path('app_enrollment_edit', {id: enrollment.id}) }}"
-                     class="px-2 py-1 rounded border border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/40">
-                    Edit
-                  </a>
-                  {% include 'enrollment/_delete_form.html.twig' with { enrollment: enrollment } %}
-                </div>
-              </td>
-            </tr>
-          {% else %}
-            <tr>
-              <td colspan="6" class="px-4 py-4 text-center text-xs text-slate-500 dark:text-gray-400">
-                No enrollments found.
-              </td>
-            </tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </div>
+      <table class="min-w-full border rounded shadow bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+        <thead>
+        <tr class="bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold uppercase tracking-wide">
+          <th class="px-4 py-2">ID</th>
+          <th class="px-4 py-2">Student</th>
+          <th class="px-4 py-2">Course</th>
+          <th class="px-4 py-2">Subject</th>
+          <th class="px-4 py-2">Status</th>
+          <th class="px-4 py-2">Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for enrollment in enrollments %}
+          {% set studentProfile = enrollment.studentProfile ?? null %}
+          {% set studentUser    = studentProfile and studentProfile.user is defined ? studentProfile.user : null %}
+          {% set subject        = enrollment.subject ?? null %}
+          {% set course         = subject and subject.course is defined ? subject.course : null %}
+
+          {% set courseName  = course and course.name is defined ? course.name : '—' %}
+          {% set courseShort = courseName|length > 35 ? courseName|slice(0,35) ~ '…' : courseName %}
+
+          {% set subjectName  = subject and subject.name is defined ? subject.name : '—' %}
+          {% set subjectShort = subjectName|length > 35 ? subjectName|slice(0,35) ~ '…' : subjectName %}
+
+          <tr class="border-t hover:bg-gray-50 dark:hover:bg-gray-700 text-sm">
+            <td class="px-4 py-2">{{ enrollment.id }}</td>
+
+            <td class="px-4 py-2 text-xs">
+              {% if studentUser and studentUser.email is defined %}
+                {{ studentUser.email }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+
+            <td class="px-4 py-2">
+              <span title="{{ courseName }}">{{ courseShort }}</span>
+            </td>
+
+            <td class="px-4 py-2">
+              <span title="{{ subjectName }}">{{ subjectShort }}</span>
+            </td>
+
+            <td class="px-4 py-2">
+              {% set st = enrollment.status ?? '—' %}
+              {% set badge = {
+                'Approved': 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+                'Pending':  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
+                'Rejected': 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+              }[st] ?? 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' %}
+
+              <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full {{ badge }}">
+                {{ st }}
+              </span>
+            </td>
+
+            <td class="px-4 py-2 space-x-1">
+              <a href="{{ path('app_enrollment_show', {'id': enrollment.id}) }}"
+                 class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700 text-xs">
+                Show
+              </a>
+
+              {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('app_enrollment_edit', {'id': enrollment.id}) }}"
+                   class="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 dark:hover:bg-yellow-700 text-xs">
+                  Edit
+                </a>
+
+                <form method="post"
+                      action="{{ path('app_enrollment_delete', {'id': enrollment.id}) }}"
+                      class="inline-block"
+                      onsubmit="return confirm('Delete this enrollment?');">
+                  <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ enrollment.id) }}">
+                  <button type="submit"
+                          class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 dark:hover:bg-red-700 text-xs">
+                    Delete
+                  </button>
+                </form>
+              {% else %}
+                <button type="button"
+                        class="px-2 py-1 bg-red-100 text-red-700 rounded border border-red-300 dark:bg-red-900/30 dark:text-red-200 dark:border-red-700 cursor-not-allowed text-[11px]"
+                        title="Request delete (to be implemented)">
+                  Request Delete
+                </button>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="6" class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              No enrollments found
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
     </main>
   </div>
 </div>
 
 <script>
 const sidebar = document.getElementById('sidebar');
+const burgerButton = document.getElementById('burger-button');
 const burgerIcon = document.getElementById('burger-icon');
+const sidebarClose = document.getElementById('sidebar-close');
 
-function toggleSidebar() {
-  sidebar.classList.toggle('-translate-x-full');
-  burgerIcon.innerHTML = sidebar.classList.contains('-translate-x-full') ? '&#9776;' : '&times;';
+function openSidebar() {
+  sidebar.classList.remove('-translate-x-full');
+  if (burgerIcon) burgerIcon.innerHTML = '&times;';
 }
+function closeSidebar() {
+  sidebar.classList.add('-translate-x-full');
+  if (burgerIcon) burgerIcon.innerHTML = '&#9776;';
+}
+function toggleSidebar() {
+  if (sidebar.classList.contains('-translate-x-full')) openSidebar();
+  else closeSidebar();
+}
+
+closeSidebar();
+
+if (burgerButton) {
+  burgerButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleSidebar();
+  });
+}
+if (sidebarClose) {
+  sidebarClose.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeSidebar();
+  });
+}
+
+document.addEventListener('click', (e) => {
+  const clickedBurger = e.target.closest('#burger-button');
+  const clickedInsideSidebar = sidebar.contains(e.target);
+  if (!clickedBurger && !clickedInsideSidebar) closeSidebar();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeSidebar();
+});
 
 const DARK_KEY = 'compilex-dark-mode';
 const modeToggle = document.getElementById('mode-toggle');
+
 function loadInitialTheme() {
   const saved = localStorage.getItem(DARK_KEY);
   document.documentElement.classList.toggle('dark', saved === 'true');
 }
-modeToggle.addEventListener('click', e => {
-  e.stopPropagation();
-  const isDark = document.documentElement.classList.contains('dark');
-  document.documentElement.classList.toggle('dark', !isDark);
-  localStorage.setItem(DARK_KEY, (!isDark).toString());
-});
 loadInitialTheme();
 
-document.addEventListener('click', e => {
-  if (!sidebar.contains(e.target) &&
-      !e.target.closest('button[aria-label="Toggle menu"]') &&
-      !sidebar.classList.contains('-translate-x-full')) {
-    toggleSidebar();
-  }
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !sidebar.classList.contains('-translate-x-full')) toggleSidebar();
-});
+if (modeToggle) {
+  modeToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isDark = document.documentElement.classList.contains('dark');
+    document.documentElement.classList.toggle('dark', !isDark);
+    localStorage.setItem(DARK_KEY, (!isDark).toString());
+  });
+}
 </script>
 {% endblock %}

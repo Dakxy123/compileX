@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -36,6 +38,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         message: "Password must be at least 8 characters long and contain both letters and numbers."
     )]
     private ?string $password = null;
+
+    /**
+     * @var Collection<int, InstructorApplication>
+     */
+    #[ORM\OneToMany(targetEntity: InstructorApplication::class, mappedBy: 'applicant')]
+    private Collection $instructorApplications;
+
+    public function __construct()
+    {
+        $this->instructorApplications = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -96,5 +109,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials(): void
     {
         // Not storing temporary sensitive info, so leave empty
+    }
+
+    /**
+     * @return Collection<int, InstructorApplication>
+     */
+    public function getInstructorApplications(): Collection
+    {
+        return $this->instructorApplications;
+    }
+
+    public function addInstructorApplication(InstructorApplication $instructorApplication): static
+    {
+        if (!$this->instructorApplications->contains($instructorApplication)) {
+            $this->instructorApplications->add($instructorApplication);
+            $instructorApplication->setApplicant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInstructorApplication(InstructorApplication $instructorApplication): static
+    {
+        if ($this->instructorApplications->removeElement($instructorApplication)) {
+            // set the owning side to null (unless already changed)
+            if ($instructorApplication->getApplicant() === $this) {
+                $instructorApplication->setApplicant(null);
+            }
+        }
+
+        return $this;
     }
 }

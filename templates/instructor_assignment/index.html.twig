@@ -10,9 +10,9 @@
 
 <div id="app" class="flex min-h-screen bg-slate-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
 
-  {# Sidebar (same pattern as admin) #}
+  {# Sidebar (same as other admin pages) #}
   <aside id="sidebar"
-         class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col">
+         class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col overflow-y-auto">
     <div class="px-6 py-5 border-b border-slate-700 dark:border-gray-700 flex items-center justify-between">
       <h2 class="text-xl font-semibold tracking-tight">CompileX Admin</h2>
       <button class="text-2xl md:text-3xl focus:outline-none" onclick="toggleSidebar()">×</button>
@@ -47,14 +47,22 @@
          class="block px-3 py-2 rounded-md font-medium bg-slate-700 dark:bg-gray-700 hover:bg-slate-600 dark:hover:bg-gray-600">
         Instructor Assignments
       </a>
+      <a href="{{ path('app_instructor_application_admin_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Instructor Applications
+      </a>
+      <a href="{{ path('app_activity_log_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Activity Logs
+      </a>
       <a href="{{ path('app_student_profile_index') }}"
          class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
         Students
       </a>
 
-      <div class="pt-4 border-t border-slate-700 dark:border-gray-600">
+      <div class="pt-4 border-t border-slate-700 dark:border-gray-600 mt-4">
         <button id="mode-toggle"
-                class="mt-4 block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+                class="mt-2 block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
           Toggle Light/Dark Mode
         </button>
         <a href="/" class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
@@ -68,7 +76,7 @@
     </nav>
   </aside>
 
-  {# Main layout (same header style as admin) #}
+  {# Main layout #}
   <div class="flex-1 flex flex-col min-h-screen">
     <header class="fixed top-0 left-0 w-full z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
       <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">CompileX</h1>
@@ -89,13 +97,16 @@
           </p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <a href="{{ path('app_admin') }}"
-             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 bg-white dark:bg-gray-900 hover:bg-slate-100 dark:hover:bg-gray-800">
-            ← Back to Dashboard
-          </a>
           <a href="{{ path('app_instructor_assignment_new') }}"
              class="inline-flex items-center px-3 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">
             + New Assignment
+          </a>
+          <a href="{{ path('app_instructor_assignment_export', {
+            q: app.request.query.get('q'),
+            primary: primaryFilter
+          }) }}"
+             class="inline-flex items-center px-3 py-2 text-sm rounded-md bg-green-600 text-white hover:bg-green-700">
+            Export CSV
           </a>
         </div>
       </div>

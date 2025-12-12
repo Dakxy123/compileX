@@ -5,52 +5,20 @@
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
 
-<div class="flex min-h-screen bg-slate-50 text-slate-900">
+<div class="p-8 max-w-xl mx-auto">
+  <h1 class="text-3xl font-semibold mb-4">Edit Instructor Assignment</h1>
 
-  {% include 'instructor_assignment/_sidebar.html.twig' ignore missing %}
+  <div class="flex justify-between mb-4">
+    <a href="{{ path('app_instructor_assignment_index') }}"
+       class="text-blue-600 hover:underline">&larr; Back to list</a>
 
-  <div class="flex-1 flex flex-col min-h-screen md:ml-64">
-    <header class="fixed top-0 left-0 md:left-64 right-0 z-40 bg-slate-800 text-white flex items-center justify-between px-6 py-3 shadow-md">
-      <h1 class="text-xl font-semibold text-blue-400 tracking-tight">CompileX</h1>
-      <button class="text-2xl md:hidden focus:outline-none" aria-label="Toggle menu" onclick="toggleSidebar()">
-        <span id="burger-icon">&#9776;</span>
-      </button>
-    </header>
+    <div>
+      {% include 'instructor_assignment/_delete_form.html.twig' with { assignment: assignment } %}
+    </div>
+  </div>
 
-    <div class="h-16"></div>
-
-    <main class="flex-1 p-6 md:p-8 max-w-xl mx-auto w-full space-y-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-semibold mb-1">Edit Instructor Assignment</h1>
-          <p class="text-sm text-slate-500">
-            Update instructor or subject details.
-          </p>
-        </div>
-        <a href="{{ path('app_instructor_assignment_index') }}"
-           class="inline-flex items-center px-3 py-2 text-xs rounded-md border border-slate-300 bg-white hover:bg-slate-100">
-          ← Back
-        </a>
-      </div>
-
-      {% include 'instructor_assignment/_form.html.twig' with { form: form, button_label: 'Update' } %}
-
-      <div class="pt-4">
-        {% include 'instructor_assignment/_delete_form.html.twig' with { assignment: assignment } %}
-      </div>
-    </main>
+  <div class="bg-white p-6 rounded shadow border border-gray-200">
+    {% include 'instructor_assignment/_form.html.twig' with { form: form, button_label: 'Update' } %}
   </div>
 </div>
-
-<script>
-const sidebar = document.getElementById('sidebar');
-const burgerIcon = document.getElementById('burger-icon');
-function toggleSidebar() {
-  if (!sidebar) return;
-  sidebar.classList.toggle('-translate-x-full');
-  if (burgerIcon) {
-    burgerIcon.innerHTML = sidebar.classList.contains('-translate-x-full') ? '&#9776;' : '&times;';
-  }
-}
-</script>
 {% endblock %}

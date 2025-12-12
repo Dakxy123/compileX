@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Apply as Instructor — CompileX{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+  <header class="w-full bg-slate-800 text-white px-6 py-4 flex items-center justify-between shadow">
+    <h1 class="text-xl font-semibold text-blue-400">CompileX — Student</h1>
+    <div class="flex items-center gap-3 text-sm">
+      <span class="text-slate-200">
+        {{ app.user ? app.user.userIdentifier : '' }}
+      </span>
+      <a href="{{ path('app_student_dashboard') }}"
+         class="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-100">
+        Back to dashboard
+      </a>
+    </div>
+  </header>
+
+  <main class="flex-1 p-6">
+    <div class="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl shadow p-6 space-y-4">
+      <h2 class="text-xl font-semibold">Apply to become an instructor</h2>
+      <p class="text-sm text-slate-600">
+        Fill out the form below and upload your portfolio. Your application will be reviewed by an admin.
+      </p>
+
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="rounded-md px-4 py-2 mb-2 text-sm
+                      {% if label == 'success' %}
+                        bg-emerald-50 text-emerald-800 border border-emerald-200
+                      {% elseif label == 'error' %}
+                        bg-red-50 text-red-800 border border-red-200
+                      {% else %}
+                        bg-slate-50 text-slate-800 border border-slate-200
+                      {% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      {% include 'instructor_application/_form.html.twig' with { form: form, button_label: 'Submit Application' } %}
+    </div>
+  </main>
+</div>
+{% endblock %}

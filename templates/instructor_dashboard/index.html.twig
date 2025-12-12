@@ -6,25 +6,17 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = { darkMode: 'class' };
-  const DARK_KEY = 'compilex-dark-mode';
-  function loadInitialTheme() {
-    const saved = localStorage.getItem(DARK_KEY);
-    document.documentElement.classList.toggle('dark', saved === 'true');
-  }
-  document.addEventListener('DOMContentLoaded', loadInitialTheme);
 </script>
 
 <div id="app" class="flex min-h-screen bg-slate-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-
-  <!-- Sidebar -->
   <aside id="sidebar"
          class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col">
     <div class="px-6 py-5 border-b border-slate-700 dark:border-gray-700 flex items-center justify-between">
       <h2 class="text-xl font-semibold tracking-tight">CompileX Instructor</h2>
-      <button class="text-2xl md:text-3xl focus:outline-none" onclick="toggleSidebar()">×</button>
+      <button class="text-2xl focus:outline-none" id="sidebar-close">×</button>
     </div>
 
-    <nav class="flex-1 px-4 py-4 space-y-1">
+    <nav class="flex-1 px-4 py-4 space-y-1 text-sm overflow-y-auto">
       <a href="{{ path('home') }}"
          class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
         Home
@@ -42,73 +34,242 @@
         Instructor Dashboard
       </a>
 
-      <div class="pt-4 border-t border-slate-700 dark:border-gray-600 mt-4">
+      <div class="mt-4 pt-3 border-t border-slate-700 dark:border-gray-600 text-xs uppercase tracking-wide text-slate-400 dark:text-gray-400">
+        Teaching Tools
+      </div>
+
+      <a href="#overview"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Dashboard Overview
+      </a>
+      <a href="#subjects"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        My Subjects & Courses
+      </a>
+      <a href="#enrollments"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        My Enrollments
+      </a>
+
+      <div class="mt-3 pt-3 border-t border-slate-700 dark:border-gray-600 text-xs uppercase tracking-wide text-slate-400 dark:text-gray-400">
+        Global Lists (View Only)
+      </div>
+
+      <a href="{{ path('app_subject_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        All Subjects
+      </a>
+      <a href="{{ path('app_module_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        All Modules
+      </a>
+      <a href="{{ path('app_enrollment_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        All Enrollments
+      </a>
+      <a href="{{ path('app_student_profile_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        All Students
+      </a>
+
+      <div class="pt-4 mt-4 border-t border-slate-700 dark:border-gray-600 text-sm">
         <button id="mode-toggle"
                 class="mt-2 block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
           Toggle Light/Dark Mode
         </button>
         <a href="{{ path('app_logout') }}"
-           class="block mt-2 px-3 py-2 rounded-md font-medium text-red-500 hover:bg-red-700">
+           class="block mt-2 px-3 py-2 rounded-md font-medium text-red-300 hover:bg-red-700/40">
           Logout
         </a>
       </div>
     </nav>
   </aside>
 
-  <!-- Main -->
   <div class="flex-1 flex flex-col min-h-screen">
     <header class="fixed top-0 left-0 w-full z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
-      <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">CompileX</h1>
-      <button class="text-2xl md:text-3xl focus:outline-none" aria-label="Toggle menu" onclick="toggleSidebar()">
+      <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">CompileX — Instructor</h1>
+      <button class="text-2xl focus:outline-none" aria-label="Toggle menu" id="burger-button">
         <span id="burger-icon">&#9776;</span>
       </button>
     </header>
 
     <div class="h-16"></div>
 
-    <main id="main-content" class="flex-1 p-8 space-y-6">
+    <main id="main-content" class="flex-1 p-6 md:p-8 space-y-8 max-w-6xl mx-auto w-full">
 
-      <!-- Top: welcome -->
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h2 class="text-3xl font-semibold">Instructor Dashboard</h2>
-          <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
-            Welcome{% if user %}, {{ user.email }}{% endif %}. This area is reserved for instructor tools and course management.
-          </p>
-        </div>
-      </div>
-
-      <!-- Stats cards (placeholder for now) -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 shadow-sm">
-          <p class="text-sm text-gray-500 dark:text-gray-400">Total Courses</p>
-          <p class="mt-2 text-2xl font-semibold">–</p>
-          <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Future: show assigned courses</p>
-        </div>
-
-        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 shadow-sm">
-          <p class="text-sm text-gray-500 dark:text-gray-400">Total Subjects</p>
-          <p class="mt-2 text-2xl font-semibold">–</p>
-          <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Future: subjects handled by instructor</p>
-        </div>
-
-        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 shadow-sm">
-          <p class="text-sm text-gray-500 dark:text-gray-400">Enrolled Students</p>
-          <p class="mt-2 text-2xl font-semibold">–</p>
-          <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Future: per-course/student stats</p>
-        </div>
-      </div>
-
-      <!-- Placeholder table -->
-      <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold text-lg">Upcoming Classes (Placeholder)</h3>
-          <span class="text-xs text-gray-500 dark:text-gray-400">No data yet</span>
-        </div>
+      <section class="space-y-2">
+        <h2 class="text-3xl font-semibold">Instructor Dashboard</h2>
         <p class="text-sm text-gray-600 dark:text-gray-300">
-          This section can later show upcoming sessions, deadlines, or tasks assigned to this instructor.
+          Welcome{% if user %}, {{ user.email }}{% endif %}. This panel shows the subjects, courses, and students linked to you.
         </p>
-      </div>
+
+        <div class="flex flex-wrap gap-2 text-xs md:text-sm mt-2">
+          <a href="#overview"
+             class="px-3 py-1 rounded-full border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
+            Overview
+          </a>
+          <a href="#subjects"
+             class="px-3 py-1 rounded-full border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
+            My Subjects & Courses
+          </a>
+          <a href="#enrollments"
+             class="px-3 py-1 rounded-full border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
+            Recent Enrollments
+          </a>
+        </div>
+      </section>
+
+      <section id="overview" class="space-y-4 scroll-mt-24">
+        <h3 class="text-xl font-semibold">Overview</h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 shadow-sm">
+            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Assigned Subjects</p>
+            <p class="mt-2 text-2xl font-semibold">{{ totalAssignedSubjects ?? 0 }}</p>
+            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Subjects where you are assigned as instructor.</p>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 shadow-sm">
+            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Courses Covered</p>
+            <p class="mt-2 text-2xl font-semibold">{{ totalAssignedCourses ?? 0 }}</p>
+            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Distinct courses linked to your subjects.</p>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 shadow-sm">
+            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Modules</p>
+            <p class="mt-2 text-2xl font-semibold">{{ totalAssignedModules ?? 0 }}</p>
+            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Learning modules under your subjects.</p>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 shadow-sm">
+            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Enrollments</p>
+            <p class="mt-2 text-2xl font-semibold">{{ totalInstructorEnrollments ?? 0 }}</p>
+            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Student enrollments in your subjects.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="subjects" class="space-y-4 scroll-mt-24">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">My Subjects &amp; Courses</h3>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-50 dark:bg-gray-900">
+              <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <th class="px-4 py-2">Subject</th>
+                <th class="px-4 py-2">Course</th>
+                <th class="px-4 py-2">Assignment</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for ia in latestAssignments %}
+              {% set subj = ia.subject ?? null %}
+              {% set course = (subj and subj.course) ? subj.course : null %}
+
+              <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                <td class="px-4 py-2 text-xs align-top">
+                  {% if subj %}
+                    <div class="font-mono text-[11px] text-slate-500 dark:text-gray-400">{{ subj.code ?? '' }}</div>
+                    <div class="text-slate-900 dark:text-gray-100">
+                      {{ subj.name ? (subj.name|length > 40 ? subj.name|slice(0,40) ~ '…' : subj.name) : '—' }}
+                    </div>
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+
+                <td class="px-4 py-2 text-xs align-top">
+                  {% if course %}
+                    {{ course.name ? (course.name|length > 40 ? course.name|slice(0,40) ~ '…' : course.name) : '—' }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+
+                <td class="px-4 py-2 text-xs align-top">
+                  {% if ia.isPrimary %}
+                    <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
+                      Primary
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full bg-slate-100 text-slate-700 dark:bg-gray-700 dark:text-gray-200">
+                      Secondary
+                    </span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="3" class="px-4 py-4 text-center text-xs text-slate-500 dark:text-gray-400">
+                  You have no subject assignments yet.
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="enrollments" class="space-y-4 scroll-mt-24">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">Recent Enrollments in My Subjects</h3>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-50 dark:bg-gray-900">
+              <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <th class="px-4 py-2">Student</th>
+                <th class="px-4 py-2">Subject</th>
+                <th class="px-4 py-2">Course</th>
+                <th class="px-4 py-2">Status</th>
+                <th class="px-4 py-2">Request</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for e in latestEnrollments %}
+              {% set studentProfile = e.studentProfile ?? null %}
+              {% set stuUser = (studentProfile and studentProfile.user) ? studentProfile.user : null %}
+              {% set subj = e.subject ?? null %}
+              {% set course = (subj and subj.course) ? subj.course : null %}
+
+              <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                <td class="px-4 py-2 text-xs align-top">{{ stuUser ? (stuUser.email ?? '—') : '—' }}</td>
+                <td class="px-4 py-2 text-xs align-top">
+                  {% if subj %}
+                    {{ subj.name ? (subj.name|length > 30 ? subj.name|slice(0,30) ~ '…' : subj.name) : '—' }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td class="px-4 py-2 text-xs align-top">
+                  {% if course %}
+                    {{ course.name ? (course.name|length > 30 ? course.name|slice(0,30) ~ '…' : course.name) : '—' }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td class="px-4 py-2 text-xs align-top">{{ e.status ?? '—' }}</td>
+                <td class="px-4 py-2 text-xs align-top">
+                  <button type="button"
+                          class="inline-flex items-center px-2.5 py-1 rounded-md border border-slate-300 dark:border-gray-600 text-[11px] font-medium text-slate-700 dark:text-gray-200 hover:bg-slate-100 dark:hover:bg-gray-700">
+                    Request change
+                  </button>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" class="px-4 py-4 text-center text-xs text-slate-500 dark:text-gray-400">
+                  No enrollments yet for your subjects.
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
     </main>
   </div>
@@ -116,14 +277,46 @@
 
 <script>
 const sidebar = document.getElementById('sidebar');
+const burgerButton = document.getElementById('burger-button');
 const burgerIcon = document.getElementById('burger-icon');
+const sidebarClose = document.getElementById('sidebar-close');
 const DARK_KEY = 'compilex-dark-mode';
 const modeToggle = document.getElementById('mode-toggle');
 
-function toggleSidebar() {
-  sidebar.classList.toggle('-translate-x-full');
-  burgerIcon.innerHTML = sidebar.classList.contains('-translate-x-full') ? '&#9776;' : '&times;';
+function openSidebar() {
+  sidebar.classList.remove('-translate-x-full');
+  if (burgerIcon) burgerIcon.innerHTML = '&times;';
 }
+function closeSidebar() {
+  sidebar.classList.add('-translate-x-full');
+  if (burgerIcon) burgerIcon.innerHTML = '&#9776;';
+}
+function toggleSidebar() {
+  if (sidebar.classList.contains('-translate-x-full')) openSidebar();
+  else closeSidebar();
+}
+closeSidebar();
+
+if (burgerButton) {
+  burgerButton.addEventListener('click', function (e) {
+    e.stopPropagation();
+    toggleSidebar();
+  });
+}
+if (sidebarClose) {
+  sidebarClose.addEventListener('click', function (e) {
+    e.stopPropagation();
+    closeSidebar();
+  });
+}
+document.addEventListener('click', function (e) {
+  const clickedBurger = e.target.closest('#burger-button');
+  const clickedInsideSidebar = sidebar.contains(e.target);
+  if (!clickedBurger && !clickedInsideSidebar) closeSidebar();
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeSidebar();
+});
 
 function loadInitialThemeJS() {
   const saved = localStorage.getItem(DARK_KEY);
@@ -131,25 +324,13 @@ function loadInitialThemeJS() {
 }
 loadInitialThemeJS();
 
-modeToggle.addEventListener('click', e => {
-  e.stopPropagation();
-  const isDark = document.documentElement.classList.contains('dark');
-  document.documentElement.classList.toggle('dark', !isDark);
-  localStorage.setItem(DARK_KEY, (!isDark).toString());
-});
-
-document.addEventListener('click', e => {
-  if (!sidebar.contains(e.target) &&
-      !e.target.closest('button[aria-label="Toggle menu"]') &&
-      !sidebar.classList.contains('-translate-x-full')) {
-    toggleSidebar();
-  }
-});
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !sidebar.classList.contains('-translate-x-full')) {
-    toggleSidebar();
-  }
-});
+if (modeToggle) {
+  modeToggle.addEventListener('click', function (e) {
+    e.stopPropagation();
+    const isDark = document.documentElement.classList.contains('dark');
+    document.documentElement.classList.toggle('dark', !isDark);
+    localStorage.setItem(DARK_KEY, String(!isDark));
+  });
+}
 </script>
 {% endblock %}

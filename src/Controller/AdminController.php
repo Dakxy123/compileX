@@ -11,6 +11,8 @@ use App\Repository\ModuleRepository;
 use App\Repository\EnrollmentRepository;
 use App\Repository\InstructorAssignmentRepository;
 use App\Repository\ActivityLogRepository;
+use App\Repository\InstructorApplicationRepository;
+use App\Service\ActivityLogger;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,6 +22,10 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 final class AdminController extends AbstractController
 {
+    public function __construct(
+        private ActivityLogger $activityLogger
+    ) {}
+
     #[Route('', name: 'app_admin', methods: ['GET'])]
     public function index(
         UserRepository $userRepository,
@@ -31,7 +37,16 @@ final class AdminController extends AbstractController
         EnrollmentRepository $enrollmentRepository,
         InstructorAssignmentRepository $instructorAssignmentRepository,
         ActivityLogRepository $activityLogRepository,
+        InstructorApplicationRepository $instructorApplicationRepository,
     ): Response {
+
+        // ✅ ACTIVITY LOG
+        $this->activityLogger->log(
+            'admin.dashboard.view',
+            'admin',
+            'Viewed admin dashboard'
+        );
+
         $totalUsers = $userRepository->count([]);
 
         $totalAdmins = (int) $userRepository->createQueryBuilder('u')
@@ -49,12 +64,11 @@ final class AdminController extends AbstractController
             ->getSingleScalarResult();
 
         $totalStudentProfiles = $studentProfileRepository->count([]);
-
         $totalCourses = $courseRepository->count([]);
 
         $activeCourses = (int) $courseRepository->createQueryBuilder('c')
             ->select('COUNT(c.id)')
-            ->andWhere('c.IsActive = :active')
+            ->andWhere('c.isActive = :active')
             ->setParameter('active', true)
             ->getQuery()
             ->getSingleScalarResult();
@@ -78,22 +92,17 @@ final class AdminController extends AbstractController
             ->getSingleScalarResult();
 
         $totalContactMessages = $contactMessageRepository->count([]);
-
-        $latestContactMessages = $contactMessageRepository->createQueryBuilder('m')
-            ->orderBy('m.id', 'DESC')
-            ->setMaxResults(5)
-            ->getQuery()
-            ->getResult();
-
         $totalModules = $moduleRepository->count([]);
-
-        $latestModules = $moduleRepository->createQueryBuilder('m2')
-            ->orderBy('m2.id', 'DESC')
-            ->setMaxResults(5)
-            ->getQuery()
-            ->getResult();
-
         $totalEnrollments = $enrollmentRepository->count([]);
+        $totalInstructorAssignments = $instructorAssignmentRepository->count([]);
+        $totalActivityLogs = $activityLogRepository->count([]);
+
+        $latestUsers = $userRepository->findBy([], ['id' => 'DESC'], 5);
+        $latestCourses = $courseRepository->findBy([], ['id' => 'DESC'], 5);
+        $latestSubjects = $subjectRepository->findBy([], ['id' => 'DESC'], 5);
+        $latestModules = $moduleRepository->findBy([], ['id' => 'DESC'], 5);
+
+        $latestStudentProfiles = $studentProfileRepository->findBy([], ['id' => 'DESC'], 5);
 
         $latestEnrollments = $enrollmentRepository->createQueryBuilder('e')
             ->leftJoin('e.studentProfile', 'sp')->addSelect('sp')
@@ -105,8 +114,6 @@ final class AdminController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        $totalInstructorAssignments = $instructorAssignmentRepository->count([]);
-
         $latestInstructorAssignments = $instructorAssignmentRepository->createQueryBuilder('ia')
             ->leftJoin('ia.instructor', 'instr')->addSelect('instr')
             ->leftJoin('ia.subject', 'subj')->addSelect('subj')
@@ -116,8 +123,6 @@ final class AdminController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        $totalActivityLogs = $activityLogRepository->count([]);
-
         $latestActivityLogs = $activityLogRepository->createQueryBuilder('al')
             ->leftJoin('al.user', 'alu')->addSelect('alu')
             ->orderBy('al.createdAt', 'DESC')
@@ -125,55 +130,38 @@ final class AdminController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        $latestUsers = $userRepository->createQueryBuilder('u3')
-            ->orderBy('u3.id', 'DESC')
-            ->setMaxResults(5)
+        $pendingInstructorApplications = (int) $instructorApplicationRepository->createQueryBuilder('ia2')
+            ->select('COUNT(ia2.id)')
+            ->andWhere('ia2.status = :status')
+            ->setParameter('status', 'PENDING')
             ->getQuery()
-            ->getResult();
-
-        $latestCourses = $courseRepository->createQueryBuilder('c2')
-            ->orderBy('c2.id', 'DESC')
-            ->setMaxResults(5)
-            ->getQuery()
-            ->getResult();
-
-        $latestSubjects = $subjectRepository->createQueryBuilder('s2')
-            ->orderBy('s2.id', 'DESC')
-            ->setMaxResults(5)
-            ->getQuery()
-            ->getResult();
-
-        $latestStudentProfiles = $studentProfileRepository->createQueryBuilder('sp3')
-            ->orderBy('sp3.id', 'DESC')
-            ->setMaxResults(5)
-            ->getQuery()
-            ->getResult();
+            ->getSingleScalarResult();
 
         return $this->render('admin/index.html.twig', [
-            'totalUsers'                  => $totalUsers,
-            'totalAdmins'                 => $totalAdmins,
-            'totalInstructors'            => $totalInstructors,
-            'totalStudentProfiles'        => $totalStudentProfiles,
-            'totalCourses'                => $totalCourses,
-            'activeCourses'               => $activeCourses,
-            'inactiveCourses'             => $inactiveCourses,
-            'totalSubjects'               => $totalSubjects,
-            'ongoingStudents'             => $ongoingStudents,
-            'completedStudents'           => $completedStudents,
-            'totalContactMessages'        => $totalContactMessages,
-            'totalModules'                => $totalModules,
-            'totalEnrollments'            => $totalEnrollments,
-            'totalInstructorAssignments'  => $totalInstructorAssignments,
-            'totalActivityLogs'           => $totalActivityLogs,
-            'latestUsers'                 => $latestUsers,
-            'latestCourses'               => $latestCourses,
-            'latestSubjects'              => $latestSubjects,
-            'latestStudentProfiles'       => $latestStudentProfiles,
-            'latestContactMessages'       => $latestContactMessages,
-            'latestModules'               => $latestModules,
-            'latestEnrollments'           => $latestEnrollments,
-            'latestInstructorAssignments' => $latestInstructorAssignments,
-            'latestActivityLogs'          => $latestActivityLogs,
+            'totalUsers'                    => $totalUsers,
+            'totalAdmins'                   => $totalAdmins,
+            'totalInstructors'              => $totalInstructors,
+            'totalStudentProfiles'          => $totalStudentProfiles,
+            'totalCourses'                  => $totalCourses,
+            'activeCourses'                 => $activeCourses,
+            'inactiveCourses'               => $inactiveCourses,
+            'totalSubjects'                 => $totalSubjects,
+            'ongoingStudents'               => $ongoingStudents,
+            'completedStudents'             => $completedStudents,
+            'totalContactMessages'          => $totalContactMessages,
+            'totalModules'                  => $totalModules,
+            'totalEnrollments'              => $totalEnrollments,
+            'totalInstructorAssignments'    => $totalInstructorAssignments,
+            'totalActivityLogs'             => $totalActivityLogs,
+            'latestUsers'                   => $latestUsers,
+            'latestCourses'                 => $latestCourses,
+            'latestSubjects'                => $latestSubjects,
+            'latestStudentProfiles'         => $latestStudentProfiles,
+            'latestModules'                 => $latestModules,
+            'latestEnrollments'             => $latestEnrollments,
+            'latestInstructorAssignments'   => $latestInstructorAssignments,
+            'latestActivityLogs'            => $latestActivityLogs,
+            'pendingInstructorApplications' => $pendingInstructorApplications,
         ]);
     }
 }

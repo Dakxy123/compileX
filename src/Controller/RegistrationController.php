@@ -12,10 +12,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Service\ActivityLogger;
 
 #[Route('/register')]
 final class RegistrationController extends AbstractController
 {
+    public function __construct(
+        private ActivityLogger $activityLogger
+    ) {}
+
     #[Route('/student', name: 'app_register_student', methods: ['GET', 'POST'])]
     public function registerStudent(
         Request $request,
@@ -23,6 +28,9 @@ final class RegistrationController extends AbstractController
         UserPasswordHasherInterface $passwordHasher,
         UserRepository $userRepository
     ): Response {
+        // ✅ ACTIVITY LOG (view form)
+        $this->activityLogger->log('auth.register_student.view', 'auth', 'Viewed student registration form.');
+
         // Form is NOT bound to a single entity (we handle manually)
         $form = $this->createForm(StudentRegistrationType::class);
         $form->handleRequest($request);
@@ -30,15 +38,22 @@ final class RegistrationController extends AbstractController
         $errors = [];
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $email       = (string) $form->get('email')->getData();
+            $email         = (string) $form->get('email')->getData();
             $plainPassword = (string) $form->get('password')->getData();
-            $course      = $form->get('course')->getData();
-            $yearLevel   = (int) $form->get('yearLevel')->getData();
+            $course        = $form->get('course')->getData();
+            $yearLevel     = (int) $form->get('yearLevel')->getData();
 
             // Check if email already exists
             $existing = $userRepository->findOneBy(['email' => $email]);
             if ($existing) {
                 $errors[] = 'This email is already registered.';
+
+                // ✅ ACTIVITY LOG (failed)
+                $this->activityLogger->log(
+                    'auth.register_student.failed',
+                    'auth',
+                    'Student registration failed (email already exists): ' . $email
+                );
             }
 
             if (empty($errors)) {
@@ -62,10 +77,17 @@ final class RegistrationController extends AbstractController
                 $entityManager->persist($profile);
                 $entityManager->flush();
 
+                // ✅ ACTIVITY LOG (success)
+                $this->activityLogger->log(
+                    'auth.register_student.success',
+                    'auth',
+                    'Student account created: ' . $email
+                );
+
                 $this->addFlash('success', 'Your student account has been created. You can now log in.');
 
-                // For now redirect to admin dashboard or change later to app_login
-                return $this->redirectToRoute('app_admin');
+                // ✅ Better UX: redirect to login instead of admin
+                return $this->redirectToRoute('app_login');
             }
         }
 

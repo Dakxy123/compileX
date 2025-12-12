@@ -1,97 +1,55 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Student Profile Details{% endblock %}
+{% block title %}Student Profile Details — Admin{% endblock %}
 
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config = { darkMode: 'class' };</script>
 
-<div class="min-h-screen flex items-start justify-center bg-slate-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-10">
-  <div class="w-full max-w-xl bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-semibold">Student Profile Details</h1>
-      <a href="{{ path('app_student_profile_index') }}" class="text-sm text-blue-500 hover:underline">
-        ← Back to list
-      </a>
-    </div>
+<div class="p-8 max-w-3xl mx-auto">
 
-    <table class="min-w-full text-sm border border-gray-200 dark:border-gray-700">
-      <tbody>
-        <tr>
-          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left w-40">ID</th>
-          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-            {{ studentProfile.id }}
-          </td>
-        </tr>
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-semibold">Student Profile Details</h1>
 
-        <tr>
-          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">User Email</th>
-          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-            {{ studentProfile.user ? studentProfile.user.email : '—' }}
-          </td>
-        </tr>
+    <a href="{{ path('app_student_profile_edit', {'id': studentProfile.id}) }}"
+       class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+      Edit
+    </a>
+  </div>
 
-        <tr>
-          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Course</th>
-          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-            {{ studentProfile.course ? studentProfile.course.name : '—' }}
-          </td>
-        </tr>
+  <a href="{{ path('app_student_profile_index') }}"
+     class="text-blue-600 hover:underline mb-4 block">&larr; Back to list</a>
 
-        <tr>
-          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Year Level</th>
-          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-            Year {{ studentProfile.yearLevel }}
-          </td>
-        </tr>
+  <div class="bg-white dark:bg-gray-800 p-6 rounded shadow border border-gray-200 dark:border-gray-700 space-y-3 text-sm">
 
-        <tr>
-          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Status</th>
-          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-            {% set st = studentProfile.status %}
-            {% if st == 'Ongoing' %}
-              <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                Ongoing
-              </span>
-            {% elseif st == 'On Leave' %}
-              <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
-                On Leave
-              </span>
-            {% elseif st == 'Completed' %}
-              <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
-                Completed
-              </span>
-            {% elseif st == 'Dropped' %}
-              <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
-                Dropped
-              </span>
-            {% else %}
-              {{ st }}
-            {% endif %}
-          </td>
-        </tr>
+    <p><strong>ID:</strong> {{ studentProfile.id }}</p>
 
-        <tr>
-          <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left">Created At</th>
-          <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-            {{ studentProfile.createdAt ? studentProfile.createdAt|date('Y-m-d H:i') : '—' }}
-          </td>
-        </tr>
+    <p><strong>User Email:</strong>
+      {{ studentProfile.user ? studentProfile.user.email : '—' }}
+    </p>
 
-        <tr>
-          <th class="px-4 py-2 text-left">Updated At</th>
-          <td class="px-4 py-2">
-            {{ studentProfile.updatedAt ? studentProfile.updatedAt|date('Y-m-d H:i') : '—' }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <p><strong>Course:</strong>
+      {{ studentProfile.course ? studentProfile.course.name : '—' }}
+    </p>
 
-    <div class="mt-4 flex justify-between items-center">
-      <a href="{{ path('app_student_profile_edit', {'id': studentProfile.id}) }}"
-         class="px-4 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-700">
-        Edit
-      </a>
+    <p><strong>Year Level:</strong>
+      {% if studentProfile.yearLevel < 6 %}
+        Year {{ studentProfile.yearLevel }}
+      {% else %}
+        Year 6+
+      {% endif %}
+    </p>
+
+    <p><strong>Status:</strong> {{ studentProfile.status }}</p>
+
+    <p><strong>Created At:</strong>
+      {{ studentProfile.createdAt ? studentProfile.createdAt|date('Y-m-d H:i:s') : '—' }}
+    </p>
+
+    <p><strong>Last Updated:</strong>
+      {{ studentProfile.updatedAt ? studentProfile.updatedAt|date('Y-m-d H:i:s') : '—' }}
+    </p>
+
+    <div class="pt-4 border-t border-gray-300 dark:border-gray-700">
       {% include 'student_profile/_delete_form.html.twig' %}
     </div>
   </div>

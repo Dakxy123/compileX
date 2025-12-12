@@ -4,61 +4,447 @@
 
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
 
-<div class="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
-  <!-- Header -->
-  <header class="w-full bg-slate-800 text-white px-6 py-4 flex items-center justify-between shadow">
-    <h1 class="text-xl font-semibold text-blue-400">CompileX — Student</h1>
+<div id="app" class="flex min-h-screen bg-slate-50 text-slate-900 dark:bg-gray-900 dark:text-gray-100">
 
-    <div class="flex items-center gap-3 text-sm">
-      <span class="text-slate-200">
-        {{ app.user ? app.user.userIdentifier : '' }}
-      </span>
-
-      <a href="{{ path('home') }}"
-         class="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-100">
-        Home
-      </a>
-
-      <a href="{{ path('app_logout') }}"
-         class="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white">
-        Logout
-      </a>
+  {# =================== SIDEBAR =================== #}
+  <aside id="sidebar"
+         class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="px-6 py-5 border-b border-slate-700 dark:border-gray-700 flex items-center justify-between">
+      <h2 class="text-xl font-semibold tracking-tight">CompileX Student</h2>
+      <button class="text-2xl md:text-3xl focus:outline-none" onclick="toggleSidebar()">×</button>
     </div>
-  </header>
 
-  <!-- Main -->
-  <main class="flex-1 p-6">
-    <div class="max-w-5xl mx-auto space-y-6">
-      <h2 class="text-2xl font-semibold mb-2">Welcome, Student 👋</h2>
-      <p class="text-slate-600">
-        This is your student area. For now, this is just a placeholder dashboard.
-        Later, this can show your course, year level, and progress.
-      </p>
+    <nav class="flex-1 px-4 py-4 space-y-1 text-sm">
+      <a href="#overview"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Dashboard Overview
+      </a>
+      <a href="#profile"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        My Profile
+      </a>
+      <a href="#subjects"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        My Subjects
+      </a>
+      <a href="#modules"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Modules
+      </a>
+      <a href="#instructor-application"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Instructor Application
+      </a>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-        <div class="bg-white rounded-xl shadow p-4 border border-slate-100">
-          <h3 class="font-semibold mb-2">My Status</h3>
-          <p class="text-sm text-slate-600">
-            In the future, you’ll see your course, year level, and status here.
-          </p>
-        </div>
-
-        <div class="bg-white rounded-xl shadow p-4 border border-slate-100">
-          <h3 class="font-semibold mb-2">Subjects</h3>
-          <p class="text-sm text-slate-600">
-            This section can list your enrolled subjects and materials.
-          </p>
-        </div>
-
-        <div class="bg-white rounded-xl shadow p-4 border border-slate-100">
-          <h3 class="font-semibold mb-2">Announcements</h3>
-          <p class="text-sm text-slate-600">
-            Future area for updates and important messages from the school.
-          </p>
-        </div>
+      <div class="pt-4 mt-4 border-t border-slate-700 dark:border-gray-600 text-sm space-y-1">
+        <button id="mode-toggle"
+                class="block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Toggle Light/Dark Mode
+        </button>
+        <a href="{{ path('home') }}"
+           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+          Back to Home
+        </a>
+        <a href="{{ path('app_logout') }}"
+           class="block px-3 py-2 rounded-md font-medium text-red-300 hover:bg-red-700/40">
+          Logout
+        </a>
       </div>
-    </div>
-  </main>
+    </nav>
+  </aside>
+
+  {# =================== MAIN CONTENT =================== #}
+  <div class="flex-1 flex flex-col min-h-screen">
+    <header class="fixed top-0 left-0 w-full z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
+      <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">
+        CompileX — Student
+      </h1>
+      <div class="flex items-center gap-3 text-sm">
+        <span class="text-slate-200">
+          {{ app.user ? app.user.userIdentifier : '' }}
+        </span>
+        <button class="text-2xl md:text-3xl focus:outline-none" aria-label="Toggle menu" onclick="toggleSidebar()">
+          <span id="burger-icon">&#9776;</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="h-16"></div>
+
+    <main class="flex-1 p-6 md:p-8 space-y-10 max-w-6xl mx-auto w-full">
+
+      {# ✅ UX: Instructor Promotion Banner #}
+      {% if isInstructor %}
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <p class="text-sm font-semibold text-emerald-800">✅ You are now an Instructor.</p>
+              <p class="text-xs text-emerald-700">You can now access the Instructor Dashboard and manage your assigned subjects.</p>
+            </div>
+            <a href="{{ path('app_instructor_dashboard') }}"
+               class="inline-flex items-center justify-center px-3 py-2 text-sm rounded-md bg-emerald-600 text-white hover:bg-emerald-700">
+              Go to Instructor Dashboard →
+            </a>
+          </div>
+        </div>
+      {% endif %}
+
+      {# ========== OVERVIEW ========== #}
+      <section id="overview" class="space-y-4 scroll-mt-20">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-semibold mb-1">
+            Welcome, {{ app.user ? app.user.userIdentifier : 'Student' }} 👋
+          </h2>
+          <p class="text-sm text-slate-600 dark:text-gray-300">
+            This dashboard shows your basic profile, enrolled subjects, related modules, and your instructor application status.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-4">
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Profile</p>
+            <p class="mt-1 text-lg font-semibold">
+              {% if studentProfile %}
+                {{ studentProfile.status ?? 'Ongoing' }}
+              {% else %}
+                Not set
+              {% endif %}
+            </p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-gray-400">From your student profile.</p>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-4">
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Enrolled Subjects</p>
+            <p class="mt-1 text-lg font-semibold">{{ enrollments|length }}</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-gray-400">Based on your enrollments.</p>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-4">
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Related Modules</p>
+            <p class="mt-1 text-lg font-semibold">{{ modules|length }}</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-gray-400">Learning materials from your subjects.</p>
+          </div>
+        </div>
+      </section>
+
+      {# ========== PROFILE ========== #}
+      <section id="profile" class="space-y-4 scroll-mt-24">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">My Profile</h3>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-4 md:p-5">
+          {% if studentProfile %}
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <dt class="text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wide">Email</dt>
+                <dd class="mt-1 text-slate-800 dark:text-gray-100">{{ app.user ? app.user.userIdentifier : '—' }}</dd>
+              </div>
+
+              <div>
+                <dt class="text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wide">Course</dt>
+                <dd class="mt-1 text-slate-800 dark:text-gray-100">
+                  {{ studentProfile.course ? studentProfile.course.name : '—' }}
+                </dd>
+              </div>
+
+              <div>
+                <dt class="text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wide">Year Level</dt>
+                <dd class="mt-1 text-slate-800 dark:text-gray-100">{{ studentProfile.yearLevel ?? '—' }}</dd>
+              </div>
+
+              <div>
+                <dt class="text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wide">Status</dt>
+                <dd class="mt-1">
+                  <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full
+                               {% if studentProfile.status == 'Completed' %}
+                                 bg-emerald-100 text-emerald-700
+                               {% else %}
+                                 bg-blue-100 text-blue-700
+                               {% endif %}">
+                    {{ studentProfile.status ?? 'Ongoing' }}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+          {% else %}
+            <p class="text-sm text-slate-600 dark:text-gray-300">
+              No student profile is linked to your account yet. Please contact the administrator for assistance.
+            </p>
+          {% endif %}
+        </div>
+      </section>
+
+      {# ========== SUBJECTS ========== #}
+      <section id="subjects" class="space-y-4 scroll-mt-24">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">My Subjects & Enrollments</h3>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-50 dark:bg-gray-900">
+              <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                <th class="px-4 py-2">Subject</th>
+                <th class="px-4 py-2">Course</th>
+                <th class="px-4 py-2">Status</th>
+                <th class="px-4 py-2">Score</th>
+                <th class="px-4 py-2">Grade</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for e in enrollments %}
+              {% set subj = e.subject %}
+              <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                <td class="px-4 py-2 text-xs align-top">
+                  {% if subj %}
+                    <div class="font-mono text-[11px] text-slate-600 dark:text-gray-300">{{ subj.code }}</div>
+                    <div class="text-slate-800 dark:text-gray-100">
+                      {{ subj.name|length > 30 ? subj.name|slice(0,30) ~ '…' : subj.name }}
+                    </div>
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td class="px-4 py-2 text-xs align-top">
+                  {% if subj and subj.course %}
+                    {{ subj.course.name|length > 30 ? subj.course.name|slice(0,30) ~ '…' : subj.course.name }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td class="px-4 py-2 text-xs align-top">
+                  {% set status = e.status %}
+                  {% set badgeClasses = {
+                    'Enrolled': 'bg-blue-100 text-blue-700',
+                    'Ongoing': 'bg-amber-100 text-amber-700',
+                    'Completed': 'bg-emerald-100 text-emerald-700',
+                    'Dropped': 'bg-red-100 text-red-700'
+                  }[status] ?? 'bg-slate-100 text-slate-700' %}
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold {{ badgeClasses }}">
+                    {{ status ?? 'Enrolled' }}
+                  </span>
+                </td>
+                <td class="px-4 py-2 text-xs align-top">
+                  {% if e.score is not null %}
+                    {{ e.score|number_format(2, '.', ',') }}
+                  {% else %}
+                    <span class="text-slate-400">—</span>
+                  {% endif %}
+                </td>
+                <td class="px-4 py-2 text-xs align-top">{{ e.grade ?? '—' }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" class="px-4 py-4 text-center text-xs text-slate-500 dark:text-gray-400">
+                  You have no enrollments yet.
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {# ========== MODULES ========== #}
+      <section id="modules" class="space-y-4 scroll-mt-24">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">Modules for My Subjects</h3>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-50 dark:bg-gray-900">
+              <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                <th class="px-4 py-2">Module</th>
+                <th class="px-4 py-2">Subject</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for m in modules %}
+              {% set subj = m.subject is defined ? m.subject : null %}
+              <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                <td class="px-4 py-2 text-xs align-top">
+                  <div class="font-mono text-[11px] text-slate-600 dark:text-gray-300">
+                    {{ m.code is defined ? m.code : (m.moduleCode is defined ? m.moduleCode : '—') }}
+                  </div>
+                  <div class="text-slate-800 dark:text-gray-100">
+                    {% set titleCandidate = m.name is defined ? m.name : (m.title is defined ? m.title : '') %}
+                    {{ titleCandidate ? (titleCandidate|length > 30 ? titleCandidate|slice(0,30) ~ '…' : titleCandidate) : '—' }}
+                  </div>
+                </td>
+                <td class="px-4 py-2 text-xs align-top">
+                  {% if subj %}
+                    {{ subj.code is defined ? subj.code ~ ' — ' : '' }}
+                    {{ subj.name is defined ? (subj.name|length > 30 ? subj.name|slice(0,30) ~ '…' : subj.name) : '' }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="2" class="px-4 py-4 text-center text-xs text-slate-500 dark:text-gray-400">
+                  No modules available yet for your subjects.
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {# ========== INSTRUCTOR APPLICATION ========== #}
+      <section id="instructor-application" class="space-y-4 scroll-mt-24">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">Become an Instructor</h3>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5">
+          {% if hasApplication %}
+            <p class="text-sm text-slate-700 dark:text-gray-200 mb-1">
+              You already submitted an application. Current status:
+              <span class="font-semibold text-blue-700 dark:text-blue-300">{{ applicationStatus }}</span>
+            </p>
+
+            {% if applicationStatus == 'PENDING' %}
+              <p class="text-xs text-slate-500 dark:text-gray-400">
+                Your application is under review. The admin will decide soon.
+              </p>
+            {% endif %}
+
+            {% if application and application.createdAt %}
+              <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">
+                Submitted on: {{ application.createdAt|date('Y-m-d H:i') }}
+              </p>
+            {% endif %}
+          {% else %}
+            <p class="text-sm text-slate-700 dark:text-gray-200 mb-3">
+              If you have enough experience and credentials, you can apply to become an instructor.
+            </p>
+
+            <button type="button"
+                    onclick="openApplyModal()"
+                    class="px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700">
+              Apply as Instructor
+            </button>
+          {% endif %}
+        </div>
+      </section>
+
+      {# 🧩 ACTIVITY LOG PLACEHOLDER (UI only, for later) #}
+      {#
+      <section id="activity-log" class="space-y-4 scroll-mt-24">
+        <h3 class="text-xl font-semibold">Activity Log</h3>
+        <div class="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 text-sm text-slate-600 dark:text-gray-300">
+          Activity logs will appear here soon.
+        </div>
+      </section>
+      #}
+
+    </main>
+  </div>
 </div>
+
+{# ========== MODAL FOR INSTRUCTOR APPLICATION ========== #}
+<div id="applyModal"
+     class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+  <div class="bg-white dark:bg-gray-900 w-full max-w-lg p-6 rounded-xl shadow-xl border border-slate-300 dark:border-gray-700">
+    <h2 class="text-xl font-semibold mb-3">Instructor Application</h2>
+
+    <form action="{{ path('app_instructor_application_new') }}"
+          method="post"
+          enctype="multipart/form-data"
+          class="space-y-4">
+
+      <div>
+        <label class="block text-sm font-medium mb-1">Reason</label>
+        <textarea name="reason" rows="4" required
+                  class="w-full border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md px-3 py-2 text-sm"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">
+          Portfolio (PDF / DOC / DOCX / PPT / PPTX / ZIP)
+        </label>
+        <input type="file"
+               name="portfolio"
+               accept=".pdf,.doc,.docx,.ppt,.pptx,.zip"
+               class="w-full border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md px-3 py-2 text-sm">
+        <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">
+          Upload your CV, sample works, or teaching credentials.
+        </p>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button"
+                onclick="closeApplyModal()"
+                class="px-3 py-2 rounded-md border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+          Cancel
+        </button>
+        <button type="submit"
+                class="px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700">
+          Submit Application
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const burgerIcon = document.getElementById('burger-icon');
+
+function toggleSidebar() {
+  sidebar.classList.toggle('-translate-x-full');
+  if (burgerIcon) {
+    burgerIcon.innerHTML = sidebar.classList.contains('-translate-x-full') ? '&#9776;' : '&times;';
+  }
+}
+
+const DARK_KEY = 'compilex-dark-mode';
+const modeToggle = document.getElementById('mode-toggle');
+
+function loadInitialTheme() {
+  const saved = localStorage.getItem(DARK_KEY);
+  document.documentElement.classList.toggle('dark', saved === 'true');
+}
+loadInitialTheme();
+
+if (modeToggle) {
+  modeToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isDark = document.documentElement.classList.contains('dark');
+    document.documentElement.classList.toggle('dark', !isDark);
+    localStorage.setItem(DARK_KEY, (!isDark).toString());
+  });
+}
+
+document.addEventListener('click', e => {
+  if (!sidebar.contains(e.target) &&
+      !e.target.closest('button[aria-label="Toggle menu"]') &&
+      !sidebar.classList.contains('-translate-x-full')) {
+    toggleSidebar();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' &&
+      !sidebar.classList.contains('-translate-x-full')) {
+    toggleSidebar();
+  }
+});
+
+function openApplyModal() {
+  document.getElementById('applyModal').classList.remove('hidden');
+}
+function closeApplyModal() {
+  document.getElementById('applyModal').classList.add('hidden');
+}
+</script>
 {% endblock %}

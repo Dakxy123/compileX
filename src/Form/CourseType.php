@@ -16,17 +16,16 @@ class CourseType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Course Name',
+                'label' => 'Course Code (e.g. BSCS)',
             ])
             ->add('description', TextareaType::class, [
                 'required' => false,
-                'label' => 'Description',
+                'label'    => 'Course Name / Description (e.g. Bachelor of Science in Computer Science)',
             ])
             ->add('IsActive', CheckboxType::class, [
                 'required' => false,
-                'label' => 'Active?',
-            ])
-        ;
+                'label'    => 'Active?',
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

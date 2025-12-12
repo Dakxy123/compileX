@@ -1,35 +1,46 @@
 <div class="space-y-4">
-  <!-- Name -->
   <div>
-    {{ form_label(form.name, 'Course Name', {'label_attr': {'class': 'block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200'}}) }}
+    {{ form_label(form.name, 'Course Code (e.g. BSCS)', {
+      'label_attr': {
+        'class': 'block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200'
+      }
+    }) }}
     {{ form_widget(form.name, {
       'attr': {
-        'class': 'w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100'
+        'class': 'w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100',
+        'placeholder': 'BSCS'
       }
     }) }}
     {% include '/form/_errors_tailwind.html.twig' with {'errors': form.name.vars.errors} %}
   </div>
 
-  <!-- Description -->
   <div>
-    {{ form_label(form.description, 'Description', {'label_attr': {'class': 'block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200'}}) }}
+    {{ form_label(form.description, 'Course Name / Description (e.g. Bachelor of Science in Computer Science)', {
+      'label_attr': {
+        'class': 'block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200'
+      }
+    }) }}
     {{ form_widget(form.description, {
       'attr': {
         'class': 'w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100',
-        'rows': 4
+        'rows': 4,
+        'placeholder': 'Bachelor of Science in Computer Science'
       }
     }) }}
     {% include '/form/_errors_tailwind.html.twig' with {'errors': form.description.vars.errors} %}
   </div>
 
-  <!-- Active -->
   <div class="flex items-center gap-2">
     {{ form_widget(form.IsActive, {
       'attr': {
         'class': 'h-4 w-4'
       }
     }) }}
-    {{ form_label(form.IsActive, 'Active?', {'label_attr': {'class': 'text-sm text-gray-700 dark:text-gray-200'}}) }}
+    {{ form_label(form.IsActive, 'Active?', {
+      'label_attr': {
+        'class': 'text-sm text-gray-700 dark:text-gray-200'
+      }
+    }) }}
     {% include '/form/_errors_tailwind.html.twig' with {'errors': form.IsActive.vars.errors} %}
   </div>
 </div>

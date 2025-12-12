@@ -12,16 +12,16 @@
 
 <div id="app" class="flex min-h-screen bg-slate-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
 
-  <!-- Sidebar -->
-  <aside id="sidebar" class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col">
-    <div class="px-6 py-5 border-b border-slate-700 flex items-center justify-between">
+  <aside id="sidebar"
+         class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col overflow-y-auto">
+    <div class="px-6 py-5 border-b border-slate-700 dark:border-gray-700 flex items-center justify-between">
       <h2 class="text-xl font-semibold tracking-tight">CompileX Admin</h2>
       <button class="text-2xl md:text-3xl focus:outline-none" onclick="toggleSidebar()">×</button>
     </div>
 
     <nav class="flex-1 px-4 py-4 space-y-1">
       <a href="{{ path('app_admin') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+         class="block px-3 py-2 rounded-md font-medium bg-slate-700 dark:bg-gray-700 hover:bg-slate-600 dark:hover:bg-gray-600">
         Admin Dashboard
       </a>
 
@@ -38,14 +38,34 @@
          class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
         Subjects
       </a>
+      <a href="{{ path('app_module_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Modules
+      </a>
+      <a href="{{ path('app_enrollment_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Enrollments
+      </a>
+      <a href="{{ path('app_instructor_assignment_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Instructor Assignments
+      </a>
+      <a href="{{ path('app_instructor_application_admin_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Instructor Applications
+      </a>
+      <a href="{{ path('app_activity_log_index') }}"
+         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+        Activity Logs
+      </a>
       <a href="{{ path('app_student_profile_index') }}"
          class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
         Students
       </a>
 
-      <div class="pt-4 border-t border-slate-700 dark:border-gray-600">
+      <div class="pt-4 border-t border-slate-700 dark:border-gray-600 mt-4">
         <button id="mode-toggle"
-                class="mt-4 block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
+                class="mt-2 block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
           Toggle Light/Dark Mode
         </button>
         <a href="/" class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
@@ -59,7 +79,6 @@
     </nav>
   </aside>
 
-  <!-- Main Content -->
   <div class="flex-1 flex flex-col min-h-screen">
     <header class="fixed top-0 left-0 w-full z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
       <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">CompileX</h1>
@@ -74,12 +93,17 @@
       <div class="flex items-center justify-between mb-4">
         <h1 class="text-3xl font-semibold">Users</h1>
         <div class="space-x-2">
-          <a href="{{ path('app_user_new') }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700">+ New User</a>
-          <a href="{{ path('app_user_export', {'q': q, 'role': role}) }}" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 dark:hover:bg-green-700">Export CSV</a>
+          <a href="{{ path('app_user_new') }}"
+             class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700">
+            + New User
+          </a>
+          <a href="{{ path('app_user_export', {'q': q, 'role': role}) }}"
+             class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 dark:hover:bg-green-700">
+            Export CSV
+          </a>
         </div>
       </div>
 
-      <!-- Search + Role Filter -->
       <form method="get" class="flex gap-2 mb-4">
         <input type="text" name="q" value="{{ q }}" placeholder="Search email"
                class="px-3 py-2 border rounded w-full bg-white dark:bg-gray-700 dark:text-gray-100 text-gray-900">
@@ -92,10 +116,11 @@
           <option value="ROLE_INSTRUCTOR"  {{ role is defined and role == 'ROLE_INSTRUCTOR'  ? 'selected' : '' }}>Instructor</option>
         </select>
 
-        <button class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 dark:bg-gray-600 dark:hover:bg-gray-500">Search</button>
+        <button class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 dark:bg-gray-600 dark:hover:bg-gray-500">
+          Search
+        </button>
       </form>
 
-      <!-- Users Table -->
       <table class="min-w-full border rounded shadow bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
         <thead>
           <tr class="bg-gray-100 dark:bg-gray-700 text-left">
@@ -134,23 +159,38 @@
 
             <tr class="border-t hover:bg-gray-50 dark:hover:bg-gray-700">
               <td class="px-4 py-2">{{ user.id }}</td>
-              <td class="px-4 py-2">{{ user.email }}</td>
+              <td class="px-4 py-2 max-w-[180px]">
+                <span class="block truncate" title="{{ user.email }}">
+                  {{ user.email }}
+                </span>
+              </td>
               <td class="px-4 py-2">
                 {{ displayRole }}
               </td>
               <td class="px-4 py-2 space-x-1">
-                <a href="{{ path('app_user_show', {'id': user.id}) }}" class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700">Show</a>
-                <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 dark:hover:bg-yellow-700">Edit</a>
+                <a href="{{ path('app_user_show', {'id': user.id}) }}"
+                   class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700">
+                  Show
+                </a>
+                <a href="{{ path('app_user_edit', {'id': user.id}) }}"
+                   class="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 dark:hover:bg-yellow-700">
+                  Edit
+                </a>
 
                 <form method="post" action="{{ path('app_user_delete', {'id': user.id}) }}"
                       class="inline-block" onsubmit="return confirm('Delete this user?');">
                   <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
-                  <button type="submit" class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 dark:hover:bg-red-700">Delete</button>
+                  <button type="submit"
+                          class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 dark:hover:bg-red-700">
+                    Delete
+                  </button>
                 </form>
               </td>
             </tr>
           {% else %}
-            <tr><td colspan="6" class="px-4 py-2">No users found</td></tr>
+            <tr>
+              <td colspan="4" class="px-4 py-2">No users found</td>
+            </tr>
           {% endfor %}
         </tbody>
       </table>
@@ -158,7 +198,6 @@
   </div>
 </div>
 
-<!-- Scripts -->
 <script>
 const sidebar = document.getElementById('sidebar');
 const burgerIcon = document.getElementById('burger-icon');

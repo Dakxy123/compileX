@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Review Application — Admin — CompileX{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-slate-50 text-slate-900 py-8 px-4">
+  <div class="max-w-3xl mx-auto space-y-6">
+
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-semibold">Review Instructor Application</h1>
+        <p class="text-sm text-slate-500">
+          Applicant: {{ instructor_application.applicant ? instructor_application.applicant.email : '—' }}
+        </p>
+      </div>
+      <a href="{{ path('app_instructor_application_index') }}"
+         class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-100">
+        ← Back to list
+      </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+      {% include 'instructor_application/_form.html.twig' with { form: form, button_label: 'Save changes' } %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

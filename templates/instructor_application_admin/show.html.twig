@@ -1,0 +1,154 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Application #{{ application.id }} — Admin — CompileX{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+  <header class="w-full bg-slate-800 text-white px-6 py-3 flex items-center justify-between shadow">
+    <h1 class="text-xl font-semibold text-blue-400">CompileX — Admin</h1>
+    <div class="flex items-center gap-3 text-sm">
+      <a href="{{ path('app_admin') }}"
+         class="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-100">
+        Dashboard
+      </a>
+      <a href="{{ path('app_logout') }}"
+         class="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white">
+        Logout
+      </a>
+    </div>
+  </header>
+
+  <main class="flex-1 p-6 md:p-8">
+    <div class="max-w-3xl mx-auto space-y-6">
+
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="rounded-md px-4 py-2 text-sm
+                      {% if label == 'success' %}
+                        bg-emerald-50 text-emerald-800 border border-emerald-200
+                      {% elseif label == 'error' %}
+                        bg-red-50 text-red-800 border border-red-200
+                      {% else %}
+                        bg-slate-50 text-slate-800 border border-slate-200
+                      {% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-2xl font-semibold">
+            Application #{{ application.id }}
+          </h2>
+          <p class="text-sm text-slate-600 mt-1">
+            Submitted by {{ application.applicant ? application.applicant.email : 'Unknown user' }}.
+          </p>
+        </div>
+
+        <a href="{{ path('app_instructor_application_admin_index') }}"
+           class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-100">
+          ← Back to list
+        </a>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+        <dl class="grid grid-cols-1 gap-4 text-sm">
+          <div>
+            <dt class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Applicant</dt>
+            <dd class="mt-1">
+              {{ application.applicant ? application.applicant.email : '—' }}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</dt>
+            <dd class="mt-1">
+              {% set s = application.status %}
+              {% set badgeClasses = {
+                'PENDING':  'bg-amber-100 text-amber-700',
+                'APPROVED': 'bg-emerald-100 text-emerald-700',
+                'REJECTED': 'bg-red-100 text-red-700'
+              }[s] ?? 'bg-slate-100 text-slate-700' %}
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold {{ badgeClasses }}">
+                {{ s }}
+              </span>
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Reason</dt>
+            <dd class="mt-1 whitespace-pre-line">
+              {{ application.reason ?? '—' }}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Portfolio</dt>
+            <dd class="mt-1">
+              {% if application.portfolioFilename %}
+                <a href="{{ asset('uploads/portfolios/' ~ application.portfolioFilename) }}"
+                   target="_blank"
+                   class="text-blue-600 hover:underline text-sm">
+                  Download portfolio
+                </a>
+              {% else %}
+                <span class="text-xs text-slate-500">No file attached.</span>
+              {% endif %}
+            </dd>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <dt class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Submitted at</dt>
+              <dd class="mt-1">
+                {{ application.createdAt ? application.createdAt|date('Y-m-d H:i') : '—' }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Reviewed</dt>
+              <dd class="mt-1 text-sm">
+                {% if application.reviewedAt %}
+                  {{ application.reviewedAt|date('Y-m-d H:i') }}
+                  {% if application.reviewedBy %}
+                    <span class="text-xs text-slate-500">
+                      by {{ application.reviewedBy.email }}
+                    </span>
+                  {% endif %}
+                {% else %}
+                  <span class="text-xs text-slate-500">Not yet reviewed.</span>
+                {% endif %}
+              </dd>
+            </div>
+          </div>
+        </dl>
+      </div>
+
+      {% if application.status == 'PENDING' %}
+        <div class="flex flex-wrap gap-3">
+          <form method="post"
+                action="{{ path('app_instructor_application_admin_approve', {id: application.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ application.id) }}">
+            <button type="submit"
+                    class="inline-flex items-center px-4 py-2 text-sm rounded-md bg-emerald-600 text-white hover:bg-emerald-700">
+              Approve &amp; Promote
+            </button>
+          </form>
+
+          <form method="post"
+                action="{{ path('app_instructor_application_admin_reject', {id: application.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ application.id) }}">
+            <button type="submit"
+                    class="inline-flex items-center px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700">
+              Reject
+            </button>
+          </form>
+        </div>
+      {% endif %}
+
+    </div>
+  </main>
+</div>
+{% endblock %}
