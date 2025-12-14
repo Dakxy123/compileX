@@ -8,106 +8,197 @@
   tailwind.config = { darkMode: 'class' };
 </script>
 
-<div id="app" class="flex min-h-screen bg-slate-50 text-slate-900 dark:bg-gray-900 dark:text-gray-100">
+<style>
+  html { scroll-behavior:smooth }
+  .glass{background:rgba(30,41,59,.92);backdrop-filter:blur(10px)}
+  .dark .glass{background:rgba(31,41,55,.88)}
+  .sidebar{width:18rem}
+  .sidebar-collapsed .sidebar{width:5.25rem}
+  .sidebar-collapsed .nav-text{display:none}
+  .sidebar-collapsed .nav-group-title{display:none}
+  .sidebar-collapsed .brand-sub{display:none}
+  .content{margin-left:18rem}
+  .sidebar-collapsed .content{margin-left:5.25rem}
+  @media (max-width: 767px){ .content{margin-left:0} }
+</style>
 
-  {# =================== SIDEBAR =================== #}
-  <aside id="sidebar"
-         class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col">
-    <div class="px-6 py-5 border-b border-slate-700 dark:border-gray-700 flex items-center justify-between">
-      <h2 class="text-xl font-semibold tracking-tight">CompileX Student</h2>
-      <button class="text-2xl md:text-3xl focus:outline-none" onclick="toggleSidebar()">×</button>
-    </div>
+<div id="root" class="min-h-screen bg-slate-50 dark:bg-gray-900 text-slate-900 dark:text-gray-100">
 
-    <nav class="flex-1 px-4 py-4 space-y-1 text-sm">
-      <a href="#overview"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Dashboard Overview
-      </a>
-      <a href="#profile"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        My Profile
-      </a>
-      <a href="#subjects"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        My Subjects
-      </a>
-      <a href="#modules"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Modules
-      </a>
-      <a href="#instructor-application"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Instructor Application
-      </a>
-
-      <div class="pt-4 mt-4 border-t border-slate-700 dark:border-gray-600 text-sm space-y-1">
-        <button id="mode-toggle"
-                class="block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-          Toggle Light/Dark Mode
+  <header class="fixed top-0 left-0 right-0 z-50 h-16 glass border-b border-white/10">
+    <div class="h-16 px-4 md:px-6 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button id="burger-mobile" class="md:hidden w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white" aria-label="Open menu">
+          &#9776;
         </button>
-        <a href="{{ path('home') }}"
-           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-          Back to Home
-        </a>
-        <a href="{{ path('app_logout') }}"
-           class="block px-3 py-2 rounded-md font-medium text-red-300 hover:bg-red-700/40">
+
+        <button id="burger-desktop" class="hidden md:inline-flex w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 items-center justify-center text-white" aria-label="Collapse sidebar">
+          ≡
+        </button>
+
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center font-bold text-blue-200">
+            CX
+          </div>
+          <div class="leading-tight">
+            <div class="text-sm font-semibold tracking-tight text-blue-200">CompileX</div>
+            <div class="text-xs text-slate-200/80 brand-sub">Student Dashboard</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="hidden sm:inline text-xs text-slate-200/80">
+          {{ app.user ? app.user.userIdentifier : '' }}
+        </span>
+
+        {% if is_granted('ROLE_ADMIN') %}
+          <a href="{{ path('app_admin') }}"
+             class="hidden sm:inline-flex px-3 py-1.5 rounded-lg border border-white/15 bg-white/10 hover:bg-white/20 text-white text-sm">
+            Admin
+          </a>
+        {% endif %}
+
+        {% if isInstructor %}
+          <a href="{{ path('app_instructor_dashboard') }}"
+             class="hidden sm:inline-flex px-3 py-1.5 rounded-lg border border-emerald-400/20 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-100 text-sm">
+            Instructor
+          </a>
+        {% endif %}
+
+        <button id="mode-toggle-top" class="hidden sm:inline-flex px-3 py-1.5 rounded-lg border border-white/15 bg-white/10 hover:bg-white/20 text-white text-sm">
+          Mode
+        </button>
+
+        <a href="{{ path('app_logout') }}" class="inline-flex px-3 py-1.5 rounded-lg bg-red-500/80 hover:bg-red-600 text-white text-sm">
           Logout
         </a>
       </div>
+    </div>
+  </header>
+
+  <div class="h-16"></div>
+
+  <div id="backdrop" class="hidden fixed inset-0 z-40 bg-black/40 md:hidden"></div>
+
+  <aside id="sidebar" class="sidebar fixed top-16 left-0 z-50 h-[calc(100vh-64px)] bg-slate-900 dark:bg-gray-900 border-r border-white/10 overflow-y-auto transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+    <nav class="px-4 py-6 space-y-6 text-sm text-slate-100">
+
+      <div>
+        <p class="nav-group-title text-xs uppercase text-slate-200/80 mb-2">Student</p>
+        <a href="#overview" class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 transition text-slate-100" title="Overview">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-300/90"></span>
+          <span class="nav-text font-medium">Dashboard Overview</span>
+        </a>
+        <a href="#profile" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition text-slate-100" title="Profile">
+          <span class="w-2.5 h-2.5 rounded-full bg-indigo-300/90"></span>
+          <span class="nav-text font-medium">My Profile</span>
+        </a>
+        <a href="#subjects" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition text-slate-100" title="Subjects">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-300/90"></span>
+          <span class="nav-text font-medium">My Subjects</span>
+        </a>
+        <a href="#modules" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition text-slate-100" title="Modules">
+          <span class="w-2.5 h-2.5 rounded-full bg-purple-300/90"></span>
+          <span class="nav-text font-medium">Modules</span>
+        </a>
+        <a href="#instructor-application" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition text-slate-100" title="Instructor Application">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-300/90"></span>
+          <span class="nav-text font-medium">Instructor Application</span>
+        </a>
+      </div>
+
+      <div>
+        <p class="nav-group-title text-xs uppercase text-slate-200/80 mb-2">Quick Links</p>
+
+        {% if isInstructor %}
+          <a href="{{ path('app_instructor_dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition text-slate-100" title="Instructor Dashboard">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-300/90"></span>
+            <span class="nav-text font-medium">Instructor Dashboard</span>
+          </a>
+        {% endif %}
+
+        {% if is_granted('ROLE_ADMIN') %}
+          <a href="{{ path('app_admin') }}" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition text-slate-100" title="Admin Dashboard">
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-300/90"></span>
+            <span class="nav-text font-medium">Admin Dashboard</span>
+          </a>
+        {% endif %}
+
+        <a href="{{ path('home') }}" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition text-slate-100" title="Back to Home">
+          <span class="w-2.5 h-2.5 rounded-full bg-slate-200/90"></span>
+          <span class="nav-text font-medium">Back to Home</span>
+        </a>
+      </div>
+
+      <div class="pt-4 border-t border-white/10 space-y-2">
+        <button id="mode-toggle-side" class="w-full text-left px-3 py-2 rounded-xl font-medium hover:bg-white/10 border border-transparent hover:border-white/10 text-slate-100">
+          Toggle Light/Dark Mode
+        </button>
+        <a href="{{ path('app_logout') }}" class="block px-3 py-2 rounded-xl font-medium text-red-200 hover:bg-red-500/20 border border-transparent hover:border-red-500/20">
+          Logout
+        </a>
+      </div>
+
     </nav>
   </aside>
 
-  {# =================== MAIN CONTENT =================== #}
-  <div class="flex-1 flex flex-col min-h-screen">
-    <header class="fixed top-0 left-0 w-full z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
-      <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">
-        CompileX — Student
-      </h1>
-      <div class="flex items-center gap-3 text-sm">
-        <span class="text-slate-200">
-          {{ app.user ? app.user.userIdentifier : '' }}
-        </span>
-        <button class="text-2xl md:text-3xl focus:outline-none" aria-label="Toggle menu" onclick="toggleSidebar()">
-          <span id="burger-icon">&#9776;</span>
-        </button>
-      </div>
-    </header>
+  <main class="content px-4 md:px-8 py-8">
+    <div class="max-w-6xl mx-auto space-y-10">
 
-    <div class="h-16"></div>
-
-    <main class="flex-1 p-6 md:p-8 space-y-10 max-w-6xl mx-auto w-full">
-
-      {# ✅ UX: Instructor Promotion Banner #}
       {% if isInstructor %}
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div class="rounded-2xl border border-emerald-200/70 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-950/30 p-5">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <p class="text-sm font-semibold text-emerald-800">✅ You are now an Instructor.</p>
-              <p class="text-xs text-emerald-700">You can now access the Instructor Dashboard and manage your assigned subjects.</p>
+              <p class="text-sm font-semibold text-emerald-900 dark:text-emerald-200">✅ You are now an Instructor.</p>
+              <p class="text-xs text-emerald-800/80 dark:text-emerald-200/70">You can now access the Instructor Dashboard and manage your assigned subjects.</p>
             </div>
-            <a href="{{ path('app_instructor_dashboard') }}"
-               class="inline-flex items-center justify-center px-3 py-2 text-sm rounded-md bg-emerald-600 text-white hover:bg-emerald-700">
+            <a href="{{ path('app_instructor_dashboard') }}" class="inline-flex items-center justify-center px-3 py-2 text-sm rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
               Go to Instructor Dashboard →
             </a>
           </div>
         </div>
       {% endif %}
 
-      {# ========== OVERVIEW ========== #}
-      <section id="overview" class="space-y-4 scroll-mt-20">
-        <div>
-          <h2 class="text-2xl md:text-3xl font-semibold mb-1">
-            Welcome, {{ app.user ? app.user.userIdentifier : 'Student' }} 👋
-          </h2>
-          <p class="text-sm text-slate-600 dark:text-gray-300">
-            This dashboard shows your basic profile, enrolled subjects, related modules, and your instructor application status.
-          </p>
+      <section id="overview" class="space-y-4 scroll-mt-24">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
+          <div>
+            <h2 class="text-2xl md:text-3xl font-semibold tracking-tight">
+              Welcome, {{ app.user ? app.user.userIdentifier : 'Student' }} 👋
+            </h2>
+            <p class="text-sm text-slate-600 dark:text-gray-300 mt-2 max-w-3xl">
+              This dashboard shows your basic profile, enrolled subjects, related modules, and your instructor application status.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs md:text-sm">
+            <a href="#overview" class="px-3 py-1.5 rounded-full border border-slate-300 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 bg-white/60 dark:bg-gray-800/40">Overview</a>
+            <a href="#profile" class="px-3 py-1.5 rounded-full border border-slate-300 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 bg-white/60 dark:bg-gray-800/40">Profile</a>
+            <a href="#subjects" class="px-3 py-1.5 rounded-full border border-slate-300 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 bg-white/60 dark:bg-gray-800/40">Subjects</a>
+            <a href="#modules" class="px-3 py-1.5 rounded-full border border-slate-300 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 bg-white/60 dark:bg-gray-800/40">Modules</a>
+            <a href="#instructor-application" class="px-3 py-1.5 rounded-full border border-slate-300 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 bg-white/60 dark:bg-gray-800/40">Application</a>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-4">
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Profile</p>
-            <p class="mt-1 text-lg font-semibold">
+        {% set completedCount = 0 %}
+        {% set ongoingCount = 0 %}
+        {% set enrolledCount = 0 %}
+        {% set droppedCount = 0 %}
+        {% for e in enrollments %}
+          {% set st = e.status ?? 'Enrolled' %}
+          {% if st == 'Completed' %}
+            {% set completedCount = completedCount + 1 %}
+          {% elseif st == 'Ongoing' %}
+            {% set ongoingCount = ongoingCount + 1 %}
+          {% elseif st == 'Dropped' %}
+            {% set droppedCount = droppedCount + 1 %}
+          {% else %}
+            {% set enrolledCount = enrolledCount + 1 %}
+          {% endif %}
+        {% endfor %}
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm p-5">
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Profile Status</p>
+            <p class="mt-2 text-2xl font-semibold">
               {% if studentProfile %}
                 {{ studentProfile.status ?? 'Ongoing' }}
               {% else %}
@@ -117,27 +208,39 @@
             <p class="mt-1 text-xs text-slate-500 dark:text-gray-400">From your student profile.</p>
           </div>
 
-          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-4">
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm p-5">
             <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Enrolled Subjects</p>
-            <p class="mt-1 text-lg font-semibold">{{ enrollments|length }}</p>
-            <p class="mt-1 text-xs text-slate-500 dark:text-gray-400">Based on your enrollments.</p>
+            <p class="mt-2 text-2xl font-semibold">{{ enrollments|length }}</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-gray-400">Total enrollments.</p>
           </div>
 
-          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-4">
-            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Related Modules</p>
-            <p class="mt-1 text-lg font-semibold">{{ modules|length }}</p>
-            <p class="mt-1 text-xs text-slate-500 dark:text-gray-400">Learning materials from your subjects.</p>
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm p-5">
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Completed</p>
+            <p class="mt-2 text-2xl font-semibold text-emerald-700 dark:text-emerald-300">{{ completedCount }}</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-gray-400">Finished subjects.</p>
           </div>
+
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm p-5">
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Related Modules</p>
+            <p class="mt-2 text-2xl font-semibold text-purple-700 dark:text-purple-300">{{ modules|length }}</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-gray-400">From your subjects.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 text-xs">
+          <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">Enrolled: {{ enrolledCount }}</span>
+          <span class="inline-flex items-center px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">Ongoing: {{ ongoingCount }}</span>
+          <span class="inline-flex items-center px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">Completed: {{ completedCount }}</span>
+          <span class="inline-flex items-center px-2 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-200">Dropped: {{ droppedCount }}</span>
         </div>
       </section>
 
-      {# ========== PROFILE ========== #}
       <section id="profile" class="space-y-4 scroll-mt-24">
         <div class="flex items-center justify-between">
           <h3 class="text-xl font-semibold">My Profile</h3>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-4 md:p-5">
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm p-5">
           {% if studentProfile %}
             <dl class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
@@ -147,9 +250,7 @@
 
               <div>
                 <dt class="text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wide">Course</dt>
-                <dd class="mt-1 text-slate-800 dark:text-gray-100">
-                  {{ studentProfile.course ? studentProfile.course.name : '—' }}
-                </dd>
+                <dd class="mt-1 text-slate-800 dark:text-gray-100">{{ studentProfile.course ? studentProfile.course.name : '—' }}</dd>
               </div>
 
               <div>
@@ -160,151 +261,135 @@
               <div>
                 <dt class="text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wide">Status</dt>
                 <dd class="mt-1">
-                  <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full
-                               {% if studentProfile.status == 'Completed' %}
-                                 bg-emerald-100 text-emerald-700
-                               {% else %}
-                                 bg-blue-100 text-blue-700
-                               {% endif %}">
+                  <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full {% if studentProfile.status == 'Completed' %} bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200 {% else %} bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200 {% endif %}">
                     {{ studentProfile.status ?? 'Ongoing' }}
                   </span>
                 </dd>
               </div>
             </dl>
           {% else %}
-            <p class="text-sm text-slate-600 dark:text-gray-300">
-              No student profile is linked to your account yet. Please contact the administrator for assistance.
-            </p>
+            <p class="text-sm text-slate-600 dark:text-gray-300">No student profile is linked to your account yet. Please contact the administrator for assistance.</p>
           {% endif %}
         </div>
       </section>
 
-      {# ========== SUBJECTS ========== #}
       <section id="subjects" class="space-y-4 scroll-mt-24">
         <div class="flex items-center justify-between">
           <h3 class="text-xl font-semibold">My Subjects & Enrollments</h3>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
-          <table class="min-w-full text-sm">
-            <thead class="bg-slate-50 dark:bg-gray-900">
-              <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
-                <th class="px-4 py-2">Subject</th>
-                <th class="px-4 py-2">Course</th>
-                <th class="px-4 py-2">Status</th>
-                <th class="px-4 py-2">Score</th>
-                <th class="px-4 py-2">Grade</th>
-              </tr>
-            </thead>
-            <tbody>
-            {% for e in enrollments %}
-              {% set subj = e.subject %}
-              <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                <td class="px-4 py-2 text-xs align-top">
-                  {% if subj %}
-                    <div class="font-mono text-[11px] text-slate-600 dark:text-gray-300">{{ subj.code }}</div>
-                    <div class="text-slate-800 dark:text-gray-100">
-                      {{ subj.name|length > 30 ? subj.name|slice(0,30) ~ '…' : subj.name }}
-                    </div>
-                  {% else %}
-                    —
-                  {% endif %}
-                </td>
-                <td class="px-4 py-2 text-xs align-top">
-                  {% if subj and subj.course %}
-                    {{ subj.course.name|length > 30 ? subj.course.name|slice(0,30) ~ '…' : subj.course.name }}
-                  {% else %}
-                    —
-                  {% endif %}
-                </td>
-                <td class="px-4 py-2 text-xs align-top">
-                  {% set status = e.status %}
-                  {% set badgeClasses = {
-                    'Enrolled': 'bg-blue-100 text-blue-700',
-                    'Ongoing': 'bg-amber-100 text-amber-700',
-                    'Completed': 'bg-emerald-100 text-emerald-700',
-                    'Dropped': 'bg-red-100 text-red-700'
-                  }[status] ?? 'bg-slate-100 text-slate-700' %}
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold {{ badgeClasses }}">
-                    {{ status ?? 'Enrolled' }}
-                  </span>
-                </td>
-                <td class="px-4 py-2 text-xs align-top">
-                  {% if e.score is not null %}
-                    {{ e.score|number_format(2, '.', ',') }}
-                  {% else %}
-                    <span class="text-slate-400">—</span>
-                  {% endif %}
-                </td>
-                <td class="px-4 py-2 text-xs align-top">{{ e.grade ?? '—' }}</td>
-              </tr>
-            {% else %}
-              <tr>
-                <td colspan="5" class="px-4 py-4 text-center text-xs text-slate-500 dark:text-gray-400">
-                  You have no enrollments yet.
-                </td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-gray-900">
+                <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                  <th class="px-5 py-2">Subject</th>
+                  <th class="px-5 py-2">Course</th>
+                  <th class="px-5 py-2">Status</th>
+                  <th class="px-5 py-2">Score</th>
+                  <th class="px-5 py-2">Grade</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for e in enrollments %}
+                {% set subj = e.subject %}
+                <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                  <td class="px-5 py-2 text-xs align-top">
+                    {% if subj %}
+                      <div class="font-mono text-[11px] text-slate-600 dark:text-gray-300">{{ subj.code }}</div>
+                      <div class="text-slate-800 dark:text-gray-100">{{ subj.name|length > 34 ? subj.name|slice(0,34) ~ '…' : subj.name }}</div>
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td class="px-5 py-2 text-xs align-top">
+                    {% if subj and subj.course %}
+                      {{ subj.course.name|length > 34 ? subj.course.name|slice(0,34) ~ '…' : subj.course.name }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td class="px-5 py-2 text-xs align-top">
+                    {% set status = e.status %}
+                    {% set badgeClasses = {
+                      'Enrolled': 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200',
+                      'Ongoing': 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200',
+                      'Completed': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200',
+                      'Dropped': 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-200'
+                    }[status] ?? 'bg-slate-100 text-slate-700 dark:bg-gray-700 dark:text-gray-200' %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold {{ badgeClasses }}">{{ status ?? 'Enrolled' }}</span>
+                  </td>
+                  <td class="px-5 py-2 text-xs align-top">
+                    {% if e.score is not null %}
+                      {{ e.score|number_format(2, '.', ',') }}
+                    {% else %}
+                      <span class="text-slate-400">—</span>
+                    {% endif %}
+                  </td>
+                  <td class="px-5 py-2 text-xs align-top">{{ e.grade ?? '—' }}</td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="5" class="px-5 py-4 text-center text-xs text-slate-500 dark:text-gray-400">You have no enrollments yet.</td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      {# ========== MODULES ========== #}
       <section id="modules" class="space-y-4 scroll-mt-24">
         <div class="flex items-center justify-between">
           <h3 class="text-xl font-semibold">Modules for My Subjects</h3>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
-          <table class="min-w-full text-sm">
-            <thead class="bg-slate-50 dark:bg-gray-900">
-              <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
-                <th class="px-4 py-2">Module</th>
-                <th class="px-4 py-2">Subject</th>
-              </tr>
-            </thead>
-            <tbody>
-            {% for m in modules %}
-              {% set subj = m.subject is defined ? m.subject : null %}
-              <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                <td class="px-4 py-2 text-xs align-top">
-                  <div class="font-mono text-[11px] text-slate-600 dark:text-gray-300">
-                    {{ m.code is defined ? m.code : (m.moduleCode is defined ? m.moduleCode : '—') }}
-                  </div>
-                  <div class="text-slate-800 dark:text-gray-100">
-                    {% set titleCandidate = m.name is defined ? m.name : (m.title is defined ? m.title : '') %}
-                    {{ titleCandidate ? (titleCandidate|length > 30 ? titleCandidate|slice(0,30) ~ '…' : titleCandidate) : '—' }}
-                  </div>
-                </td>
-                <td class="px-4 py-2 text-xs align-top">
-                  {% if subj %}
-                    {{ subj.code is defined ? subj.code ~ ' — ' : '' }}
-                    {{ subj.name is defined ? (subj.name|length > 30 ? subj.name|slice(0,30) ~ '…' : subj.name) : '' }}
-                  {% else %}
-                    —
-                  {% endif %}
-                </td>
-              </tr>
-            {% else %}
-              <tr>
-                <td colspan="2" class="px-4 py-4 text-center text-xs text-slate-500 dark:text-gray-400">
-                  No modules available yet for your subjects.
-                </td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-gray-900">
+                <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                  <th class="px-5 py-2">Module</th>
+                  <th class="px-5 py-2">Subject</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for m in modules %}
+                {% set subj = m.subject is defined ? m.subject : null %}
+                <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                  <td class="px-5 py-2 text-xs align-top">
+                    <div class="font-mono text-[11px] text-slate-600 dark:text-gray-300">{{ m.code is defined ? m.code : (m.moduleCode is defined ? m.moduleCode : '—') }}</div>
+                    <div class="text-slate-800 dark:text-gray-100">
+                      {% set titleCandidate = m.name is defined ? m.name : (m.title is defined ? m.title : '') %}
+                      {{ titleCandidate ? (titleCandidate|length > 34 ? titleCandidate|slice(0,34) ~ '…' : titleCandidate) : '—' }}
+                    </div>
+                  </td>
+                  <td class="px-5 py-2 text-xs align-top">
+                    {% if subj %}
+                      {{ subj.code is defined ? subj.code ~ ' — ' : '' }}
+                      {{ subj.name is defined ? (subj.name|length > 34 ? subj.name|slice(0,34) ~ '…' : subj.name) : '' }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="2" class="px-5 py-4 text-center text-xs text-slate-500 dark:text-gray-400">No modules available yet for your subjects.</td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      {# ========== INSTRUCTOR APPLICATION ========== #}
       <section id="instructor-application" class="space-y-4 scroll-mt-24">
         <div class="flex items-center justify-between">
           <h3 class="text-xl font-semibold">Become an Instructor</h3>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5">
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm p-5">
           {% if hasApplication %}
             <p class="text-sm text-slate-700 dark:text-gray-200 mb-1">
               You already submitted an application. Current status:
@@ -312,139 +397,174 @@
             </p>
 
             {% if applicationStatus == 'PENDING' %}
-              <p class="text-xs text-slate-500 dark:text-gray-400">
-                Your application is under review. The admin will decide soon.
-              </p>
+              <p class="text-xs text-slate-500 dark:text-gray-400">Your application is under review. The admin will decide soon.</p>
             {% endif %}
 
             {% if application and application.createdAt %}
-              <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">
-                Submitted on: {{ application.createdAt|date('Y-m-d H:i') }}
-              </p>
+              <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">Submitted on: {{ application.createdAt|date('Y-m-d H:i') }}</p>
             {% endif %}
           {% else %}
-            <p class="text-sm text-slate-700 dark:text-gray-200 mb-3">
-              If you have enough experience and credentials, you can apply to become an instructor.
-            </p>
+            <p class="text-sm text-slate-700 dark:text-gray-200 mb-3">If you have enough experience and credentials, you can apply to become an instructor.</p>
 
-            <button type="button"
-                    onclick="openApplyModal()"
-                    class="px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700">
+            <button type="button" id="apply-open" class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm hover:bg-blue-700">
               Apply as Instructor
             </button>
           {% endif %}
         </div>
       </section>
 
-      {# 🧩 ACTIVITY LOG PLACEHOLDER (UI only, for later) #}
-      {#
-      <section id="activity-log" class="space-y-4 scroll-mt-24">
-        <h3 class="text-xl font-semibold">Activity Log</h3>
-        <div class="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 text-sm text-slate-600 dark:text-gray-300">
-          Activity logs will appear here soon.
-        </div>
-      </section>
-      #}
+      <footer class="py-8 text-center text-xs text-slate-500 dark:text-gray-400">
+        © <span id="year"></span> CompileX — Student
+      </footer>
 
-    </main>
-  </div>
+    </div>
+  </main>
 </div>
 
-{# ========== MODAL FOR INSTRUCTOR APPLICATION ========== #}
-<div id="applyModal"
-     class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-  <div class="bg-white dark:bg-gray-900 w-full max-w-lg p-6 rounded-xl shadow-xl border border-slate-300 dark:border-gray-700">
+<div id="applyModal" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+  <div class="bg-white dark:bg-gray-900 w-full max-w-lg p-6 rounded-2xl shadow-xl border border-slate-300 dark:border-gray-700">
     <h2 class="text-xl font-semibold mb-3">Instructor Application</h2>
 
-    <form action="{{ path('app_instructor_application_new') }}"
-          method="post"
-          enctype="multipart/form-data"
-          class="space-y-4">
-
+    <form action="{{ path('app_instructor_application_new') }}" method="post" enctype="multipart/form-data" class="space-y-4">
       <div>
         <label class="block text-sm font-medium mb-1">Reason</label>
-        <textarea name="reason" rows="4" required
-                  class="w-full border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md px-3 py-2 text-sm"></textarea>
+        <textarea name="reason" rows="4" required class="w-full border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-xl px-3 py-2 text-sm"></textarea>
       </div>
 
       <div>
-        <label class="block text-sm font-medium mb-1">
-          Portfolio (PDF / DOC / DOCX / PPT / PPTX / ZIP)
-        </label>
-        <input type="file"
-               name="portfolio"
-               accept=".pdf,.doc,.docx,.ppt,.pptx,.zip"
-               class="w-full border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md px-3 py-2 text-sm">
-        <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">
-          Upload your CV, sample works, or teaching credentials.
-        </p>
+        <label class="block text-sm font-medium mb-1">Portfolio (PDF / DOC / DOCX / PPT / PPTX / ZIP)</label>
+        <input type="file" name="portfolio" accept=".pdf,.doc,.docx,.ppt,.pptx,.zip" class="w-full border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-xl px-3 py-2 text-sm">
+        <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">Upload your CV, sample works, or teaching credentials.</p>
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
-        <button type="button"
-                onclick="closeApplyModal()"
-                class="px-3 py-2 rounded-md border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
-          Cancel
-        </button>
-        <button type="submit"
-                class="px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700">
-          Submit Application
-        </button>
+        <button type="button" id="apply-cancel" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm hover:bg-blue-700">Submit Application</button>
       </div>
-
     </form>
   </div>
 </div>
 
 <script>
-const sidebar = document.getElementById('sidebar');
-const burgerIcon = document.getElementById('burger-icon');
+  const DARK_KEY='compilex-dark-mode'
+  const SIDEBAR_KEY='compilex-student-sidebar-collapsed'
 
-function toggleSidebar() {
-  sidebar.classList.toggle('-translate-x-full');
-  if (burgerIcon) {
-    burgerIcon.innerHTML = sidebar.classList.contains('-translate-x-full') ? '&#9776;' : '&times;';
+  const sidebar=document.getElementById('sidebar')
+  const backdrop=document.getElementById('backdrop')
+  const modeTop=document.getElementById('mode-toggle-top')
+  const modeSide=document.getElementById('mode-toggle-side')
+  const burgerMobile=document.getElementById('burger-mobile')
+  const burgerDesktop=document.getElementById('burger-desktop')
+  const root=document.getElementById('root')
+
+  const applyModal=document.getElementById('applyModal')
+  const applyOpen=document.getElementById('apply-open')
+  const applyCancel=document.getElementById('apply-cancel')
+
+  function isMobile(){ return window.matchMedia('(max-width: 767px)').matches }
+
+  function setBodyLock(locked){ document.body.style.overflow = locked ? 'hidden' : '' }
+
+  function openSidebar(){
+    sidebar.classList.remove('-translate-x-full')
+    if(backdrop) backdrop.classList.remove('hidden')
+    setBodyLock(true)
   }
-}
 
-const DARK_KEY = 'compilex-dark-mode';
-const modeToggle = document.getElementById('mode-toggle');
-
-function loadInitialTheme() {
-  const saved = localStorage.getItem(DARK_KEY);
-  document.documentElement.classList.toggle('dark', saved === 'true');
-}
-loadInitialTheme();
-
-if (modeToggle) {
-  modeToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isDark = document.documentElement.classList.contains('dark');
-    document.documentElement.classList.toggle('dark', !isDark);
-    localStorage.setItem(DARK_KEY, (!isDark).toString());
-  });
-}
-
-document.addEventListener('click', e => {
-  if (!sidebar.contains(e.target) &&
-      !e.target.closest('button[aria-label="Toggle menu"]') &&
-      !sidebar.classList.contains('-translate-x-full')) {
-    toggleSidebar();
+  function closeSidebar(){
+    sidebar.classList.add('-translate-x-full')
+    if(backdrop) backdrop.classList.add('hidden')
+    setBodyLock(false)
   }
-});
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' &&
-      !sidebar.classList.contains('-translate-x-full')) {
-    toggleSidebar();
+  function toggleSidebar(){
+    if(isMobile()){
+      if(sidebar.classList.contains('-translate-x-full')) openSidebar(); else closeSidebar()
+      return
+    }
+    root.classList.toggle('sidebar-collapsed')
+    localStorage.setItem(SIDEBAR_KEY,root.classList.contains('sidebar-collapsed')?'true':'false')
   }
-});
 
-function openApplyModal() {
-  document.getElementById('applyModal').classList.remove('hidden');
-}
-function closeApplyModal() {
-  document.getElementById('applyModal').classList.add('hidden');
-}
+  function setTheme(isDark){
+    document.documentElement.classList.toggle('dark',!!isDark)
+    localStorage.setItem(DARK_KEY,(!!isDark).toString())
+  }
+
+  function loadTheme(){
+    setTheme(localStorage.getItem(DARK_KEY)==='true')
+  }
+
+  function loadSidebarState(){
+    const saved=localStorage.getItem(SIDEBAR_KEY)==='true'
+    root.classList.toggle('sidebar-collapsed',saved)
+  }
+
+  function toggleTheme(){
+    const isDark=document.documentElement.classList.contains('dark')
+    setTheme(!isDark)
+  }
+
+  if(modeTop) modeTop.addEventListener('click',toggleTheme)
+  if(modeSide) modeSide.addEventListener('click',toggleTheme)
+
+  if(burgerMobile) burgerMobile.addEventListener('click',toggleSidebar)
+  if(burgerDesktop) burgerDesktop.addEventListener('click',toggleSidebar)
+
+  if(backdrop) backdrop.addEventListener('click',closeSidebar)
+
+  document.addEventListener('keydown',(e)=>{
+    if(e.key==='Escape'){
+      if(isMobile()) closeSidebar()
+      if(applyModal && !applyModal.classList.contains('hidden')) applyModal.classList.add('hidden')
+      setBodyLock(false)
+    }
+  })
+
+  document.querySelectorAll('#sidebar a[href^="#"]').forEach(a=>{
+    a.addEventListener('click',()=>{
+      if(isMobile()) closeSidebar()
+    })
+  })
+
+  window.addEventListener('resize',()=>{
+    if(!isMobile()){
+      if(backdrop) backdrop.classList.add('hidden')
+      setBodyLock(false)
+      sidebar.classList.remove('-translate-x-full')
+    }else{
+      sidebar.classList.add('-translate-x-full')
+      if(backdrop) backdrop.classList.add('hidden')
+      setBodyLock(false)
+    }
+  })
+
+  function openApplyModal(){
+    if(!applyModal) return
+    applyModal.classList.remove('hidden')
+    setBodyLock(true)
+  }
+
+  function closeApplyModal(){
+    if(!applyModal) return
+    applyModal.classList.add('hidden')
+    setBodyLock(false)
+  }
+
+  if(applyOpen) applyOpen.addEventListener('click',openApplyModal)
+  if(applyCancel) applyCancel.addEventListener('click',closeApplyModal)
+
+  if(applyModal){
+    applyModal.addEventListener('click',(e)=>{
+      if(e.target===applyModal) closeApplyModal()
+    })
+  }
+
+  const yearEl=document.getElementById('year')
+  if(yearEl) yearEl.textContent=String(new Date().getFullYear())
+
+  loadTheme()
+  loadSidebarState()
+  if(isMobile()) closeSidebar()
 </script>
 {% endblock %}

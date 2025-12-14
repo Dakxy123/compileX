@@ -1,19 +1,121 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-            {{ encore_entry_link_tags('app') }}
-        {% endblock %}
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}CompileX{% endblock %}</title>
 
-        {% block javascripts %}
-            {{ encore_entry_script_tags('app') }}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('app') }}
+    {% endblock %}
+
+    {% block javascripts %}
+        {{ encore_entry_script_tags('app') }}
+        {% block importmap %}{{ importmap('app') }}{% endblock %}
+    {% endblock %}
+</head>
+
+<body class="h-full bg-slate-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+
+<div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 space-y-3"></div>
+
+<div id="confirm-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-sm p-6 space-y-4">
+        <h3 class="text-lg font-semibold" id="confirm-title">Confirm Action</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400" id="confirm-message"></p>
+        <div class="flex justify-end gap-3 pt-4">
+            <button id="confirm-cancel"
+                    class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">
+                Cancel
+            </button>
+            <button id="confirm-ok"
+                    class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">
+                Confirm
+            </button>
+        </div>
+        <label class="flex items-center gap-2 text-xs text-gray-500 pt-2">
+            <input type="checkbox" id="confirm-remember">
+            Don’t ask again
+        </label>
+    </div>
+</div>
+
+{% block body %}{% endblock %}
+
+<script>
+const CONFIRM_KEY = 'compilex-skip-confirm';
+
+window.confirmAction = function (message, onConfirm) {
+    if (localStorage.getItem(CONFIRM_KEY) === 'true') {
+        onConfirm();
+        return;
+    }
+
+    const overlay = document.getElementById('confirm-overlay');
+    const msg = document.getElementById('confirm-message');
+    const ok = document.getElementById('confirm-ok');
+    const cancel = document.getElementById('confirm-cancel');
+    const remember = document.getElementById('confirm-remember');
+
+    msg.textContent = message;
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
+
+    const cleanup = () => {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        ok.onclick = null;
+        cancel.onclick = null;
+    };
+
+    ok.onclick = () => {
+        if (remember.checked) {
+            localStorage.setItem(CONFIRM_KEY, 'true');
+        }
+        cleanup();
+        onConfirm();
+    };
+
+    cancel.onclick = cleanup;
+};
+
+window.toast = function (text, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+
+    const colors = {
+        success: 'bg-green-600',
+        error: 'bg-red-600',
+        info: 'bg-blue-600'
+    };
+
+    el.className = `px-4 py-3 rounded-xl shadow text-white text-sm animate-fade ${colors[type] || colors.success}`;
+    el.textContent = text;
+
+    container.appendChild(el);
+
+    setTimeout(() => {
+        el.classList.add('opacity-0');
+        setTimeout(() => el.remove(), 300);
+    }, 2500);
+};
+</script>
+
+<style>
+@keyframes fade {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade {
+    animation: fade .25s ease-out;
+}
+</style>
+
+</body>
 </html>

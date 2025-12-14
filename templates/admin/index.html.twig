@@ -2,165 +2,279 @@
 
 {% block title %}Admin Dashboard — CompileX{% endblock %}
 
+{% block stylesheets %}
+<style>
+  html{scroll-behavior:smooth}
+  .sidebar-hidden{transform:translateX(-100%)}
+  .sidebar-shown{transform:translateX(0)}
+  .sidebar{width:18rem}
+  .sidebar-collapsed .sidebar{width:5.25rem}
+  .sidebar-collapsed .nav-text{display:none}
+  .sidebar-collapsed .nav-group-title{display:none}
+  .sidebar-collapsed .brand-sub{display:none}
+  .sidebar-collapsed .nav-item{justify-content:center}
+  .sidebar-collapsed .nav-item{gap:0}
+  @media (min-width:768px){
+    .content-wrap{padding-left:18rem}
+    .sidebar-collapsed .content-wrap{padding-left:5.25rem}
+  }
+  @media (max-width:767px){
+    .content-wrap{padding-left:0}
+  }
+</style>
+{% endblock %}
+
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-  tailwind.config = { darkMode: 'class' };
+  tailwind.config={darkMode:'class'};
 </script>
 
-<div id="app" class="flex min-h-screen bg-slate-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+{% set currentRoute = app.request.attributes.get('_route') %}
 
-  <aside id="sidebar"
-         class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col overflow-y-auto">
-    <div class="px-6 py-5 border-b border-slate-700 dark:border-gray-700 flex items-center justify-between">
-      <h2 class="text-xl font-semibold tracking-tight">CompileX Admin</h2>
-      <button class="text-2xl md:text-3xl focus:outline-none" onclick="toggleSidebar()">×</button>
-    </div>
+<div id="app" class="min-h-screen bg-slate-50 text-slate-900 dark:bg-gray-900 dark:text-gray-100">
 
-    <nav class="flex-1 px-4 py-4 space-y-1">
-      <a href="{{ path('app_admin') }}"
-         class="block px-3 py-2 rounded-md font-medium bg-slate-700 dark:bg-gray-700 hover:bg-slate-600 dark:hover:bg-gray-600">
-        Admin Dashboard
-      </a>
-      <a href="{{ path('app_user_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Users
-      </a>
-      <a href="{{ path('app_course_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Courses
-      </a>
-      <a href="{{ path('app_subject_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Subjects
-      </a>
-      <a href="{{ path('app_module_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Modules
-      </a>
-      <a href="{{ path('app_enrollment_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Enrollments
-      </a>
-      <a href="{{ path('app_instructor_assignment_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Instructor Assignments
-      </a>
-      <a href="{{ path('app_instructor_application_admin_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Instructor Applications
-      </a>
-      <a href="{{ path('app_activity_log_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Activity Logs
-      </a>
-      <a href="{{ path('app_student_profile_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Students
-      </a>
-
-      <div class="pt-4 border-t border-slate-700 dark:border-gray-600 mt-4">
-        <button id="mode-toggle"
-                class="mt-2 block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-          Toggle Light/Dark Mode
+  <header class="fixed top-0 left-0 right-0 z-50 h-16 bg-slate-800/95 text-white dark:bg-gray-800/95 backdrop-blur border-b border-slate-700/60 dark:border-gray-700/60">
+    <div class="h-16 px-4 md:px-6 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button id="burger-btn" class="md:hidden text-2xl leading-none px-2 py-1 rounded hover:bg-white/10 focus:outline-none" aria-label="Toggle menu" onclick="toggleSidebar()">
+          <span id="burger-icon">&#9776;</span>
         </button>
-        <a href="/" class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-          Back to Home
+
+        <button id="collapse-btn" class="hidden md:inline-flex items-center justify-center w-10 h-10 rounded-lg hover:bg-white/10 border border-transparent hover:border-white/10" aria-label="Collapse sidebar" type="button">
+          ≡
+        </button>
+
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center font-bold text-blue-200">
+            CX
+          </div>
+          <div class="leading-tight">
+            <div class="text-sm font-semibold tracking-tight text-blue-200">CompileX</div>
+            <div class="text-xs text-slate-300 brand-sub">Admin Dashboard</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="mode-toggle-top"
+                class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-600/70 bg-slate-700/40 hover:bg-slate-700 text-slate-100 text-sm">
+          Mode
+        </button>
+
+        <a href="/"
+           class="hidden sm:inline-flex px-3 py-1.5 rounded-lg border border-slate-600/70 bg-slate-700/20 hover:bg-slate-700 text-slate-100 text-sm">
+          Home
         </a>
+
         <a href="{{ path('app_logout') }}"
-           class="block px-3 py-2 rounded-md font-medium text-red-500 hover:bg-red-700">
+           class="inline-flex px-3 py-1.5 rounded-lg bg-red-500/90 hover:bg-red-600 text-white text-sm">
           Logout
         </a>
       </div>
-    </nav>
+    </div>
+  </header>
+
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-black/40 backdrop-blur-sm md:hidden" onclick="closeSidebar()"></div>
+
+  <aside id="sidebar"
+         class="sidebar fixed top-16 left-0 z-50 h-[calc(100vh-4rem)] bg-slate-800 text-white dark:bg-gray-800 border-r border-slate-700/60 dark:border-gray-700/60 overflow-y-auto transition-all duration-300 sidebar-hidden md:sidebar-shown md:transform-none md:block">
+    <div class="px-5 py-4 flex items-center justify-between border-b border-slate-700/60 dark:border-gray-700/60">
+      <div class="text-sm font-semibold tracking-tight">Navigation</div>
+      <button class="md:hidden text-2xl leading-none px-2 py-1 rounded hover:bg-white/10 focus:outline-none" onclick="closeSidebar()" aria-label="Close menu">×</button>
+    </div>
+
+    <div class="px-4 py-4 space-y-6">
+
+      <div class="space-y-1">
+        <div class="px-2 text-xs uppercase tracking-wider text-slate-300/90 nav-group-title">Dashboards</div>
+
+        <a href="{{ path('app_admin') }}"
+           class="nav-item group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute == 'app_admin' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}"
+           title="Admin Dashboard">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+          <span class="nav-text flex-1">Admin Dashboard</span>
+        </a>
+
+        <a href="{{ path('app_instructor_dashboard') }}"
+           class="nav-item group flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-white/10"
+           title="Instructor Dashboard">
+          <span class="w-2.5 h-2.5 rounded-full bg-violet-300"></span>
+          <span class="nav-text flex-1">Instructor Dashboard</span>
+        </a>
+
+        <a href="{{ path('app_student_dashboard') }}"
+           class="nav-item group flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-white/10"
+           title="Student Dashboard">
+          <span class="w-2.5 h-2.5 rounded-full bg-sky-300"></span>
+          <span class="nav-text flex-1">Student Dashboard</span>
+        </a>
+      </div>
+
+      <div class="space-y-1">
+        <div class="px-2 text-xs uppercase tracking-wider text-slate-300/90 nav-group-title">Management</div>
+
+        <a href="{{ path('app_user_index') }}"
+           class="nav-item group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_user_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}"
+           title="Users">
+          <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
+          <span class="nav-text flex-1">Users</span>
+        </a>
+
+        <a href="{{ path('app_student_profile_index') }}"
+           class="nav-item group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_student_profile_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}"
+           title="Students">
+          <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+          <span class="nav-text flex-1">Students</span>
+        </a>
+
+        <a href="{{ path('app_instructor_application_admin_index') }}"
+           class="nav-item group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_instructor_application_admin_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}"
+           title="Instructor Applications">
+          <span class="w-2.5 h-2.5 rounded-full bg-violet-400"></span>
+          <span class="nav-text flex-1">Instructor Applications</span>
+        </a>
+      </div>
+
+      <div class="space-y-1">
+        <div class="px-2 text-xs uppercase tracking-wider text-slate-300/90 nav-group-title">Academic</div>
+
+        <a href="{{ path('app_course_index') }}"
+           class="nav-item group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_course_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}"
+           title="Courses">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <span class="nav-text flex-1">Courses</span>
+        </a>
+
+        <a href="{{ path('app_subject_index') }}"
+           class="nav-item group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_subject_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}"
+           title="Subjects">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+          <span class="nav-text flex-1">Subjects</span>
+        </a>
+
+        <a href="{{ path('app_module_index') }}"
+           class="nav-item group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_module_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}"
+           title="Modules">
+          <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
+          <span class="nav-text flex-1">Modules</span>
+        </a>
+
+        <a href="{{ path('app_enrollment_index') }}"
+           class="nav-item group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_enrollment_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}"
+           title="Enrollments">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
+          <span class="nav-text flex-1">Enrollments</span>
+        </a>
+
+        <a href="{{ path('app_instructor_assignment_index') }}"
+           class="nav-item group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_instructor_assignment_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}"
+           title="Instructor Assignments">
+          <span class="w-2.5 h-2.5 rounded-full bg-orange-400"></span>
+          <span class="nav-text flex-1">Instructor Assignments</span>
+        </a>
+      </div>
+
+      <div class="space-y-1">
+        <div class="px-2 text-xs uppercase tracking-wider text-slate-300/90 nav-group-title">Logs</div>
+
+        <a href="{{ path('app_activity_log_index') }}"
+           class="nav-item group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_activity_log_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}"
+           title="Activity Logs">
+          <span class="w-2.5 h-2.5 rounded-full bg-fuchsia-400"></span>
+          <span class="nav-text flex-1">Activity Logs</span>
+        </a>
+      </div>
+
+      <div class="pt-4 border-t border-slate-700/60 dark:border-gray-700/60 space-y-2">
+        <button id="mode-toggle-side"
+                class="w-full text-left px-3 py-2 rounded-lg font-medium hover:bg-white/10 border border-transparent hover:border-white/10">
+          Toggle Mode
+        </button>
+
+        <a href="/"
+           class="block px-3 py-2 rounded-lg font-medium hover:bg-white/10 border border-transparent hover:border-white/10">
+          Back to Home
+        </a>
+      </div>
+
+    </div>
   </aside>
 
-  <div class="flex-1 flex flex-col min-h-screen">
-    <header class="fixed top-0 left-0 right-0 z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
-      <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">CompileX</h1>
-      <button class="text-2xl md:text-3xl focus:outline-none" aria-label="Toggle menu" onclick="toggleSidebar()">
-        <span id="burger-icon">&#9776;</span>
-      </button>
-    </header>
+  <main class="content-wrap pt-16">
+    <div class="px-4 md:px-8 py-8 max-w-7xl mx-auto space-y-10">
 
-    <div class="h-16"></div>
-
-    <main id="main-content" class="flex-1 p-8 space-y-10">
-
-      <div class="space-y-3">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+      <div class="space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
           <div>
-            <h1 class="text-3xl font-semibold">Admin Dashboard</h1>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Quick overview of users, courses, subjects, student progress, modules, enrollments, instructor assignments,
-              activity logs, and contact messages.
+            <h1 class="text-3xl md:text-4xl font-semibold tracking-tight">Admin Dashboard</h1>
+            <p class="text-sm md:text-base text-slate-600 dark:text-gray-400 mt-2 max-w-3xl">
+              Quick overview of users, courses, subjects, student progress, modules, enrollments, instructor assignments, activity logs, and contact messages.
             </p>
           </div>
-        </div>
 
-        <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-          <a href="#overview"
-             class="px-3 py-1 rounded-full border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
-            Overview
-          </a>
-          <a href="#latest"
-             class="px-3 py-1 rounded-full border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
-            Latest Activity
-          </a>
-          <a href="#contacts"
-             class="px-3 py-1 rounded-full border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
-            Contact Messages
-          </a>
+          <div class="flex flex-wrap gap-2 text-xs md:text-sm">
+            <a href="#overview"
+               class="px-3 py-1.5 rounded-full border border-slate-300 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 bg-white/60 dark:bg-gray-800/40">
+              Overview
+            </a>
+            <a href="#latest"
+               class="px-3 py-1.5 rounded-full border border-slate-300 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 bg-white/60 dark:bg-gray-800/40">
+              Latest Activity
+            </a>
+            <a href="#contacts"
+               class="px-3 py-1.5 rounded-full border border-slate-300 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 bg-white/60 dark:bg-gray-800/40">
+              Contact Messages
+            </a>
+          </div>
         </div>
       </div>
 
-      <section id="overview" class="space-y-6 scroll-mt-20">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-          Overview
-        </h2>
+      <section id="overview" class="space-y-6 scroll-mt-24">
+        <h2 class="text-xl font-semibold tracking-tight">Overview</h2>
 
         <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
 
-          <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm p-6 space-y-4">
             <div class="flex items-center justify-between">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Users</h3>
-              <a href="{{ path('app_user_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                Manage →
-              </a>
+              <h3 class="text-base font-semibold">Users</h3>
+              <a href="{{ path('app_user_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Manage →</a>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Users</p>
-                <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-50">
-                  {{ totalUsers }}
-                </p>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Total Users</p>
+                <p class="text-3xl font-extrabold">{{ totalUsers }}</p>
               </div>
               <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Admins</p>
-                <p class="text-3xl font-extrabold text-indigo-700 dark:text-indigo-300">
-                  {{ totalAdmins }}
-                </p>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Admins</p>
+                <p class="text-3xl font-extrabold text-indigo-700 dark:text-indigo-300">{{ totalAdmins }}</p>
               </div>
               <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Instructors</p>
-                <p class="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">
-                  {{ totalInstructors }}
-                </p>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Instructors</p>
+                <p class="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">{{ totalInstructors }}</p>
               </div>
               <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Student Profiles</p>
-                <p class="text-3xl font-extrabold text-sky-700 dark:text-sky-300">
-                  {{ totalStudentProfiles }}
-                </p>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Student Profiles</p>
+                <p class="text-3xl font-extrabold text-sky-700 dark:text-sky-300">{{ totalStudentProfiles }}</p>
               </div>
             </div>
           </div>
 
-          <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
-            <div class="flex items-center justify-between">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Courses, Subjects & Modules</h3>
-              <div class="flex gap-2 text-xs">
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm p-6 space-y-4">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-base font-semibold">Courses, Subjects & Modules</h3>
+              <div class="flex gap-2 text-xs whitespace-nowrap">
                 <a href="{{ path('app_course_index') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Courses →</a>
                 <a href="{{ path('app_subject_index') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Subjects →</a>
                 <a href="{{ path('app_module_index') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Modules →</a>
@@ -169,623 +283,564 @@
 
             <div class="grid grid-cols-2 gap-4">
               <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Courses</p>
-                <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-50">
-                  {{ totalCourses }}
-                </p>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Total Courses</p>
+                <p class="text-3xl font-extrabold">{{ totalCourses }}</p>
               </div>
               <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Active Courses</p>
-                <p class="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">
-                  {{ activeCourses }}
-                </p>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Active Courses</p>
+                <p class="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">{{ activeCourses }}</p>
               </div>
               <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Inactive Courses</p>
-                <p class="text-3xl font-extrabold text-amber-700 dark:text-amber-300">
-                  {{ inactiveCourses }}
-                </p>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Inactive Courses</p>
+                <p class="text-3xl font-extrabold text-amber-700 dark:text-amber-300">{{ inactiveCourses }}</p>
               </div>
               <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Subjects</p>
-                <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-50">
-                  {{ totalSubjects }}
-                </p>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Total Subjects</p>
+                <p class="text-3xl font-extrabold">{{ totalSubjects }}</p>
               </div>
               <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Modules</p>
-                <p class="text-3xl font-extrabold text-purple-700 dark:text-purple-300">
-                  {{ totalModules }}
-                </p>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Total Modules</p>
+                <p class="text-3xl font-extrabold text-purple-700 dark:text-purple-300">{{ totalModules }}</p>
               </div>
             </div>
           </div>
 
-          <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm p-6 space-y-4">
             <div class="flex items-center justify-between">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Student Progress</h3>
-              <a href="{{ path('app_student_profile_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                Manage →
-              </a>
+              <h3 class="text-base font-semibold">Student Progress</h3>
+              <a href="{{ path('app_student_profile_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Manage →</a>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Ongoing</p>
-                <p class="text-3xl font-extrabold text-blue-700 dark:text-blue-300">
-                  {{ ongoingStudents }}
-                </p>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Ongoing</p>
+                <p class="text-3xl font-extrabold text-blue-700 dark:text-blue-300">{{ ongoingStudents }}</p>
               </div>
               <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Completed</p>
-                <p class="text-3xl font-extrabold text-green-700 dark:text-green-300">
-                  {{ completedStudents }}
-                </p>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Completed</p>
+                <p class="text-3xl font-extrabold text-green-700 dark:text-green-300">{{ completedStudents }}</p>
               </div>
             </div>
 
-            <p class="text-xs text-gray-600 dark:text-gray-400">
-              Based on Student Profiles and their current status.
-            </p>
+            <p class="text-xs text-slate-600 dark:text-gray-400">Based on Student Profiles and their current status.</p>
           </div>
 
-          <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm p-6 space-y-4">
             <div class="flex items-center justify-between">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Enrollments</h3>
-              <a href="{{ path('app_enrollment_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                Manage →
-              </a>
+              <h3 class="text-base font-semibold">Enrollments</h3>
+              <a href="{{ path('app_enrollment_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Manage →</a>
             </div>
 
-            <div class="space-y-3">
-              <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Enrollments</p>
-                <p class="text-3xl font-extrabold text-rose-700 dark:text-rose-300">
-                  {{ totalEnrollments }}
-                </p>
-              </div>
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Total Enrollments</p>
+              <p class="text-3xl font-extrabold text-rose-700 dark:text-rose-300">{{ totalEnrollments }}</p>
             </div>
 
-            <p class="text-xs text-gray-600 dark:text-gray-400">
-              Total links between students and subjects/courses.
-            </p>
+            <p class="text-xs text-slate-600 dark:text-gray-400">Total links between students and subjects/courses.</p>
           </div>
 
-          <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm p-6 space-y-4">
             <div class="flex items-center justify-between">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Instructor Assignments</h3>
-              <a href="{{ path('app_instructor_assignment_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                Manage →
-              </a>
+              <h3 class="text-base font-semibold">Instructor Assignments</h3>
+              <a href="{{ path('app_instructor_assignment_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Manage →</a>
             </div>
 
-            <div class="space-y-3">
-              <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Assignments</p>
-                <p class="text-3xl font-extrabold text-orange-700 dark:text-orange-300">
-                  {{ totalInstructorAssignments }}
-                </p>
-              </div>
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Total Assignments</p>
+              <p class="text-3xl font-extrabold text-orange-700 dark:text-orange-300">{{ totalInstructorAssignments }}</p>
             </div>
 
-            <p class="text-xs text-gray-600 dark:text-gray-400">
-              Total instructor–subject links currently defined.
-            </p>
+            <p class="text-xs text-slate-600 dark:text-gray-400">Total instructor–subject links currently defined.</p>
           </div>
 
-          <div class="bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-5 flex flex-col gap-4">
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm p-6 space-y-4">
             <div class="flex items-center justify-between">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Activity Logs</h3>
-              <a href="{{ path('app_activity_log_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                View logs →
-              </a>
+              <h3 class="text-base font-semibold">Activity Logs</h3>
+              <a href="{{ path('app_activity_log_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">View logs →</a>
             </div>
 
-            <div class="space-y-3">
-              <div class="space-y-1">
-                <p class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Activity Logs</p>
-                <p class="text-3xl font-extrabold text-fuchsia-700 dark:text-fuchsia-300">
-                  {{ totalActivityLogs }}
-                </p>
-              </div>
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Total Activity Logs</p>
+              <p class="text-3xl font-extrabold text-fuchsia-700 dark:text-fuchsia-300">{{ totalActivityLogs }}</p>
             </div>
 
-            <p class="text-xs text-gray-600 dark:text-gray-400">
-              Recorded actions performed by users across the system.
-            </p>
+            <p class="text-xs text-slate-600 dark:text-gray-400">Recorded actions performed by users across the system.</p>
           </div>
 
         </div>
       </section>
 
-      <section id="latest" class="space-y-6 scroll-mt-20">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-          Latest Activity
-        </h2>
+      <section id="latest" class="space-y-6 scroll-mt-24">
+        <h2 class="text-xl font-semibold tracking-tight">Latest Activity</h2>
 
         <div class="grid gap-6 lg:grid-cols-2">
 
-          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
-            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Users</h3>
-              <a href="{{ path('app_user_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                View all
-              </a>
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold">Latest Users</h3>
+              <a href="{{ path('app_user_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">View all</a>
             </div>
-            <table class="min-w-full text-sm">
-              <thead class="bg-slate-50 dark:bg-gray-900">
-                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  <th class="px-4 py-2">Email</th>
-                  <th class="px-4 py-2">Role</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for u in latestUsers %}
-                  {% set allRoles = u.roles is iterable ? u.roles : [] %}
-                  {% set mainRoles = allRoles|filter(r => r != 'ROLE_USER') %}
-                  {% set displayRole = mainRoles is not empty ? mainRoles|join(', ') : 'ROLE_USER' %}
-                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                    <td class="px-4 py-2">{{ u.email }}</td>
-                    <td class="px-4 py-2 text-xs">{{ displayRole }}</td>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 dark:bg-gray-900">
+                  <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                    <th class="px-5 py-2">Email</th>
+                    <th class="px-5 py-2">Role</th>
                   </tr>
-                {% else %}
-                  <tr>
-                    <td colspan="2" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                      No users yet.
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {% for u in latestUsers %}
+                    {% set allRoles = u.roles is iterable ? u.roles : [] %}
+                    {% set mainRoles = allRoles|filter(r => r != 'ROLE_USER') %}
+                    {% set displayRole = mainRoles is not empty ? mainRoles|join(', ') : 'ROLE_USER' %}
+                    <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                      <td class="px-5 py-2">{{ u.email }}</td>
+                      <td class="px-5 py-2 text-xs">{{ displayRole }}</td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="2" class="px-5 py-3 text-xs text-slate-500 dark:text-gray-400">No users yet.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
-            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Courses</h3>
-              <a href="{{ path('app_course_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                View all
-              </a>
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold">Latest Courses</h3>
+              <a href="{{ path('app_course_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">View all</a>
             </div>
-            <table class="min-w-full text-sm">
-              <thead class="bg-slate-50 dark:bg-gray-900">
-                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  <th class="px-4 py-2">Name</th>
-                  <th class="px-4 py-2">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for c in latestCourses %}
-                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                    <td class="px-4 py-2">
-                      {{ c.name|length > 30 ? c.name|slice(0, 30) ~ '…' : c.name }}
-                    </td>
-                    <td class="px-4 py-2">
-                      {% if c.isActive() %}
-                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
-                          Active
-                        </span>
-                      {% else %}
-                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                          Inactive
-                        </span>
-                      {% endif %}
-                    </td>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 dark:bg-gray-900">
+                  <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                    <th class="px-5 py-2">Name</th>
+                    <th class="px-5 py-2">Status</th>
                   </tr>
-                {% else %}
-                  <tr>
-                    <td colspan="2" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                      No courses yet.
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
-            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Subjects</h3>
-              <a href="{{ path('app_subject_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                View all
-              </a>
-            </div>
-            <table class="min-w-full text-sm">
-              <thead class="bg-slate-50 dark:bg-gray-900">
-                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  <th class="px-4 py-2">Code</th>
-                  <th class="px-4 py-2">Name</th>
-                  <th class="px-4 py-2">Course</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for s in latestSubjects %}
-                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                    <td class="px-4 py-2 font-mono text-xs">{{ s.code }}</td>
-                    <td class="px-4 py-2">
-                      {{ s.name|length > 25 ? s.name|slice(0, 25) ~ '…' : s.name }}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {{ s.course ? (s.course.name|length > 20 ? s.course.name|slice(0,20) ~ '…' : s.course.name) : '—' }}
-                    </td>
-                  </tr>
-                {% else %}
-                  <tr>
-                    <td colspan="3" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                      No subjects yet.
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
-            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Student Profiles</h3>
-              <a href="{{ path('app_student_profile_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                View all
-              </a>
-            </div>
-            <table class="min-w-full text-sm">
-              <thead class="bg-slate-50 dark:bg-gray-900">
-                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  <th class="px-4 py-2">User</th>
-                  <th class="px-4 py-2">Course</th>
-                  <th class="px-4 py-2">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for sp in latestStudentProfiles %}
-                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                    <td class="px-4 py-2 text-xs">
-                      {{ sp.user ? sp.user.email : '—' }}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {{ sp.course ? (sp.course.name|length > 20 ? sp.course.name|slice(0,20) ~ '…' : sp.course.name) : '—' }}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {{ sp.status }}
-                    </td>
-                  </tr>
-                {% else %}
-                  <tr>
-                    <td colspan="3" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                      No student profiles yet.
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
-            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Modules</h3>
-              <a href="{{ path('app_module_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                View all
-              </a>
-            </div>
-            <table class="min-w-full text-sm">
-              <thead class="bg-slate-50 dark:bg-gray-900">
-                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  <th class="px-4 py-2">Code</th>
-                  <th class="px-4 py-2">Title</th>
-                  <th class="px-4 py-2">Subject</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for m in latestModules %}
-                  {% set code = m.code is defined ? m.code : (m.moduleCode is defined ? m.moduleCode : '—') %}
-                  {% set titleCandidate = m.name is defined ? m.name : (m.title is defined ? m.title : '') %}
-                  {% set title = titleCandidate ? (titleCandidate|length > 25 ? titleCandidate|slice(0,25) ~ '…' : titleCandidate) : '—' %}
-                  {% set subjectName = '—' %}
-                  {% if m.subject is defined and m.subject %}
-                    {% set rawSubjectName = m.subject.name is defined ? m.subject.name : '' %}
-                    {% set subjectName = rawSubjectName ? (rawSubjectName|length > 20 ? rawSubjectName|slice(0,20) ~ '…' : rawSubjectName) : '—' %}
-                  {% endif %}
-
-                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                    <td class="px-4 py-2 font-mono text-xs">
-                      {{ code }}
-                    </td>
-                    <td class="px-4 py-2">
-                      {{ title }}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {{ subjectName }}
-                    </td>
-                  </tr>
-                {% else %}
-                  <tr>
-                    <td colspan="3" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                      No modules yet.
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
-            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Enrollments</h3>
-              <a href="{{ path('app_enrollment_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                View all
-              </a>
-            </div>
-            <table class="min-w-full text-sm">
-              <thead class="bg-slate-50 dark:bg-gray-900">
-                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  <th class="px-4 py-2">Student</th>
-                  <th class="px-4 py-2">Subject</th>
-                  <th class="px-4 py-2">Course</th>
-                  <th class="px-4 py-2">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for e in latestEnrollments %}
-                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                    <td class="px-4 py-2 text-xs">
-                      {{ e.studentProfile and e.studentProfile.user ? e.studentProfile.user.email : '—' }}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {{ e.subject ? (e.subject.name|length > 20 ? e.subject.name|slice(0,20) ~ '…' : e.subject.name) : '—' }}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {{ e.subject and e.subject.course ? (e.subject.course.name|length > 20 ? e.subject.course.name|slice(0,20) ~ '…' : e.subject.course.name) : '—' }}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {{ e.status ?? '—' }}
-                    </td>
-                  </tr>
-                {% else %}
-                  <tr>
-                    <td colspan="4" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                      No enrollments yet.
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
-            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Instructor Assignments</h3>
-              <a href="{{ path('app_instructor_assignment_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                View all
-              </a>
-            </div>
-            <table class="min-w-full text-sm">
-              <thead class="bg-slate-50 dark:bg-gray-900">
-                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  <th class="px-4 py-2">Instructor</th>
-                  <th class="px-4 py-2">Subject</th>
-                  <th class="px-4 py-2">Course</th>
-                  <th class="px-4 py-2">Role</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for ia in latestInstructorAssignments %}
-                  {% set instr = ia.instructor is defined ? ia.instructor : null %}
-                  {% set subj = ia.subject is defined ? ia.subject : null %}
-                  {% set course = subj and subj.course is defined ? subj.course : null %}
-                  {% set roleValue = ia.role is defined ? ia.role : (ia.assignmentRole is defined ? ia.assignmentRole : null) %}
-
-                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                    <td class="px-4 py-2 text-xs">
-                      {% if instr %}
-                        {{ instr.email ?? '—' }}
-                      {% else %}
-                        —
-                      {% endif %}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {% if subj %}
-                        {{ subj.code is defined ? subj.code ~ ' — ' : '' }}
-                        {{ subj.name is defined
-                            ? (subj.name|length > 20 ? subj.name|slice(0,20) ~ '…' : subj.name)
-                            : '' }}
-                      {% else %}
-                        —
-                      {% endif %}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {% if course %}
-                        {{ course.name is defined
-                            ? (course.name|length > 20 ? course.name|slice(0,20) ~ '…' : course.name)
-                            : '—' }}
-                      {% else %}
-                        —
-                      {% endif %}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {{ roleValue ?? '—' }}
-                    </td>
-                  </tr>
-                {% else %}
-                  <tr>
-                    <td colspan="4" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                      No instructor assignments yet.
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
-            <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Activity Logs</h3>
-              <a href="{{ path('app_activity_log_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                View all
-              </a>
-            </div>
-            <table class="min-w-full text-sm">
-              <thead class="bg-slate-50 dark:bg-gray-900">
-                <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  <th class="px-4 py-2">User</th>
-                  <th class="px-4 py-2">Action</th>
-                  <th class="px-4 py-2">Entity</th>
-                  <th class="px-4 py-2">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for al in latestActivityLogs %}
-                  {% set logUser = al.user is defined ? al.user : null %}
-                  {% set entityType = al.entityType is defined ? al.entityType : null %}
-                  {% set description = al.description is defined ? al.description : null %}
-                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                    <td class="px-4 py-2 text-xs">
-                      {% if logUser %}
-                        {{ logUser.email ?? '—' }}
-                      {% else %}
-                        —
-                      {% endif %}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {{ al.action is defined and al.action ? al.action : '—' }}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {% if entityType or description %}
-                        {{ entityType ?? '' }}{% if entityType and description %} — {% endif %}
-                        {% if description %}
-                          {{ description|length > 25 ? description|slice(0,25) ~ '…' : description }}
+                </thead>
+                <tbody>
+                  {% for c in latestCourses %}
+                    <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                      <td class="px-5 py-2">{{ c.name|length > 30 ? c.name|slice(0, 30) ~ '…' : c.name }}</td>
+                      <td class="px-5 py-2">
+                        {% if c.isActive() %}
+                          <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">Active</span>
+                        {% else %}
+                          <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">Inactive</span>
                         {% endif %}
-                      {% else %}
-                        —
-                      {% endif %}
-                    </td>
-                    <td class="px-4 py-2 text-xs">
-                      {% if al.createdAt is defined and al.createdAt %}
-                        {{ al.createdAt|date('Y-m-d H:i') }}
-                      {% else %}
-                        —
-                      {% endif %}
-                    </td>
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="2" class="px-5 py-3 text-xs text-slate-500 dark:text-gray-400">No courses yet.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold">Latest Subjects</h3>
+              <a href="{{ path('app_subject_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">View all</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 dark:bg-gray-900">
+                  <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                    <th class="px-5 py-2">Code</th>
+                    <th class="px-5 py-2">Name</th>
+                    <th class="px-5 py-2">Course</th>
                   </tr>
-                {% else %}
-                  <tr>
-                    <td colspan="4" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                      No activity logs yet.
-                    </td>
+                </thead>
+                <tbody>
+                  {% for s in latestSubjects %}
+                    <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                      <td class="px-5 py-2 font-mono text-xs">{{ s.code }}</td>
+                      <td class="px-5 py-2">{{ s.name|length > 25 ? s.name|slice(0, 25) ~ '…' : s.name }}</td>
+                      <td class="px-5 py-2 text-xs">{{ s.course ? (s.course.name|length > 20 ? s.course.name|slice(0,20) ~ '…' : s.course.name) : '—' }}</td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="3" class="px-5 py-3 text-xs text-slate-500 dark:text-gray-400">No subjects yet.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold">Latest Student Profiles</h3>
+              <a href="{{ path('app_student_profile_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">View all</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 dark:bg-gray-900">
+                  <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                    <th class="px-5 py-2">User</th>
+                    <th class="px-5 py-2">Course</th>
+                    <th class="px-5 py-2">Status</th>
                   </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {% for sp in latestStudentProfiles %}
+                    <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                      <td class="px-5 py-2 text-xs">{{ sp.user ? sp.user.email : '—' }}</td>
+                      <td class="px-5 py-2 text-xs">{{ sp.course ? (sp.course.name|length > 20 ? sp.course.name|slice(0,20) ~ '…' : sp.course.name) : '—' }}</td>
+                      <td class="px-5 py-2 text-xs">{{ sp.status }}</td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="3" class="px-5 py-3 text-xs text-slate-500 dark:text-gray-400">No student profiles yet.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold">Latest Modules</h3>
+              <a href="{{ path('app_module_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">View all</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 dark:bg-gray-900">
+                  <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                    <th class="px-5 py-2">Code</th>
+                    <th class="px-5 py-2">Title</th>
+                    <th class="px-5 py-2">Subject</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for m in latestModules %}
+                    {% set code = m.code is defined ? m.code : (m.moduleCode is defined ? m.moduleCode : '—') %}
+                    {% set titleCandidate = m.name is defined ? m.name : (m.title is defined ? m.title : '') %}
+                    {% set title = titleCandidate ? (titleCandidate|length > 25 ? titleCandidate|slice(0,25) ~ '…' : titleCandidate) : '—' %}
+                    {% set subjectName = '—' %}
+                    {% if m.subject is defined and m.subject %}
+                      {% set rawSubjectName = m.subject.name is defined ? m.subject.name : '' %}
+                      {% set subjectName = rawSubjectName ? (rawSubjectName|length > 20 ? rawSubjectName|slice(0,20) ~ '…' : rawSubjectName) : '—' %}
+                    {% endif %}
+                    <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                      <td class="px-5 py-2 font-mono text-xs">{{ code }}</td>
+                      <td class="px-5 py-2">{{ title }}</td>
+                      <td class="px-5 py-2 text-xs">{{ subjectName }}</td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="3" class="px-5 py-3 text-xs text-slate-500 dark:text-gray-400">No modules yet.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold">Latest Enrollments</h3>
+              <a href="{{ path('app_enrollment_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">View all</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 dark:bg-gray-900">
+                  <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                    <th class="px-5 py-2">Student</th>
+                    <th class="px-5 py-2">Subject</th>
+                    <th class="px-5 py-2">Course</th>
+                    <th class="px-5 py-2">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for e in latestEnrollments %}
+                    <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                      <td class="px-5 py-2 text-xs">{{ e.studentProfile and e.studentProfile.user ? e.studentProfile.user.email : '—' }}</td>
+                      <td class="px-5 py-2 text-xs">{{ e.subject ? (e.subject.name|length > 20 ? e.subject.name|slice(0,20) ~ '…' : e.subject.name) : '—' }}</td>
+                      <td class="px-5 py-2 text-xs">{{ e.subject and e.subject.course ? (e.subject.course.name|length > 20 ? e.subject.course.name|slice(0,20) ~ '…' : e.subject.course.name) : '—' }}</td>
+                      <td class="px-5 py-2 text-xs">{{ e.status ?? '—' }}</td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="4" class="px-5 py-3 text-xs text-slate-500 dark:text-gray-400">No enrollments yet.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold">Latest Instructor Assignments</h3>
+              <a href="{{ path('app_instructor_assignment_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">View all</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 dark:bg-gray-900">
+                  <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                    <th class="px-5 py-2">Instructor</th>
+                    <th class="px-5 py-2">Subject</th>
+                    <th class="px-5 py-2">Course</th>
+                    <th class="px-5 py-2">Role</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for ia in latestInstructorAssignments %}
+                    {% set instr = ia.instructor is defined ? ia.instructor : null %}
+                    {% set subj = ia.subject is defined ? ia.subject : null %}
+                    {% set course = subj and subj.course is defined ? subj.course : null %}
+                    {% set roleValue = ia.role is defined ? ia.role : (ia.assignmentRole is defined ? ia.assignmentRole : null) %}
+                    <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                      <td class="px-5 py-2 text-xs">{{ instr ? (instr.email ?? '—') : '—' }}</td>
+                      <td class="px-5 py-2 text-xs">
+                        {% if subj %}
+                          {{ subj.code is defined ? subj.code ~ ' — ' : '' }}
+                          {{ subj.name is defined ? (subj.name|length > 20 ? subj.name|slice(0,20) ~ '…' : subj.name) : '' }}
+                        {% else %}
+                          —
+                        {% endif %}
+                      </td>
+                      <td class="px-5 py-2 text-xs">
+                        {% if course %}
+                          {{ course.name is defined ? (course.name|length > 20 ? course.name|slice(0,20) ~ '…' : course.name) : '—' }}
+                        {% else %}
+                          —
+                        {% endif %}
+                      </td>
+                      <td class="px-5 py-2 text-xs">{{ roleValue ?? '—' }}</td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="4" class="px-5 py-3 text-xs text-slate-500 dark:text-gray-400">No instructor assignments yet.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="text-sm font-semibold">Latest Activity Logs</h3>
+              <a href="{{ path('app_activity_log_index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">View all</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 dark:bg-gray-900">
+                  <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                    <th class="px-5 py-2">User</th>
+                    <th class="px-5 py-2">Action</th>
+                    <th class="px-5 py-2">Entity</th>
+                    <th class="px-5 py-2">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for al in latestActivityLogs %}
+                    {% set logUser = al.user is defined ? al.user : null %}
+                    {% set entityType = al.entityType is defined ? al.entityType : null %}
+                    {% set description = al.description is defined ? al.description : null %}
+                    <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                      <td class="px-5 py-2 text-xs">{{ logUser ? (logUser.email ?? '—') : '—' }}</td>
+                      <td class="px-5 py-2 text-xs">{{ al.action is defined and al.action ? al.action : '—' }}</td>
+                      <td class="px-5 py-2 text-xs">
+                        {% if entityType or description %}
+                          {{ entityType ?? '' }}{% if entityType and description %} — {% endif %}
+                          {% if description %}
+                            {{ description|length > 25 ? description|slice(0,25) ~ '…' : description }}
+                          {% endif %}
+                        {% else %}
+                          —
+                        {% endif %}
+                      </td>
+                      <td class="px-5 py-2 text-xs">
+                        {% if al.createdAt is defined and al.createdAt %}
+                          {{ al.createdAt|date('Y-m-d H:i') }}
+                        {% else %}
+                          —
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="4" class="px-5 py-3 text-xs text-slate-500 dark:text-gray-400">No activity logs yet.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
 
         </div>
       </section>
 
-      <section id="contacts" class="space-y-6 scroll-mt-20">
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            Contact Messages
-          </h2>
-          <span class="text-xs px-3 py-1 rounded-full bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">
+      <section id="contacts" class="space-y-6 scroll-mt-24">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-xl font-semibold tracking-tight">Contact Messages</h2>
+          <span class="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-700 dark:text-gray-300">
             Total messages: {{ totalContactMessages }}
           </span>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm">
-          <div class="px-4 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
-            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Latest Contact Messages</h3>
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+          <div class="px-5 py-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+            <h3 class="text-sm font-semibold">Latest Contact Messages</h3>
           </div>
 
-          <table class="min-w-full text-sm">
-            <thead class="bg-slate-50 dark:bg-gray-900">
-              <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                <th class="px-4 py-2">From</th>
-                <th class="px-4 py-2">Email</th>
-                <th class="px-4 py-2">Subject</th>
-                <th class="px-4 py-2">Message</th>
-                <th class="px-4 py-2">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for m in latestContactMessages %}
-                <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                  <td class="px-4 py-2 text-xs">
-                    {{ m.name ?? '—' }}
-                  </td>
-                  <td class="px-4 py-2 text-xs">
-                    {{ m.email ?? '—' }}
-                  </td>
-                  <td class="px-4 py-2 text-xs">
-                    {{ m.subject is defined and m.subject ? (m.subject|length > 25 ? m.subject|slice(0,25) ~ '…' : m.subject) : '—' }}
-                  </td>
-                  <td class="px-4 py-2 text-xs">
-                    {% set msg = m.message is defined ? m.message : '' %}
-                    {{ msg|length > 40 ? msg|slice(0,40) ~ '…' : msg }}
-                  </td>
-                  <td class="px-4 py-2 text-xs">
-                    {% if m.createdAt is defined and m.createdAt %}
-                      {{ m.createdAt|date('Y-m-d H:i') }}
-                    {% else %}
-                      —
-                    {% endif %}
-                  </td>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-gray-900">
+                <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                  <th class="px-5 py-2">From</th>
+                  <th class="px-5 py-2">Email</th>
+                  <th class="px-5 py-2">Subject</th>
+                  <th class="px-5 py-2">Message</th>
+                  <th class="px-5 py-2">Date</th>
                 </tr>
-              {% else %}
-                <tr>
-                  <td colspan="5" class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                    No contact messages yet.
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {% for m in latestContactMessages %}
+                  <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                    <td class="px-5 py-2 text-xs">{{ m.name ?? '—' }}</td>
+                    <td class="px-5 py-2 text-xs">{{ m.email ?? '—' }}</td>
+                    <td class="px-5 py-2 text-xs">{{ m.subject is defined and m.subject ? (m.subject|length > 25 ? m.subject|slice(0,25) ~ '…' : m.subject) : '—' }}</td>
+                    <td class="px-5 py-2 text-xs">
+                      {% set msg = m.message is defined ? m.message : '' %}
+                      {{ msg|length > 40 ? msg|slice(0,40) ~ '…' : msg }}
+                    </td>
+                    <td class="px-5 py-2 text-xs">
+                      {% if m.createdAt is defined and m.createdAt %}
+                        {{ m.createdAt|date('Y-m-d H:i') }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="5" class="px-5 py-3 text-xs text-slate-500 dark:text-gray-400">No contact messages yet.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-    </main>
-  </div>
+      <footer class="py-8 text-center text-xs text-slate-500 dark:text-gray-400">
+        © <span id="year">2025</span> CompileX — Admin
+      </footer>
+
+    </div>
+  </main>
+
 </div>
 
 <script>
-const sidebar = document.getElementById('sidebar');
-const burgerIcon = document.getElementById('burger-icon');
+  const DARK_KEY='compilex-dark-mode';
+  const SIDEBAR_KEY='compilex-admin-sidebar-collapsed';
+  const app=document.getElementById('app');
+  const sidebar=document.getElementById('sidebar');
+  const backdrop=document.getElementById('sidebar-backdrop');
+  const burgerIcon=document.getElementById('burger-icon');
+  const modeTop=document.getElementById('mode-toggle-top');
+  const modeSide=document.getElementById('mode-toggle-side');
+  const collapseBtn=document.getElementById('collapse-btn');
 
-function toggleSidebar() {
-  sidebar.classList.toggle('-translate-x-full');
-  if (burgerIcon) {
-    burgerIcon.innerHTML = sidebar.classList.contains('-translate-x-full') ? '&#9776;' : '&times;';
+  function isMobile(){
+    return window.matchMedia('(max-width: 767px)').matches;
   }
-}
 
-const DARK_KEY = 'compilex-dark-mode';
-const modeToggle = document.getElementById('mode-toggle');
+  function setBodyLock(locked){
+    document.body.style.overflow=locked?'hidden':'';
+  }
 
-function loadInitialTheme() {
-  const saved = localStorage.getItem(DARK_KEY);
-  document.documentElement.classList.toggle('dark', saved === 'true');
-}
+  function openSidebar(){
+    if(!isMobile()) return;
+    sidebar.classList.remove('sidebar-hidden');
+    sidebar.classList.add('sidebar-shown');
+    backdrop.classList.remove('hidden');
+    setBodyLock(true);
+    if(burgerIcon) burgerIcon.innerHTML='&times;';
+  }
 
-if (modeToggle) {
-  modeToggle.addEventListener('click', e => {
-    e.stopPropagation();
-    const isDark = document.documentElement.classList.contains('dark');
-    document.documentElement.classList.toggle('dark', !isDark);
-    localStorage.setItem(DARK_KEY, (!isDark).toString());
+  function closeSidebar(){
+    if(!isMobile()) return;
+    sidebar.classList.add('sidebar-hidden');
+    sidebar.classList.remove('sidebar-shown');
+    backdrop.classList.add('hidden');
+    setBodyLock(false);
+    if(burgerIcon) burgerIcon.innerHTML='&#9776;';
+  }
+
+  function toggleSidebar(){
+    if(!isMobile()) return;
+    const hidden=sidebar.classList.contains('sidebar-hidden');
+    if(hidden) openSidebar(); else closeSidebar();
+  }
+
+  function setTheme(isDark){
+    document.documentElement.classList.toggle('dark',!!isDark);
+    localStorage.setItem(DARK_KEY,(!!isDark).toString());
+  }
+
+  function loadInitialTheme(){
+    setTheme(localStorage.getItem(DARK_KEY)==='true');
+  }
+
+  function toggleTheme(){
+    setTheme(!document.documentElement.classList.contains('dark'));
+  }
+
+  function loadSidebarCollapsed(){
+    const saved=localStorage.getItem(SIDEBAR_KEY)==='true';
+    app.classList.toggle('sidebar-collapsed',saved);
+  }
+
+  function toggleSidebarCollapsed(){
+    if(isMobile()) return;
+    app.classList.toggle('sidebar-collapsed');
+    localStorage.setItem(SIDEBAR_KEY,app.classList.contains('sidebar-collapsed')?'true':'false');
+  }
+
+  if(modeTop) modeTop.addEventListener('click',toggleTheme);
+  if(modeSide) modeSide.addEventListener('click',toggleTheme);
+  if(collapseBtn) collapseBtn.addEventListener('click',toggleSidebarCollapsed);
+
+  document.addEventListener('keydown',(e)=>{
+    if(e.key==='Escape') closeSidebar();
   });
-}
 
-loadInitialTheme();
+  document.querySelectorAll('#sidebar a').forEach(a=>{
+    a.addEventListener('click',()=>closeSidebar());
+  });
 
-document.addEventListener('click', e => {
-  if (!sidebar.contains(e.target) &&
-      !e.target.closest('button[aria-label="Toggle menu"]') &&
-      !e.target.closest('#burger-icon') &&
-      !sidebar.classList.contains('-translate-x-full')) {
-    toggleSidebar();
-  }
-});
+  window.addEventListener('resize',()=>{
+    if(!isMobile()){
+      backdrop.classList.add('hidden');
+      setBodyLock(false);
+      if(burgerIcon) burgerIcon.innerHTML='&#9776;';
+      sidebar.classList.remove('sidebar-hidden');
+      sidebar.classList.remove('sidebar-shown');
+    }else{
+      sidebar.classList.add('sidebar-hidden');
+      sidebar.classList.remove('sidebar-shown');
+      setBodyLock(false);
+      if(burgerIcon) burgerIcon.innerHTML='&#9776;';
+    }
+  });
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !sidebar.classList.contains('-translate-x-full')) {
-    toggleSidebar();
-  }
-});
+  const yearEl=document.getElementById('year');
+  if(yearEl) yearEl.textContent=String(new Date().getFullYear());
+
+  loadInitialTheme();
+  loadSidebarCollapsed();
+  closeSidebar();
 </script>
 {% endblock %}

@@ -40,7 +40,6 @@ final class AdminController extends AbstractController
         InstructorApplicationRepository $instructorApplicationRepository,
     ): Response {
 
-        // ✅ ACTIVITY LOG
         $this->activityLogger->log(
             'admin.dashboard.view',
             'admin',
@@ -66,9 +65,10 @@ final class AdminController extends AbstractController
         $totalStudentProfiles = $studentProfileRepository->count([]);
         $totalCourses = $courseRepository->count([]);
 
+        // ✅ IMPORTANT: property is IsActive (not isActive)
         $activeCourses = (int) $courseRepository->createQueryBuilder('c')
             ->select('COUNT(c.id)')
-            ->andWhere('c.isActive = :active')
+            ->andWhere('c.IsActive = :active')
             ->setParameter('active', true)
             ->getQuery()
             ->getSingleScalarResult();
@@ -92,6 +92,14 @@ final class AdminController extends AbstractController
             ->getSingleScalarResult();
 
         $totalContactMessages = $contactMessageRepository->count([]);
+
+        // ✅ ADD THIS (fix for Twig variable)
+        $latestContactMessages = $contactMessageRepository->createQueryBuilder('m')
+            ->orderBy('m.id', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+
         $totalModules = $moduleRepository->count([]);
         $totalEnrollments = $enrollmentRepository->count([]);
         $totalInstructorAssignments = $instructorAssignmentRepository->count([]);
@@ -101,7 +109,6 @@ final class AdminController extends AbstractController
         $latestCourses = $courseRepository->findBy([], ['id' => 'DESC'], 5);
         $latestSubjects = $subjectRepository->findBy([], ['id' => 'DESC'], 5);
         $latestModules = $moduleRepository->findBy([], ['id' => 'DESC'], 5);
-
         $latestStudentProfiles = $studentProfileRepository->findBy([], ['id' => 'DESC'], 5);
 
         $latestEnrollments = $enrollmentRepository->createQueryBuilder('e')
@@ -149,6 +156,7 @@ final class AdminController extends AbstractController
             'ongoingStudents'               => $ongoingStudents,
             'completedStudents'             => $completedStudents,
             'totalContactMessages'          => $totalContactMessages,
+            'latestContactMessages'         => $latestContactMessages, // ✅ FIX
             'totalModules'                  => $totalModules,
             'totalEnrollments'              => $totalEnrollments,
             'totalInstructorAssignments'    => $totalInstructorAssignments,

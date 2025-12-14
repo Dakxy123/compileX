@@ -2,118 +2,207 @@
 
 {% block title %}Instructor Dashboard — CompileX{% endblock %}
 
+{% block stylesheets %}
+<style>
+  html{scroll-behavior:smooth}
+  .sidebar-hidden{transform:translateX(-100%)}
+  .sidebar-shown{transform:translateX(0)}
+  .sidebar{width:18rem}
+  .sidebar-collapsed .sidebar{width:5.25rem}
+  .sidebar-collapsed .nav-text{display:none}
+  .sidebar-collapsed .nav-group-title{display:none}
+  .sidebar-collapsed .brand-sub{display:none}
+  .content{margin-left:18rem}
+  .sidebar-collapsed .content{margin-left:5.25rem}
+  @media (max-width: 767px){
+    .content{margin-left:0}
+  }
+</style>
+{% endblock %}
+
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = { darkMode: 'class' };
-</script>
+<script>tailwind.config={darkMode:'class'};</script>
 
-<div id="app" class="flex min-h-screen bg-slate-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-  <aside id="sidebar"
-         class="fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 text-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col">
-    <div class="px-6 py-5 border-b border-slate-700 dark:border-gray-700 flex items-center justify-between">
-      <h2 class="text-xl font-semibold tracking-tight">CompileX Instructor</h2>
-      <button class="text-2xl focus:outline-none" id="sidebar-close">×</button>
-    </div>
+{% set currentRoute = app.request.attributes.get('_route') %}
 
-    <nav class="flex-1 px-4 py-4 space-y-1 text-sm overflow-y-auto">
-      <a href="{{ path('home') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Home
-      </a>
+<div id="app" class="min-h-screen bg-slate-50 text-slate-900 dark:bg-gray-900 dark:text-gray-100">
 
-      {% if is_granted('ROLE_ADMIN') %}
-        <a href="{{ path('app_admin') }}"
-           class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-          Admin Dashboard
-        </a>
-      {% endif %}
-
-      <a href="{{ path('app_instructor_dashboard') }}"
-         class="block px-3 py-2 rounded-md font-medium bg-slate-700 dark:bg-gray-700 hover:bg-slate-600 dark:hover:bg-gray-600">
-        Instructor Dashboard
-      </a>
-
-      <div class="mt-4 pt-3 border-t border-slate-700 dark:border-gray-600 text-xs uppercase tracking-wide text-slate-400 dark:text-gray-400">
-        Teaching Tools
-      </div>
-
-      <a href="#overview"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        Dashboard Overview
-      </a>
-      <a href="#subjects"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        My Subjects & Courses
-      </a>
-      <a href="#enrollments"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        My Enrollments
-      </a>
-
-      <div class="mt-3 pt-3 border-t border-slate-700 dark:border-gray-600 text-xs uppercase tracking-wide text-slate-400 dark:text-gray-400">
-        Global Lists (View Only)
-      </div>
-
-      <a href="{{ path('app_subject_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        All Subjects
-      </a>
-      <a href="{{ path('app_module_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        All Modules
-      </a>
-      <a href="{{ path('app_enrollment_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        All Enrollments
-      </a>
-      <a href="{{ path('app_student_profile_index') }}"
-         class="block px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-        All Students
-      </a>
-
-      <div class="pt-4 mt-4 border-t border-slate-700 dark:border-gray-600 text-sm">
-        <button id="mode-toggle"
-                class="mt-2 block w-full text-left px-3 py-2 rounded-md font-medium hover:bg-slate-700 dark:hover:bg-gray-700">
-          Toggle Light/Dark Mode
+  <header class="fixed top-0 left-0 right-0 z-50 h-16 bg-slate-800/95 text-white dark:bg-gray-800/95 backdrop-blur border-b border-slate-700/60 dark:border-gray-700/60">
+    <div class="h-16 px-4 md:px-6 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button id="burger-btn" class="md:hidden text-2xl leading-none px-2 py-1 rounded hover:bg-white/10 focus:outline-none" aria-label="Toggle menu">
+          <span id="burger-icon">&#9776;</span>
         </button>
+
+        <button id="burger-desktop"
+                class="hidden md:inline-flex w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 items-center justify-center"
+                aria-label="Collapse sidebar">
+          ≡
+        </button>
+
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center font-bold text-blue-200">
+            CX
+          </div>
+          <div class="leading-tight">
+            <div class="text-sm font-semibold tracking-tight text-blue-200">CompileX</div>
+            <div class="text-xs text-slate-300 brand-sub">Instructor Dashboard</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        {% if is_granted('ROLE_ADMIN') %}
+          <a href="{{ path('app_admin') }}"
+             class="hidden sm:inline-flex px-3 py-1.5 rounded-lg border border-slate-600/70 bg-slate-700/20 hover:bg-slate-700 text-slate-100 text-sm">
+            Admin
+          </a>
+        {% endif %}
+
+        <a href="{{ path('home') }}"
+           class="hidden sm:inline-flex px-3 py-1.5 rounded-lg border border-slate-600/70 bg-slate-700/20 hover:bg-slate-700 text-slate-100 text-sm">
+          Home
+        </a>
+
+        <button id="mode-toggle-top"
+                class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-600/70 bg-slate-700/40 hover:bg-slate-700 text-slate-100 text-sm">
+          Mode
+        </button>
+
         <a href="{{ path('app_logout') }}"
-           class="block mt-2 px-3 py-2 rounded-md font-medium text-red-300 hover:bg-red-700/40">
+           class="inline-flex px-3 py-1.5 rounded-lg bg-red-500/90 hover:bg-red-600 text-white text-sm">
           Logout
         </a>
       </div>
+    </div>
+  </header>
+
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-black/40 backdrop-blur-sm md:hidden"></div>
+
+  <aside id="sidebar"
+         class="sidebar fixed top-16 left-0 z-50 h-[calc(100vh-4rem)] bg-slate-800 text-white dark:bg-gray-800 border-r border-slate-700/60 dark:border-gray-700/60 overflow-y-auto transition-transform duration-300 sidebar-hidden md:sidebar-shown md:transform-none md:block">
+    <div class="px-5 py-4 flex items-center justify-between border-b border-slate-700/60 dark:border-gray-700/60">
+      <div class="text-sm font-semibold tracking-tight nav-group-title">Navigation</div>
+      <button id="sidebar-close" class="md:hidden text-2xl leading-none px-2 py-1 rounded hover:bg-white/10 focus:outline-none" aria-label="Close menu">×</button>
+    </div>
+
+    <nav class="px-4 py-4 space-y-6 text-sm">
+
+      <div class="space-y-1">
+        <div class="px-2 text-xs uppercase tracking-wider text-slate-300/90 nav-group-title">Quick</div>
+
+        <a href="{{ path('home') }}"
+           class="group flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-white/10">
+          <span class="w-2.5 h-2.5 rounded-full bg-white/60"></span>
+          <span class="flex-1 nav-text">Home</span>
+        </a>
+
+        {% if is_granted('ROLE_ADMIN') %}
+          <a href="{{ path('app_admin') }}"
+             class="group flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-white/10">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+            <span class="flex-1 nav-text">Admin Dashboard</span>
+          </a>
+        {% endif %}
+
+        <a href="{{ path('app_instructor_dashboard') }}"
+           class="group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_instructor_dashboard' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}">
+          <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+          <span class="flex-1 nav-text">Instructor Dashboard</span>
+        </a>
+      </div>
+
+      <div class="space-y-1">
+        <div class="px-2 text-xs uppercase tracking-wider text-slate-300/90 nav-group-title">Teaching Tools</div>
+
+        <a href="#overview"
+           class="group flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-white/10">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <span class="flex-1 nav-text">Dashboard Overview</span>
+        </a>
+
+        <a href="#subjects"
+           class="group flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-white/10">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+          <span class="flex-1 nav-text">My Subjects & Courses</span>
+        </a>
+
+        <a href="#enrollments"
+           class="group flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-white/10">
+          <span class="w-2.5 h-2.5 rounded-full bg-fuchsia-400"></span>
+          <span class="flex-1 nav-text">My Enrollments</span>
+        </a>
+      </div>
+
+      <div class="space-y-1">
+        <div class="px-2 text-xs uppercase tracking-wider text-slate-300/90 nav-group-title">Global Lists (View Only)</div>
+
+        <a href="{{ path('app_subject_index') }}"
+           class="group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_subject_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}">
+          <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
+          <span class="flex-1 nav-text">All Subjects</span>
+        </a>
+
+        <a href="{{ path('app_module_index') }}"
+           class="group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_module_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}">
+          <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
+          <span class="flex-1 nav-text">All Modules</span>
+        </a>
+
+        <a href="{{ path('app_enrollment_index') }}"
+           class="group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_enrollment_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
+          <span class="flex-1 nav-text">All Enrollments</span>
+        </a>
+
+        <a href="{{ path('app_student_profile_index') }}"
+           class="group flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                  {% if currentRoute starts with 'app_student_profile_' %} bg-white/10 border border-white/10 {% else %} hover:bg-white/10 {% endif %}">
+          <span class="w-2.5 h-2.5 rounded-full bg-orange-400"></span>
+          <span class="flex-1 nav-text">All Students</span>
+        </a>
+      </div>
+
+      <div class="pt-4 border-t border-slate-700/60 dark:border-gray-700/60 space-y-2">
+        <button id="mode-toggle-side"
+                class="w-full text-left px-3 py-2 rounded-lg font-medium hover:bg-white/10 border border-transparent hover:border-white/10">
+          <span class="nav-text">Toggle Mode</span>
+        </button>
+
+        <a href="{{ path('app_logout') }}"
+           class="block px-3 py-2 rounded-lg font-medium text-red-200 hover:bg-red-500/20 border border-transparent hover:border-red-400/20">
+          <span class="nav-text">Logout</span>
+        </a>
+      </div>
+
     </nav>
   </aside>
 
-  <div class="flex-1 flex flex-col min-h-screen">
-    <header class="fixed top-0 left-0 w-full z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
-      <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">CompileX — Instructor</h1>
-      <button class="text-2xl focus:outline-none" aria-label="Toggle menu" id="burger-button">
-        <span id="burger-icon">&#9776;</span>
-      </button>
-    </header>
-
-    <div class="h-16"></div>
-
-    <main id="main-content" class="flex-1 p-6 md:p-8 space-y-8 max-w-6xl mx-auto w-full">
+  <main class="content pt-16">
+    <div class="px-4 md:px-8 py-8 max-w-6xl mx-auto w-full space-y-8">
 
       <section class="space-y-2">
         <h2 class="text-3xl font-semibold">Instructor Dashboard</h2>
-        <p class="text-sm text-gray-600 dark:text-gray-300">
+        <p class="text-sm text-slate-600 dark:text-gray-300">
           Welcome{% if user %}, {{ user.email }}{% endif %}. This panel shows the subjects, courses, and students linked to you.
         </p>
 
         <div class="flex flex-wrap gap-2 text-xs md:text-sm mt-2">
           <a href="#overview"
-             class="px-3 py-1 rounded-full border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
+             class="px-3 py-1.5 rounded-full border border-slate-300 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 bg-white/60 dark:bg-gray-800/40">
             Overview
           </a>
           <a href="#subjects"
-             class="px-3 py-1 rounded-full border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
+             class="px-3 py-1.5 rounded-full border border-slate-300 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 bg-white/60 dark:bg-gray-800/40">
             My Subjects & Courses
           </a>
           <a href="#enrollments"
-             class="px-3 py-1 rounded-full border border-slate-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-gray-800">
+             class="px-3 py-1.5 rounded-full border border-slate-300 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 bg-white/60 dark:bg-gray-800/40">
             Recent Enrollments
           </a>
         </div>
@@ -123,28 +212,28 @@
         <h3 class="text-xl font-semibold">Overview</h3>
 
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 shadow-sm">
-            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Assigned Subjects</p>
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-5 shadow-sm">
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Assigned Subjects</p>
             <p class="mt-2 text-2xl font-semibold">{{ totalAssignedSubjects ?? 0 }}</p>
-            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Subjects where you are assigned as instructor.</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-gray-500">Subjects where you are assigned as instructor.</p>
           </div>
 
-          <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 shadow-sm">
-            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Courses Covered</p>
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-5 shadow-sm">
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Courses Covered</p>
             <p class="mt-2 text-2xl font-semibold">{{ totalAssignedCourses ?? 0 }}</p>
-            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Distinct courses linked to your subjects.</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-gray-500">Distinct courses linked to your subjects.</p>
           </div>
 
-          <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 shadow-sm">
-            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Modules</p>
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-5 shadow-sm">
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Modules</p>
             <p class="mt-2 text-2xl font-semibold">{{ totalAssignedModules ?? 0 }}</p>
-            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Learning modules under your subjects.</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-gray-500">Learning modules under your subjects.</p>
           </div>
 
-          <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 shadow-sm">
-            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Enrollments</p>
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-5 shadow-sm">
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Enrollments</p>
             <p class="mt-2 text-2xl font-semibold">{{ totalInstructorEnrollments ?? 0 }}</p>
-            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Student enrollments in your subjects.</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-gray-500">Student enrollments in your subjects.</p>
           </div>
         </div>
       </section>
@@ -154,61 +243,59 @@
           <h3 class="text-xl font-semibold">My Subjects &amp; Courses</h3>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
-          <table class="min-w-full text-sm">
-            <thead class="bg-slate-50 dark:bg-gray-900">
-              <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                <th class="px-4 py-2">Subject</th>
-                <th class="px-4 py-2">Course</th>
-                <th class="px-4 py-2">Assignment</th>
-              </tr>
-            </thead>
-            <tbody>
-            {% for ia in latestAssignments %}
-              {% set subj = ia.subject ?? null %}
-              {% set course = (subj and subj.course) ? subj.course : null %}
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-gray-900">
+                <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                  <th class="px-5 py-2">Subject</th>
+                  <th class="px-5 py-2">Course</th>
+                  <th class="px-5 py-2">Assignment</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for ia in latestAssignments %}
+                {% set subj = ia.subject ?? null %}
+                {% set course = (subj and subj.course) ? subj.course : null %}
 
-              <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                <td class="px-4 py-2 text-xs align-top">
-                  {% if subj %}
-                    <div class="font-mono text-[11px] text-slate-500 dark:text-gray-400">{{ subj.code ?? '' }}</div>
-                    <div class="text-slate-900 dark:text-gray-100">
-                      {{ subj.name ? (subj.name|length > 40 ? subj.name|slice(0,40) ~ '…' : subj.name) : '—' }}
-                    </div>
-                  {% else %}
-                    —
-                  {% endif %}
-                </td>
+                <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                  <td class="px-5 py-2 text-xs align-top">
+                    {% if subj %}
+                      <div class="font-mono text-[11px] text-slate-500 dark:text-gray-400">{{ subj.code ?? '' }}</div>
+                      <div class="text-slate-900 dark:text-gray-100">
+                        {{ subj.name ? (subj.name|length > 40 ? subj.name|slice(0,40) ~ '…' : subj.name) : '—' }}
+                      </div>
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
 
-                <td class="px-4 py-2 text-xs align-top">
-                  {% if course %}
-                    {{ course.name ? (course.name|length > 40 ? course.name|slice(0,40) ~ '…' : course.name) : '—' }}
-                  {% else %}
-                    —
-                  {% endif %}
-                </td>
+                  <td class="px-5 py-2 text-xs align-top">
+                    {% if course %}
+                      {{ course.name ? (course.name|length > 40 ? course.name|slice(0,40) ~ '…' : course.name) : '—' }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
 
-                <td class="px-4 py-2 text-xs align-top">
-                  {% if ia.isPrimary %}
-                    <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
-                      Primary
-                    </span>
-                  {% else %}
-                    <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full bg-slate-100 text-slate-700 dark:bg-gray-700 dark:text-gray-200">
-                      Secondary
-                    </span>
-                  {% endif %}
-                </td>
-              </tr>
-            {% else %}
-              <tr>
-                <td colspan="3" class="px-4 py-4 text-center text-xs text-slate-500 dark:text-gray-400">
-                  You have no subject assignments yet.
-                </td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
+                  <td class="px-5 py-2 text-xs align-top">
+                    {% if ia.isPrimary %}
+                      <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">Primary</span>
+                    {% else %}
+                      <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full bg-slate-100 text-slate-700 dark:bg-gray-700 dark:text-gray-200">Secondary</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="3" class="px-5 py-4 text-center text-xs text-slate-500 dark:text-gray-400">
+                    You have no subject assignments yet.
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -217,120 +304,168 @@
           <h3 class="text-xl font-semibold">Recent Enrollments in My Subjects</h3>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
-          <table class="min-w-full text-sm">
-            <thead class="bg-slate-50 dark:bg-gray-900">
-              <tr class="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                <th class="px-4 py-2">Student</th>
-                <th class="px-4 py-2">Subject</th>
-                <th class="px-4 py-2">Course</th>
-                <th class="px-4 py-2">Status</th>
-                <th class="px-4 py-2">Request</th>
-              </tr>
-            </thead>
-            <tbody>
-            {% for e in latestEnrollments %}
-              {% set studentProfile = e.studentProfile ?? null %}
-              {% set stuUser = (studentProfile and studentProfile.user) ? studentProfile.user : null %}
-              {% set subj = e.subject ?? null %}
-              {% set course = (subj and subj.course) ? subj.course : null %}
+        <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-gray-900">
+                <tr class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">
+                  <th class="px-5 py-2">Student</th>
+                  <th class="px-5 py-2">Subject</th>
+                  <th class="px-5 py-2">Course</th>
+                  <th class="px-5 py-2">Status</th>
+                  <th class="px-5 py-2">Request</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for e in latestEnrollments %}
+                {% set studentProfile = e.studentProfile ?? null %}
+                {% set stuUser = (studentProfile and studentProfile.user) ? studentProfile.user : null %}
+                {% set subj = e.subject ?? null %}
+                {% set course = (subj and subj.course) ? subj.course : null %}
 
-              <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
-                <td class="px-4 py-2 text-xs align-top">{{ stuUser ? (stuUser.email ?? '—') : '—' }}</td>
-                <td class="px-4 py-2 text-xs align-top">
-                  {% if subj %}
-                    {{ subj.name ? (subj.name|length > 30 ? subj.name|slice(0,30) ~ '…' : subj.name) : '—' }}
-                  {% else %}
-                    —
-                  {% endif %}
-                </td>
-                <td class="px-4 py-2 text-xs align-top">
-                  {% if course %}
-                    {{ course.name ? (course.name|length > 30 ? course.name|slice(0,30) ~ '…' : course.name) : '—' }}
-                  {% else %}
-                    —
-                  {% endif %}
-                </td>
-                <td class="px-4 py-2 text-xs align-top">{{ e.status ?? '—' }}</td>
-                <td class="px-4 py-2 text-xs align-top">
-                  <button type="button"
-                          class="inline-flex items-center px-2.5 py-1 rounded-md border border-slate-300 dark:border-gray-600 text-[11px] font-medium text-slate-700 dark:text-gray-200 hover:bg-slate-100 dark:hover:bg-gray-700">
-                    Request change
-                  </button>
-                </td>
-              </tr>
-            {% else %}
-              <tr>
-                <td colspan="5" class="px-4 py-4 text-center text-xs text-slate-500 dark:text-gray-400">
-                  No enrollments yet for your subjects.
-                </td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
+                <tr class="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-900">
+                  <td class="px-5 py-2 text-xs align-top">{{ stuUser ? (stuUser.email ?? '—') : '—' }}</td>
+                  <td class="px-5 py-2 text-xs align-top">
+                    {% if subj %}
+                      {{ subj.name ? (subj.name|length > 30 ? subj.name|slice(0,30) ~ '…' : subj.name) : '—' }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td class="px-5 py-2 text-xs align-top">
+                    {% if course %}
+                      {{ course.name ? (course.name|length > 30 ? course.name|slice(0,30) ~ '…' : course.name) : '—' }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td class="px-5 py-2 text-xs align-top">{{ e.status ?? '—' }}</td>
+                  <td class="px-5 py-2 text-xs align-top">
+                    <button type="button"
+                            class="inline-flex items-center px-2.5 py-1 rounded-md border border-slate-300 dark:border-gray-600 text-[11px] font-medium text-slate-700 dark:text-gray-200 hover:bg-slate-100 dark:hover:bg-gray-700">
+                      Request change
+                    </button>
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="5" class="px-5 py-4 text-center text-xs text-slate-500 dark:text-gray-400">
+                    No enrollments yet for your subjects.
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-    </main>
-  </div>
+    </div>
+  </main>
+
 </div>
 
 <script>
-const sidebar = document.getElementById('sidebar');
-const burgerButton = document.getElementById('burger-button');
-const burgerIcon = document.getElementById('burger-icon');
-const sidebarClose = document.getElementById('sidebar-close');
-const DARK_KEY = 'compilex-dark-mode';
-const modeToggle = document.getElementById('mode-toggle');
+  const DARK_KEY='compilex-dark-mode';
+  const SIDEBAR_KEY='compilex-instructor-sidebar-collapsed';
+  const app=document.getElementById('app');
+  const sidebar=document.getElementById('sidebar');
+  const backdrop=document.getElementById('sidebar-backdrop');
+  const burgerBtn=document.getElementById('burger-btn');
+  const burgerDesktop=document.getElementById('burger-desktop');
+  const burgerIcon=document.getElementById('burger-icon');
+  const sidebarClose=document.getElementById('sidebar-close');
+  const modeTop=document.getElementById('mode-toggle-top');
+  const modeSide=document.getElementById('mode-toggle-side');
 
-function openSidebar() {
-  sidebar.classList.remove('-translate-x-full');
-  if (burgerIcon) burgerIcon.innerHTML = '&times;';
-}
-function closeSidebar() {
-  sidebar.classList.add('-translate-x-full');
-  if (burgerIcon) burgerIcon.innerHTML = '&#9776;';
-}
-function toggleSidebar() {
-  if (sidebar.classList.contains('-translate-x-full')) openSidebar();
-  else closeSidebar();
-}
-closeSidebar();
+  function isMobile(){return window.matchMedia('(max-width: 767px)').matches;}
+  function setBodyLock(locked){document.body.style.overflow=locked?'hidden':'';}
 
-if (burgerButton) {
-  burgerButton.addEventListener('click', function (e) {
-    e.stopPropagation();
-    toggleSidebar();
+  function openSidebar(){
+    if(!isMobile()) return;
+    sidebar.classList.remove('sidebar-hidden');
+    sidebar.classList.add('sidebar-shown');
+    backdrop.classList.remove('hidden');
+    setBodyLock(true);
+    if(burgerIcon) burgerIcon.innerHTML='&times;';
+  }
+
+  function closeSidebar(){
+    if(!isMobile()) return;
+    sidebar.classList.add('sidebar-hidden');
+    sidebar.classList.remove('sidebar-shown');
+    backdrop.classList.add('hidden');
+    setBodyLock(false);
+    if(burgerIcon) burgerIcon.innerHTML='&#9776;';
+  }
+
+  function toggleMobileSidebar(){
+    if(!isMobile()) return;
+    if(sidebar.classList.contains('sidebar-hidden')) openSidebar(); else closeSidebar();
+  }
+
+  function setTheme(isDark){
+    document.documentElement.classList.toggle('dark',!!isDark);
+    localStorage.setItem(DARK_KEY,(!!isDark).toString());
+  }
+
+  function loadTheme(){
+    setTheme(localStorage.getItem(DARK_KEY)==='true');
+  }
+
+  function toggleTheme(){
+    const isDark=document.documentElement.classList.contains('dark');
+    setTheme(!isDark);
+  }
+
+  function setCollapsed(collapsed){
+    app.classList.toggle('sidebar-collapsed',!!collapsed);
+    localStorage.setItem(SIDEBAR_KEY,(!!collapsed).toString());
+  }
+
+  function toggleDesktopCollapse(){
+    if(isMobile()) return;
+    setCollapsed(!app.classList.contains('sidebar-collapsed'));
+  }
+
+  function loadCollapsed(){
+    setCollapsed(localStorage.getItem(SIDEBAR_KEY)==='true');
+  }
+
+  if(burgerBtn) burgerBtn.addEventListener('click',(e)=>{e.stopPropagation();toggleMobileSidebar();});
+  if(sidebarClose) sidebarClose.addEventListener('click',(e)=>{e.stopPropagation();closeSidebar();});
+  if(backdrop) backdrop.addEventListener('click',()=>closeSidebar());
+
+  if(burgerDesktop) burgerDesktop.addEventListener('click',(e)=>{e.stopPropagation();toggleDesktopCollapse();});
+
+  if(modeTop) modeTop.addEventListener('click',toggleTheme);
+  if(modeSide) modeSide.addEventListener('click',toggleTheme);
+
+  document.addEventListener('keydown',(e)=>{
+    if(e.key==='Escape'){
+      if(isMobile()) closeSidebar();
+    }
   });
-}
-if (sidebarClose) {
-  sidebarClose.addEventListener('click', function (e) {
-    e.stopPropagation();
-    closeSidebar();
-  });
-}
-document.addEventListener('click', function (e) {
-  const clickedBurger = e.target.closest('#burger-button');
-  const clickedInsideSidebar = sidebar.contains(e.target);
-  if (!clickedBurger && !clickedInsideSidebar) closeSidebar();
-});
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape') closeSidebar();
-});
 
-function loadInitialThemeJS() {
-  const saved = localStorage.getItem(DARK_KEY);
-  document.documentElement.classList.toggle('dark', saved === 'true');
-}
-loadInitialThemeJS();
-
-if (modeToggle) {
-  modeToggle.addEventListener('click', function (e) {
-    e.stopPropagation();
-    const isDark = document.documentElement.classList.contains('dark');
-    document.documentElement.classList.toggle('dark', !isDark);
-    localStorage.setItem(DARK_KEY, String(!isDark));
+  document.querySelectorAll('#sidebar a').forEach(a=>{
+    a.addEventListener('click',()=>{if(isMobile()) closeSidebar();});
   });
-}
+
+  window.addEventListener('resize',()=>{
+    if(!isMobile()){
+      backdrop.classList.add('hidden');
+      setBodyLock(false);
+      if(burgerIcon) burgerIcon.innerHTML='&#9776;';
+      sidebar.classList.remove('sidebar-hidden');
+      sidebar.classList.remove('sidebar-shown');
+    }else{
+      sidebar.classList.add('sidebar-hidden');
+      sidebar.classList.remove('sidebar-shown');
+    }
+  });
+
+  loadTheme();
+  loadCollapsed();
+  closeSidebar();
 </script>
 {% endblock %}
