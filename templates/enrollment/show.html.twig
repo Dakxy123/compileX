@@ -1,76 +1,149 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Enrollment Details — Admin{% endblock %}
+{% block title %}Enrollment Details — CompileX{% endblock %}
 
 {% block body %}
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
 
-<div class="p-8 max-w-4xl mx-auto">
+<div id="app" class="flex min-h-screen bg-slate-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+  <div class="flex-1 flex flex-col min-h-screen">
 
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-semibold">Enrollment Details</h1>
+    <header class="fixed top-0 left-0 w-full z-40 bg-slate-800 text-white dark:bg-gray-800 flex items-center justify-between px-6 py-3 shadow-md">
+      <h1 class="text-xl font-semibold text-blue-400 dark:text-blue-300 tracking-tight">
+        CompileX — Enrollment
+      </h1>
+    </header>
 
-    {% if is_granted('ROLE_ADMIN') %}
-      <a href="{{ path('app_enrollment_edit', {'id': enrollment.id}) }}"
-         class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
-        Edit
-      </a>
-    {% endif %}
-  </div>
+    <div class="h-16"></div>
 
-  <a href="{{ path('app_enrollment_index') }}"
-     class="text-blue-600 hover:underline mb-4 block">&larr; Back to list</a>
+    <main class="flex-1 p-6 md:p-8 max-w-4xl mx-auto w-full space-y-6">
 
-  {% set studentProfile = enrollment.studentProfile ?? null %}
-  {% set studentUser    = studentProfile and studentProfile.user is defined ? studentProfile.user : null %}
-  {% set subject        = enrollment.subject ?? null %}
-  {% set course         = subject and subject.course is defined ? subject.course : null %}
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+          <h1 class="text-3xl font-semibold">Enrollment Details</h1>
+          <p class="text-sm text-slate-600 dark:text-gray-400 mt-1">
+            Detailed view of a student enrollment record.
+          </p>
+        </div>
 
-  <div class="bg-white dark:bg-gray-800 p-6 rounded shadow border border-gray-200 dark:border-gray-700 space-y-4">
-    <p><strong>ID:</strong> {{ enrollment.id }}</p>
+        <div class="flex gap-2">
+          <a href="{{ path('app_enrollment_index') }}"
+             class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:bg-slate-50 dark:hover:bg-gray-800">
+            ← Back
+          </a>
 
-    <p><strong>Student:</strong>
-      {% if studentUser and studentUser.email is defined %}
-        {{ studentUser.email }}
-      {% else %}
-        —
-      {% endif %}
-    </p>
-
-    <p><strong>Course:</strong>
-      {{ course and course.name is defined ? course.name : '—' }}
-    </p>
-
-    <p><strong>Subject:</strong>
-      {{ subject and subject.name is defined ? subject.name : '—' }}
-    </p>
-
-    <p><strong>Status:</strong>
-      {% set st = enrollment.status ?? '—' %}
-      {% if st == 'Approved' %}
-        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">{{ st }}</span>
-      {% elseif st == 'Pending' %}
-        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">{{ st }}</span>
-      {% elseif st == 'Rejected' %}
-        <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">{{ st }}</span>
-      {% else %}
-        <span class="px-2 py-1 bg-gray-200 text-gray-800 rounded text-xs">{{ st }}</span>
-      {% endif %}
-    </p>
-
-    {# Optional: createdAt/updatedAt if you have them #}
-    {% if enrollment.createdAt is defined %}
-      <p><strong>Created At:</strong> {{ enrollment.createdAt|date('Y-m-d H:i') }}</p>
-    {% endif %}
-    {% if enrollment.updatedAt is defined %}
-      <p><strong>Updated At:</strong> {{ enrollment.updatedAt|date('Y-m-d H:i') }}</p>
-    {% endif %}
-
-    {% if is_granted('ROLE_ADMIN') %}
-      <div class="pt-4 border-t border-gray-300 dark:border-gray-700">
-        {% include 'enrollment/_delete_form.html.twig' %}
+          {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_enrollment_edit', {'id': enrollment.id}) }}"
+               class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-700">
+              Edit
+            </a>
+          {% endif %}
+        </div>
       </div>
-    {% endif %}
+
+      {% set studentProfile = enrollment.studentProfile ?? null %}
+      {% set studentUser    = studentProfile and studentProfile.user is defined ? studentProfile.user : null %}
+      {% set subject        = enrollment.subject ?? null %}
+      {% set course         = subject and subject.course is defined ? subject.course : null %}
+
+      <div class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-sm p-6 space-y-6">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+          <div>
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Enrollment ID</p>
+            <p class="font-semibold">{{ enrollment.id }}</p>
+          </div>
+
+          <div>
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Student</p>
+            <p class="font-semibold">
+              {{ studentUser and studentUser.email is defined ? studentUser.email : '—' }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Course</p>
+            <p class="font-semibold">
+              {{ course and course.name is defined ? course.name : '—' }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Subject</p>
+            <p class="font-semibold">
+              {{ subject and subject.name is defined ? subject.name : '—' }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Status</p>
+            {% set st = enrollment.status ?? '—' %}
+            {% set badge = {
+              'Approved': 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+              'Pending':  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
+              'Rejected': 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+            }[st] ?? 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' %}
+
+            <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full {{ badge }}">
+              {{ st }}
+            </span>
+          </div>
+
+          {% if enrollment.score is defined %}
+            <div>
+              <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Score</p>
+              <p class="font-semibold">{{ enrollment.score ?? '—' }}</p>
+            </div>
+          {% endif %}
+
+          {% if enrollment.grade is defined %}
+            <div>
+              <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Grade</p>
+              <p class="font-semibold">{{ enrollment.grade ?? '—' }}</p>
+            </div>
+          {% endif %}
+        </div>
+
+        {% if enrollment.remarks is defined and enrollment.remarks %}
+          <div>
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400 mb-1">
+              Remarks
+            </p>
+            <div class="bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-lg p-4 text-sm">
+              {{ enrollment.remarks }}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if enrollment.createdAt is defined or enrollment.updatedAt is defined %}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm pt-4 border-t border-slate-200 dark:border-gray-700">
+            {% if enrollment.createdAt is defined %}
+              <div>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Created At</p>
+                <p class="font-semibold">{{ enrollment.createdAt|date('Y-m-d H:i') }}</p>
+              </div>
+            {% endif %}
+            {% if enrollment.updatedAt is defined %}
+              <div>
+                <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-gray-400">Updated At</p>
+                <p class="font-semibold">{{ enrollment.updatedAt|date('Y-m-d H:i') }}</p>
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if is_granted('ROLE_ADMIN') %}
+          <div class="pt-4 border-t border-slate-200 dark:border-gray-700 flex justify-end">
+            {% include 'enrollment/_delete_form.html.twig' %}
+          </div>
+        {% endif %}
+
+      </div>
+
+    </main>
   </div>
 </div>
 {% endblock %}

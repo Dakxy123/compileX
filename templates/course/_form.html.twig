@@ -1,46 +1,61 @@
-<div class="space-y-4">
+<div class="space-y-5">
   <div>
     {{ form_label(form.name, 'Course Code (e.g. BSCS)', {
       'label_attr': {
-        'class': 'block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200'
+        'class': 'block text-sm font-semibold mb-1.5 text-slate-700 dark:text-gray-200'
       }
     }) }}
+
     {{ form_widget(form.name, {
       'attr': {
-        'class': 'w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100',
+        'class': 'w-full rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-slate-900 dark:text-gray-100 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
         'placeholder': 'BSCS'
       }
     }) }}
+
     {% include '/form/_errors_tailwind.html.twig' with {'errors': form.name.vars.errors} %}
   </div>
 
   <div>
     {{ form_label(form.description, 'Course Name / Description (e.g. Bachelor of Science in Computer Science)', {
       'label_attr': {
-        'class': 'block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200'
+        'class': 'block text-sm font-semibold mb-1.5 text-slate-700 dark:text-gray-200'
       }
     }) }}
+
     {{ form_widget(form.description, {
       'attr': {
-        'class': 'w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:text-gray-100',
+        'class': 'w-full rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-slate-900 dark:text-gray-100 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
         'rows': 4,
         'placeholder': 'Bachelor of Science in Computer Science'
       }
     }) }}
+
     {% include '/form/_errors_tailwind.html.twig' with {'errors': form.description.vars.errors} %}
   </div>
 
-  <div class="flex items-center gap-2">
-    {{ form_widget(form.IsActive, {
-      'attr': {
-        'class': 'h-4 w-4'
-      }
-    }) }}
-    {{ form_label(form.IsActive, 'Active?', {
-      'label_attr': {
-        'class': 'text-sm text-gray-700 dark:text-gray-200'
-      }
-    }) }}
+  <div class="rounded-xl border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-900 px-4 py-3">
+    <div class="flex items-center justify-between gap-3">
+      <div>
+        {{ form_label(form.IsActive, 'Active?', {
+          'label_attr': {
+            'class': 'text-sm font-semibold text-slate-700 dark:text-gray-200'
+          }
+        }) }}
+        <p class="text-xs text-slate-500 dark:text-gray-400 mt-0.5">
+          If disabled, the course will still exist but won’t be selectable for new records.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        {{ form_widget(form.IsActive, {
+          'attr': {
+            'class': 'h-5 w-5 rounded border-slate-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500'
+          }
+        }) }}
+      </div>
+    </div>
+
     {% include '/form/_errors_tailwind.html.twig' with {'errors': form.IsActive.vars.errors} %}
   </div>
 </div>
