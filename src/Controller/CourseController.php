@@ -25,7 +25,6 @@ final class CourseController extends AbstractController
     #[Route('/', name: 'app_course_index', methods: ['GET'])]
     public function index(Request $request, CourseRepository $courseRepository): Response
     {
-        // ✅ ActivityLogger: course list viewed
         $this->activityLogger->log(
             'course.viewed',
             'course',
@@ -33,8 +32,7 @@ final class CourseController extends AbstractController
         );
 
         $q = trim((string) $request->query->get('q', ''));
-        $status = $request->query->get('status', 'all'); // all|active|inactive
-
+        $status = $request->query->get('status', 'all');
         $qb = $courseRepository->createQueryBuilder('c');
 
         if ($q !== '') {
@@ -64,7 +62,6 @@ final class CourseController extends AbstractController
     #[Route('/export', name: 'app_course_export', methods: ['GET'])]
     public function export(Request $request, CourseRepository $courseRepository): Response
     {
-        // ✅ ActivityLogger: export
         $this->activityLogger->log(
             'course.exported',
             'course',
@@ -131,7 +128,6 @@ final class CourseController extends AbstractController
             $entityManager->persist($course);
             $entityManager->flush();
 
-            // ✅ ActivityLogger: created
             $this->activityLogger->log(
                 'course.created',
                 'course',
@@ -151,7 +147,6 @@ final class CourseController extends AbstractController
     #[Route('/{id}', name: 'app_course_show', methods: ['GET'])]
     public function show(Course $course): Response
     {
-        // ✅ ActivityLogger: show
         $this->activityLogger->log(
             'course.viewed_one',
             'course',
@@ -176,7 +171,6 @@ final class CourseController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            // ✅ ActivityLogger: updated
             $this->activityLogger->log(
                 'course.updated',
                 'course',
@@ -207,7 +201,6 @@ final class CourseController extends AbstractController
             $entityManager->remove($course);
             $entityManager->flush();
 
-            // ✅ ActivityLogger: deleted
             $this->activityLogger->log(
                 'course.deleted',
                 'course',

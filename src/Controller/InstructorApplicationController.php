@@ -3,15 +3,17 @@
 namespace App\Controller;
 
 use App\Entity\InstructorApplication;
+use App\Entity\User;
+use App\Service\ActivityLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
-use App\Service\ActivityLogger;
 
 #[Route('/student')]
 #[IsGranted('ROLE_USER')]
@@ -27,15 +29,14 @@ final class InstructorApplicationController extends AbstractController
     public function new(Request $request): Response
     {
         $user = $this->getUser();
-        if (!$user) {
+
+        if (!$user instanceof User) {
             throw $this->createAccessDeniedException();
         }
 
-        // 1) Read form data
-        $reason = trim((string) $request->request->get('reason'));
-        $file   = $request->files->get('portfolio');
+        $reason = trim((string) $request->request->get('reason', ''));
+        $file = $request->files->get('portfolio');
 
-        // 2) Basic validation
         if ($reason === '') {
             $this->addFlash('error', 'Please explain your reason for applying.');
 
@@ -44,55 +45,44 @@ final class InstructorApplicationController extends AbstractController
             ]);
         }
 
-        if (!$file) {
-            $this->addFlash(
-                'error',
-                'Please attach your portfolio (PDF, DOC, DOCX, PPT, PPTX or ZIP).'
-            );
+        if (!$file instanceof UploadedFile) {
+            $this->addFlash('error', 'Please attach your portfolio (PDF, DOC, DOCX, PPT, PPTX or ZIP).');
 
             return $this->redirectToRoute('app_student_dashboard', [
                 '_fragment' => 'instructor-application',
             ]);
         }
 
-        // 3) Validate extension
         $allowedExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'zip'];
-        $extension = strtolower($file->getClientOriginalExtension());
+        $extension = strtolower((string) $file->getClientOriginalExtension());
 
-        if (!in_array($extension, $allowedExtensions, true)) {
-            $this->addFlash(
-                'error',
-                'Invalid file type. Allowed: PDF, DOC, DOCX, PPT, PPTX, ZIP.'
-            );
+        if ($extension === '' || !in_array($extension, $allowedExtensions, true)) {
+            $this->addFlash('error', 'Invalid file type. Allowed: PDF, DOC, DOCX, PPT, PPTX, ZIP.');
 
             return $this->redirectToRoute('app_student_dashboard', [
                 '_fragment' => 'instructor-application',
             ]);
         }
 
-        // 4) Prepare upload folder
-        $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/portfolios';
+        $projectDir = (string) $this->getParameter('kernel.project_dir');
+        $uploadDir = $projectDir . '/public/uploads/portfolios';
 
-        if (!is_dir($uploadDir)) {
-            if (!mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
-                $this->addFlash('error', 'Server error: upload directory is not writable.');
+        if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
+            $this->addFlash('error', 'Server error: upload directory is not writable.');
 
-                return $this->redirectToRoute('app_student_dashboard', [
-                    '_fragment' => 'instructor-application',
-                ]);
-            }
+            return $this->redirectToRoute('app_student_dashboard', [
+                '_fragment' => 'instructor-application',
+            ]);
         }
 
-        // 5) Generate safe filename
-        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $safeFilename     = $this->slugger->slug($originalFilename);
-        $timestamp        = (new \DateTimeImmutable())->format('YmdHis');
-        $newFilename      = sprintf('%s_%s.%s', $safeFilename, $timestamp, $extension);
+        $originalFilename = pathinfo((string) $file->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = (string) $this->slugger->slug($originalFilename);
+        $timestamp = (new \DateTimeImmutable())->format('YmdHis');
+        $newFilename = sprintf('%s_%s.%s', $safeFilename, $timestamp, $extension);
 
-        // 6) Move file
         try {
             $file->move($uploadDir, $newFilename);
-        } catch (FileException) {
+        } catch (FileException $e) {
             $this->addFlash('error', 'There was a problem saving your file. Please try again.');
 
             return $this->redirectToRoute('app_student_dashboard', [
@@ -100,7 +90,6 @@ final class InstructorApplicationController extends AbstractController
             ]);
         }
 
-        // 7) Create InstructorApplication entity
         $application = new InstructorApplication();
         $application->setApplicant($user);
         $application->setReason($reason);
@@ -111,14 +100,14 @@ final class InstructorApplicationController extends AbstractController
         $this->em->persist($application);
         $this->em->flush();
 
-        // ✅ Activity log
+        $email = method_exists($user, 'getEmail') ? (string) $user->getEmail() : (string) $user->getUserIdentifier();
+
         $this->activityLogger->log(
             'instructor_application.submitted',
             'instructor_application',
-            sprintf('User %s submitted an instructor application.', $user->getEmail())
+            sprintf('User %s submitted an instructor application.', $email)
         );
 
-        // 8) Flash + redirect
         $this->addFlash('success', 'Your instructor application has been submitted.');
 
         return $this->redirectToRoute('app_student_dashboard', [

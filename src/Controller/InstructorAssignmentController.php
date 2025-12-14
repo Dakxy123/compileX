@@ -31,7 +31,7 @@ final class InstructorAssignmentController extends AbstractController
         );
 
         $search  = trim((string) $request->query->get('q', ''));
-        $primary = $request->query->get('primary'); // '', '1', '0'
+        $primary = $request->query->get('primary'); 
 
         $qb = $repository->createQueryBuilder('ia')
             ->leftJoin('ia.instructor', 'i')->addSelect('i')
@@ -74,7 +74,7 @@ final class InstructorAssignmentController extends AbstractController
         );
 
         $search  = trim((string) $request->query->get('q', ''));
-        $primary = $request->query->get('primary'); // '', '1', '0'
+        $primary = $request->query->get('primary'); 
 
         $qb = $repository->createQueryBuilder('ia')
             ->leftJoin('ia.instructor', 'i')->addSelect('i')

@@ -65,7 +65,6 @@ final class AdminController extends AbstractController
         $totalStudentProfiles = $studentProfileRepository->count([]);
         $totalCourses = $courseRepository->count([]);
 
-        // ✅ IMPORTANT: property is IsActive (not isActive)
         $activeCourses = (int) $courseRepository->createQueryBuilder('c')
             ->select('COUNT(c.id)')
             ->andWhere('c.IsActive = :active')
@@ -93,7 +92,6 @@ final class AdminController extends AbstractController
 
         $totalContactMessages = $contactMessageRepository->count([]);
 
-        // ✅ ADD THIS (fix for Twig variable)
         $latestContactMessages = $contactMessageRepository->createQueryBuilder('m')
             ->orderBy('m.id', 'DESC')
             ->setMaxResults(5)
@@ -156,7 +154,7 @@ final class AdminController extends AbstractController
             'ongoingStudents'               => $ongoingStudents,
             'completedStudents'             => $completedStudents,
             'totalContactMessages'          => $totalContactMessages,
-            'latestContactMessages'         => $latestContactMessages, // ✅ FIX
+            'latestContactMessages'         => $latestContactMessages,
             'totalModules'                  => $totalModules,
             'totalEnrollments'              => $totalEnrollments,
             'totalInstructorAssignments'    => $totalInstructorAssignments,

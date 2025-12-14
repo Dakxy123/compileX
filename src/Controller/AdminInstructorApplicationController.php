@@ -27,7 +27,6 @@ final class AdminInstructorApplicationController extends AbstractController
     ): Response {
         $status = $request->query->get('status');
 
-        // ✅ ACTIVITY LOG
         $this->activityLogger->log(
             'instructor_application.index',
             'instructor_application',
@@ -54,7 +53,6 @@ final class AdminInstructorApplicationController extends AbstractController
     #[Route('/{id}', name: 'app_instructor_application_admin_show', methods: ['GET'])]
     public function show(InstructorApplication $application): Response
     {
-        // ✅ ACTIVITY LOG
         $this->activityLogger->log(
             'instructor_application.show',
             'instructor_application',
@@ -90,7 +88,6 @@ final class AdminInstructorApplicationController extends AbstractController
         $application->setReviewedAt(new \DateTimeImmutable());
         $application->setReviewedBy($this->getUser());
 
-        // Auto-promote applicant to ROLE_INSTRUCTOR (keep existing roles)
         $user = $application->getApplicant();
         if ($user) {
             $roles = $user->getRoles();
@@ -100,7 +97,6 @@ final class AdminInstructorApplicationController extends AbstractController
             }
         }
 
-        // ✅ ACTIVITY LOG (before/after flush ok; either works)
         $this->activityLogger->log(
             'instructor_application.approve',
             'instructor_application',
@@ -140,7 +136,6 @@ final class AdminInstructorApplicationController extends AbstractController
         $application->setReviewedAt(new \DateTimeImmutable());
         $application->setReviewedBy($this->getUser());
 
-        // ✅ ACTIVITY LOG
         $this->activityLogger->log(
             'instructor_application.reject',
             'instructor_application',

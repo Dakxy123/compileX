@@ -19,7 +19,6 @@ final class ContactController extends AbstractController
         $subject = trim((string) $request->request->get('subject'));
         $messageText = trim((string) $request->request->get('message'));
 
-        // Simple required validation
         if ($name === '' || $email === '' || $messageText === '') {
             $this->addFlash('error', 'Please fill in your name, email, and message.');
             return $this->redirectToRoute('home', ['_fragment' => 'contact']);

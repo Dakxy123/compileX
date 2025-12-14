@@ -30,7 +30,6 @@ final class InstructorDashboardController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        // ✅ ACTIVITY LOG
         $this->activityLogger->log(
             'instructor.dashboard.view',
             'instructor_dashboard',

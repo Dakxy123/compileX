@@ -26,7 +26,6 @@ final class ActivityLogController extends AbstractController
         Request $request,
         ActivityLogRepository $activityLogRepository
     ): Response {
-        // ✅ LOG
         $this->activityLogger->log(
             'activity_log.view',
             'activity_log',
@@ -83,7 +82,6 @@ final class ActivityLogController extends AbstractController
         ]);
     }
 
-    // ⚠️ OPTIONAL — manual log creation (you may delete later)
     #[Route('/new', name: 'app_activity_log_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
@@ -95,7 +93,6 @@ final class ActivityLogController extends AbstractController
             $em->persist($log);
             $em->flush();
 
-            // ✅ LOG
             $this->activityLogger->log(
                 'activity_log.manual_create',
                 'activity_log',
@@ -115,7 +112,6 @@ final class ActivityLogController extends AbstractController
     #[Route('/{id}', name: 'app_activity_log_show', methods: ['GET'])]
     public function show(ActivityLog $activityLog): Response
     {
-        // ✅ LOG
         $this->activityLogger->log(
             'activity_log.view_one',
             'activity_log',
@@ -139,7 +135,6 @@ final class ActivityLogController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
 
-            // ✅ LOG
             $this->activityLogger->log(
                 'activity_log.manual_edit',
                 'activity_log',
@@ -168,7 +163,6 @@ final class ActivityLogController extends AbstractController
             $em->remove($activityLog);
             $em->flush();
 
-            // ✅ LOG
             $this->activityLogger->log(
                 'activity_log.manual_delete',
                 'activity_log',
